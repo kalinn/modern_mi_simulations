@@ -4,7 +4,7 @@ library(dplyr)
 library(mice)
 library(tidyverse)
 
-rootdir <- "/project/flatiron_ucc/programs/kylie/RunMe"
+rootdir <- "/project/flatiron_ucc/programs/kylie/RunMe2"
 system(paste0("mkdir ", file.path(rootdir, "datasets")))
 system(paste0("mkdir ", file.path(rootdir, "datasets", "mDats")))
 system(paste0("mkdir ", file.path(rootdir, "datasets", "cDats")))
@@ -19,12 +19,17 @@ system (paste0 ('mkdir ', file.path (rootdir, 'datasets', 'trueEff', 'MAR', prop
 system (paste0 ('mkdir ', file.path (rootdir, 'datasets', 'trueEff', 'MAR', proportionList[3])))
 iter <- 1000
 effOR <- 0.5
-# Optional stages for debuging / descriptive stats
-assess.missing <- F
+
 # set number of Plasmode simulations
 nsim <- 1
+
 # Magic intercepts for missingness proportions
-b0 <- c(-16.10, -14.02, -12.81)
+# in ECOG to be 10/30/50%
+b0 <- c(-17.4, -12.95, -10.25)
+
+# Magic intercepts for missingness proportions
+# in newVar to be 10/30/50%
+b0nv <- c(-9.73, -8.26, -7.285)
 
 for (w in 1:3) {
   set.seed(123)
@@ -78,35 +83,12 @@ for (w in 1:3) {
   # Round the few half scores up to next integer
   sdat.c$b.ecogvalue <- ceiling(sdat.c$b.ecogvalue)
 
-  # Check NA proportions
-  # ECOG is the main reason for missing data.
-  if (assess.missing) {
-    natab <- function(x) {
-      if (anyNA(x)) {
-        table(is.na(x))
-      } else {
-        (NA)
-      }
-    }
-    na.omit.list <- function(y) {
-      return(y[!sapply(y, function(x) all(is.na(x)))])
-    }
-    apply(sdat, 2, natab) %>% na.omit.list()
-    # Missing data visualization (generate and output to file)
-    # 1778 missing due to ECOG alone, 384 missing due to disease grade alone,
-    # 264 due to race/ethnicity alone, 465 missing due to ECOG with others,
-    # # 34 due to race/eth + disease grade combo, 1 missing due to gender
-    # p1 <- gg_miss_upset(sdat)
-    # tiff("U:/projects/FLATIRON missing data sim/missing-data-pattern.tiff", units="in",
-    #      width=7, height=6, res=300)
-    # p1
-    # dev.off()
-    # Compare event rate in base data to incomplete data
-    brate.b <- pyears(Surv(sdat$cmonth, sdat$dead) ~ 1, scale = 12)
-    brate.cc <- pyears(Surv(sdat.c$cmonth, sdat.c$dead) ~ 1, scale = 12)
-    # Check exposure prevalence in base data and incomplete data
-    table(sdat$treat) %>% prop.table()
-    table(sdat.c$treat) %>% prop.table()
+  # Here we generate a new variable for the outcome model that has a nonlinear age terms and interactions age x smokey and age x surgery.
+  # We will include this term in the outcome model so it is correctly specified, but imputation model for this variable will be misspecified by MICE
+  sdat.c$newVar <- 0.5*(sdat.c$age - 70) + 0.5 * (sdat.c$age - 70)^2 - 5 * sdat.c$smokey + 8 * sdat.c$surgery - 1 * (sdat.c$age - 70) * sdat.c$smokey + 0.5 * (sdat.c$age - 70) * sdat.c$surgery + rnorm(nrow(sdat.c), sd = 20)
+
+  if (FALSE){
+    cor (cbind (sdat.c$age, sdat.c$age^2, sdat.c$smokey, sdat.c$surgery, sdat.c$newVar), method='spearman')
   }
 
   # Step 2: Estimate associations with outcome and censoring
@@ -119,34 +101,48 @@ for (w in 1:3) {
   # package run the model. If you run it yourself it gets it right.
 
   # Build outcome hazard
-  os1 <- coxph(Surv(sdat.c$cmonth, sdat.c$dead) ~ treat + genderf + reth_black + reth_hisp + reth_oth + practypec + b.ecogvalue + smokey + dgradeh + surgery + site_ureter + site_renal + site_urethra + age, data = sdat.c, x = T)
+  os1 <- coxph(Surv(sdat.c$cmonth, sdat.c$dead) ~ treat + genderf + reth_black + reth_hisp + reth_oth + practypec + b.ecogvalue + smokey + dgradeh + surgery + site_ureter + site_renal + site_urethra + age + newVar, data = sdat.c, x = TRUE)
 
   # Censoring hazard
-  oc1 <- coxph(Surv(sdat.c$cmonth, sdat.c$ndead) ~ treat + genderf + reth_black + reth_hisp + reth_oth + practypec + b.ecogvalue + smokey + dgradeh + surgery + site_ureter + site_renal + site_urethra + age, data = sdat.c, x = T)
+  oc1 <- coxph(Surv(sdat.c$cmonth, sdat.c$ndead) ~ treat + genderf + reth_black + reth_hisp + reth_oth + practypec + b.ecogvalue + smokey + dgradeh + surgery + site_ureter + site_renal + site_urethra + age + newVar, data = sdat.c, x = TRUE)
 
   for (i in 1:iter) {
+    # Increase effect of newVar on outcome using MMOut
+    outEff <- rep(1, length(coef(os1)))
+    outEff[length(coef(os1))] <- 12
     sor <- PlasmodeSur(
       objectOut = os1,
       objectCen = oc1,
       idVar = sdat.c$patientid,
       effectOR = effOR,
+      MMOut = outEff,
       nsim = nsim,
       size = nrow(sdat.c)
     )
+
+    if (FALSE) {
+      # Check that associations reflect real
+      # associations and altered associations
+      # for treat and newVar
+      colnames(sor$Sim_Data)[1] <- "patientid"
+      testdf <- dplyr::left_join(sor$Sim_Data, sdat.c, by = "patientid")
+      testdf$dead <- sor$Sim_Data$EVENT1 * 1
+      testdf$cmonth <- sor$Sim_Data$TIME1
+      os1test <- coxph(Surv(testdf$cmonth, testdf$dead) ~ treat + genderf + reth_black + reth_hisp + reth_oth + practypec + b.ecogvalue + smokey + dgradeh + surgery + site_ureter + site_renal + site_urethra + age + newVar, data = testdf, x = TRUE)
+      summary(os1test)
+    }
+
     ### Generate missingness in simulated data
     # Remove unneeded variables from primary data
     sdat.m <- sdat.c %>% select(-ndead)
-    # initialize empty storage list
-    s.list <- list()
-    # Pull simulation data
-    wdat <- sor[["Sim_Data"]] %>%
-      select(paste("ID", nsim, sep = ""), paste("EVENT", nsim, sep = ""), paste("TIME", nsim, sep = ""))
-
-    names(wdat) <- c("patientid", "event", "time")
 
     # Attach full data to simulation i
-    wdat <- dplyr::left_join(wdat, sdat.m, by = "patientid") # %>% select(-patientid)
-    wdat$event <- wdat$event * 1
+    colnames(sor$Sim_Data)[1] = "patientid"
+    wdat <- dplyr::left_join(sor$Sim_Data, sdat.m, by = "patientid") 
+    wdat$event <- wdat$EVENT1 * 1
+    wdat$EVENT1 = NULL
+    wdat$time = wdat$TIME1
+    wdat$TIME1 = NULL
     wdat$dead <- NULL
     wdat$cmonth <- NULL
 
@@ -158,12 +154,17 @@ for (w in 1:3) {
     X <- wdat
     X$hazard <- NULL
     X <- as.matrix(X)
-    # Note ECOG is the last column in X
-    miss.coef <- c(rep(log(1.1), 15), 0)
+    ecogInd = which (colnames(X)%in%c('b.ecogvalue', 'event', 'time'))
+    newVarInd = which (colnames(X)%in%c('newVar', 'event', 'time'))
+    miss.coef <- c(rep(log(1.1), ncol (X)))
+    miss.coef[ecogInd] = 0
+    miss.nv <- c(rep(log(1.1), ncol (X)))
+    miss.nv[newVarInd] = 0
     # Computes columnwise prob of missing to reach
     # Pr(missing at least 1) = 10/30/50%
-    # 9 variables including ECOG
-    nvars = 9
+    # 8 variables EXCLUDING ECOG and newVar which 
+    # will have MARGINAL missingness of 10/30/50%
+    nvars = 8
     multiplier = 1 - exp (log (1 - proportionList[w]/100)/nvars)
 
     # Add MAR missingness to ECOG
@@ -185,8 +186,25 @@ for (w in 1:3) {
     NAEcog <- wdat$b.ecogvalue
     NAEcog[miss.ind == 1] <- NA
 
+    # Add MAR missingness to newVar
+    beta0nv <- b0nv[w]
+    p <- expit(beta0nv + X %*% miss.nv)
+    miss.ind <- rbinom(nrow(X), 1, p)
+    if (FALSE) {
+      J <- 1000
+      mmi <- rep(NA, J)
+      for (j in 1:J) {
+        miss.ind <- rbinom(nrow(X), 1, p)
+        mmi[j] <- mean(miss.ind)
+      }
+      summary(mmi)
+    }
+
+    NAnewVar <- wdat$newVar
+    NAnewVar[miss.ind == 1] <- NA
+
     # Add MCAR missingness
-    wdatNA <- select(wdat, -event, -hazard, -time, -reth_black, -reth_hisp, -reth_oth, -site_ureter, -site_renal, -site_urethra, -treat, -b.ecogvalue)
+    wdatNA <- select(wdat, -event, -hazard, -time, -reth_black, -reth_hisp, -reth_oth, -site_ureter, -site_renal, -site_urethra, -treat, -b.ecogvalue, -newVar)
 
     wdatNA <- apply(wdatNA, 2, function(x) {
       x[sample(c(1:nrow(wdatNA)), floor(nrow(wdatNA) * multiplier))] <- NA
@@ -225,31 +243,34 @@ for (w in 1:3) {
     wdatNA <- add_column(wdatNA, site_urethra = siteNA$site_urethra, .after = "site_renal")
 
     wdatNA <- add_column(wdatNA, b.ecogvalue = NAEcog, .after = 'treat')
+    wdatNA <- add_column(wdatNA, newVar = NAnewVar, .after = 'b.ecogvalue')
 
     nas <- wdatNA
     nas$reth_hisp <- NULL
     nas$reth_oth <- NULL
     nas$site_renal <- NULL
     nas$site_urethra <- NULL
+    nas$b.ecogvalue <- NULL
+    nas$newVar <- NULL
     prop <- mean(apply(nas, 1, function(x) any(is.na(x))))
 
+    s.list = list ()
     s.list[[paste("MissingSim", nsim, sep = "")]] <- cbind(id, wdatNA)
     s.list[[paste("FullSim", nsim, sep = "")]] <- cbind(id, wdat)
 
     # True effects
-    trueTreat <- sor$TrueOutBeta[which(names(sor$TrueOutBeta) == "TREAT")]
-    trueEcog <- sor$TrueOutBeta[which(names(sor$TrueOutBeta) == "b.ecogvalue")]
+    trueBeta <- sor$TrueOutBeta
 
-    # MAR data
+    # MCAR data
     mData <- s.list$MissingSim1
     cData <- s.list$FullSim1
 
     train <- mData[, -1]
     filename <- paste0("mData", i, ".csv")
     Cfilename <- paste0("cData", i, ".csv")
-    trueEffect <- cbind(trueTreat, trueEcog, prop)
-    colnames (trueEffect)[3] = "propMissAtLeast1Cov"
-    effname <- paste0 ("trueEff_propMiss", i, ".csv")
+    trueEffect <- c(prop, trueBeta)
+    names(trueEffect)[1] <- "propMissAtLeast1Cov"
+    effname <- paste0("propMiss_trueEffs", i, ".csv")
 
     propName <- proportionList[w]
     system(paste0("mkdir ", file.path(rootdir, "datasets", "mDats", "MAR", propName)))
