@@ -153,20 +153,25 @@ for (w in 1:3) {
 
     X <- wdat
     X$hazard <- NULL
-    X <- as.matrix(X)
-    ecogInd = which (colnames(X)%in%c('b.ecogvalue', 'event', 'time'))
-    newVarInd = which (colnames(X)%in%c('newVar', 'event', 'time'))
+    ecogInd = which (names(X)%in%c('b.ecogvalue', 'event', 'time'))
+    newVarInd = which (names(X)%in%c('newVar', 'event', 'time'))
     miss.coef <- c(rep(log(1.1), ncol (X)))
     miss.coef[ecogInd] = 0
     miss.nv <- c(rep(log(1.1), ncol (X)))
     miss.nv[newVarInd] = 0
     # Computes columnwise prob of missing to reach
     # Pr(missing at least 1) = 10/30/50%
-    # 8 variables EXCLUDING ECOG and newVar which 
+    # EXCLUDE ECOG and newVar which 
     # will have MARGINAL missingness of 10/30/50%
-    nvars = 8
+    # Also exclude treat
+    # Subtract 4 because race and site categories
+    # each only count as 1. Subtract 3 for 
+    # treat, ECOG, newVar
+    # Subtract 2 for event and time
+    nvars = ncol (X) - 4 - 2 - 3
     multiplier = 1 - exp (log (1 - proportionList[w]/100)/nvars)
 
+    X <- as.matrix(X)
     # Add MAR missingness to ECOG
     expit = function (x) exp (x)/(1 + exp (x))
     logit = function (x) log (x/(1-x))
@@ -250,8 +255,8 @@ for (w in 1:3) {
     nas$reth_oth <- NULL
     nas$site_renal <- NULL
     nas$site_urethra <- NULL
-    nas$b.ecogvalue <- NULL
-    nas$newVar <- NULL
+    # Overall row-wise missingness
+    # INCLUDING ECOG and newVar
     prop <- mean(apply(nas, 1, function(x) any(is.na(x))))
 
     s.list = list ()

@@ -145,8 +145,13 @@ for (w in 1:3) {
 
     # Computes columnwise prob of missing to reach
     # Pr(missing at least 1) = 10/30/50%
-    # 8 variables EXCLUDING ECOG and newVar (excluding txt also) 
-    nvars <- 8
+    # No missingness in txt
+    # EXCLUDE ECOG and newVar which will have
+    # MARGINAL missingness of 10/30/50%
+    # Subtract 4 for race and site categories
+    # Subtract 3 to exclude event, time, hazard
+    # Subtract 3 for treat, ECOG, newVar
+    nvars = ncol (wdat) - 4 - 3 - 3
     multiplier <- 1 - exp(log(1 - proportionList[w] / 100) / nvars)
 
     # Add MCAR missingness to ECOG and newVar
@@ -206,8 +211,8 @@ for (w in 1:3) {
     nas$reth_oth <- NULL
     nas$site_renal <- NULL
     nas$site_urethra <- NULL
-    nas$b.ecogvalue <- NULL
-    nas$newVar <- NULL
+    # Overall row-wise missing INCLUDING
+    # ECOG and newVar
     prop <- mean(apply(nas, 1, function(x) any(is.na(x))))
 
     s.list = list ()
