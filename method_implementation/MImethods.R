@@ -1,25 +1,28 @@
-rootdir <- "/project/flatiron_ucc/programs/kylie/RunMe"
 library(mice)
 library(CALIBERrfimpute)
 library(survival)
 library(dplyr)
 library(tidyverse)
 
-mechList <- c("MCAR", "MAR", "MNAR")
+rootdir <- "/project/flatiron_ucc/programs/kylie/RunMe2"
+system (paste0 ('mkdir ', file.path (rootdir, 'final_results')))
+
+mechList <- c("MCAR", "MAR", "MNAR1", "MNAR2")
 proportionList <- c(10, 30, 50)
 set.seed(100)
-for (w in 1:3) {
+for (w in 1:length (mechList)) {
   mech <- mechList[w]
-  for (k in 1:3) {
+  for (k in 1:length (proportionList)) {
     propName <- proportionList[k]
     args <- commandArgs(trailingOnly = F)
     i <- args[6]
     mData <- read.csv(file.path(rootdir, "datasets/mDats", mech, propName, paste0("mData", i, ".csv")))
     cData <- read.csv(file.path(rootdir, "datasets/cDats", mech, propName, paste0("cData", i, ".csv")))
     cData <- cData[, -1]
-    truth <- read.csv(file.path(rootdir, "datasets/trueEff", mech, propName, "trueEff_propMiss1.csv"))
-    trueTreat <- truth[1]
-    trueEcog <- truth[2]
+    truth <- read.csv(file.path(rootdir, "datasets/trueEff", mech, propName, "propMiss_trueEffs1.csv"))
+    trueTreat <- truth$x[1]
+    trueEcog <- truth$x[2]
+    trueNewVar <- truth$x[3]
 
     mCat = mData
     mCat$race = rep (NA, nrow (mData))
@@ -81,22 +84,26 @@ for (w in 1:3) {
 
     fitimp1 <- with(
       anesimp_long_mids,
-      coxph(Surv(time, event) ~ treat + genderf + reth_black + reth_hisp + reth_oth + practypec + b.ecogvalue + smokey + dgradeh + surgery + site_ureter + site_renal + site_urethra + age)
+      coxph(Surv(time, event) ~ treat + genderf + reth_black + reth_hisp + reth_oth + practypec + b.ecogvalue + smokey + dgradeh + surgery + site_ureter + site_renal + site_urethra + age + newVar)
     )
 
     pool <- summary(pool(fitimp1))
 
     TreatRow <- which(pool$term == "treat")
     EcogRow <- which(pool$term == "b.ecogvalue")
+    NewVarRow <- which(pool$term == "newVar")
 
     MICEtreat <- pool$estimate[TreatRow]
     MICEEcog <- pool$estimate[EcogRow]
+    MICENewVar <- pool$estimate[NewVarRow]
 
     biasTreatMICE <- as.numeric(MICEtreat - trueTreat)
     biasEcogMICE <- as.numeric(MICEEcog - trueEcog)
+    biasNewVarMICE <- as.numeric(MICENewVar - trueNewVar)
 
     VarTreatMICE <- (pool$std.error[TreatRow])^2
     VarEcogMICE <- (pool$std.error[EcogRow])^2
+    VarNewVarMICE <- (pool$std.error[NewVarRow])^2
 
     CIMICELowerTreat <- MICEtreat - (qnorm(.975) * (pool$std.error[TreatRow]))
     CIMICEUpperTreat <- MICEtreat + (qnorm(.975) * (pool$std.error[TreatRow]))
@@ -104,8 +111,12 @@ for (w in 1:3) {
     CIMICELowerEcog <- MICEEcog - (qnorm(.975) * (pool$std.error[EcogRow]))
     CIMICEUpperEcog <- MICEEcog + (qnorm(.975) * (pool$std.error[EcogRow]))
 
+    CIMICELowerNewVar <- MICENewVar - (qnorm(.975) * (pool$std.error[NewVarRow]))
+    CIMICEUpperNewVar <- MICENewVar + (qnorm(.975) * (pool$std.error[NewVarRow]))
+
     covereageMICETreat <- 1*between(c (trueTreat), CIMICELowerTreat, CIMICEUpperTreat)
     covereageMICEEcog <- 1*between(c (trueEcog), CIMICELowerEcog, CIMICEUpperEcog)
+    covereageMICENewVar <- 1*between(c (trueNewVar), CIMICELowerNewVar, CIMICEUpperNewVar)
 
     mData <- read.csv(file.path(rootdir, "datasets/mDats", mech, propName, paste0("mData", i, ".csv")))
 
@@ -142,12 +153,14 @@ for (w in 1:3) {
     mData$surgery <- as.factor(mData$surgery)
     mData$treat <- as.factor(mData$treat)
     mData$b.ecogvalue <- as.numeric(mData$b.ecogvalue)
+    mData$newVar <- as.numeric(mData$newVar)
     mData$race <- as.factor(mData$race)
     mData$site <- as.factor(mData$site)
 
-    forest <- mice(mData, method = c("rfcat", "rfcont", "rfcont", "rfcat", "rfcont", "rfcat", "rfcat", "rfcat", "rfcat", "rfcat", "rfcont", "rfcat", "rfcat"), m = 10, maxit = 5)
+    forest <- mice(mData, method = c("rfcat", "rfcont", "rfcont", "rfcat", "rfcont", "rfcat", "rfcat", "rfcat", "rfcat", "rfcat", "rfcont", "rfcont", "rfcat", "rfcat"), m = 10, maxit = 5)
 
     anesimp_long <- mice::complete(forest, action = "long", include = TRUE)
+    anesimp_long$b.ecogvalue = round (anesimp_long$b.ecogvalue)
 
     reth_black = 1*(anesimp_long$race=='black')
     reth_hisp = 1*(anesimp_long$race=='hisp')
@@ -169,22 +182,26 @@ for (w in 1:3) {
     anesimp_long_mids <- as.mids(anesimp_long)
     fitimp1 <- with(
       anesimp_long_mids,
-      coxph(Surv(time, event) ~ treat + genderf + reth_black + reth_hisp + reth_oth + practypec + b.ecogvalue + smokey + dgradeh + surgery + site_ureter + site_renal + site_urethra + age)
+      coxph(Surv(time, event) ~ treat + genderf + reth_black + reth_hisp + reth_oth + practypec + b.ecogvalue + smokey + dgradeh + surgery + site_ureter + site_renal + site_urethra + age + newVar)
     )
 
     pool <- summary(pool(fitimp1))
 
     TreatRow <- which(pool$term == "treat1")
     EcogRow <- which(pool$term == "b.ecogvalue")
+    NewVarRow <- which(pool$term == "newVar")
 
     forestTreat <- pool$estimate[TreatRow]
     forestEcog <- pool$estimate[EcogRow]
+    forestNewVar <- pool$estimate[NewVarRow]
 
     biasTreatForest <- as.numeric(forestTreat - trueTreat)
     biasEcogForest <- as.numeric(forestEcog - trueEcog)
+    biasNewVarForest <- as.numeric(forestNewVar - trueNewVar)
 
-    VarTreatforest <- (pool$std.error[TreatRow])^2
-    VarEcogforest <- (pool$std.error[EcogRow])^2
+    VarTreatForest <- (pool$std.error[TreatRow])^2
+    VarEcogForest <- (pool$std.error[EcogRow])^2
+    VarNewVarForest <- (pool$std.error[NewVarRow])^2
 
     CIForestLowerTreat <- forestTreat - (qnorm(.975) * (pool$std.error[TreatRow]))
     CIForestUpperTreat <- forestTreat + (qnorm(.975) * (pool$std.error[TreatRow]))
@@ -192,17 +209,23 @@ for (w in 1:3) {
     CIForestLowerEcog <- forestEcog - (qnorm(.975) * (pool$std.error[EcogRow]))
     CIForestUpperEcog <- forestEcog + (qnorm(.975) * (pool$std.error[EcogRow]))
 
+    CIForestLowerNewVar <- forestNewVar - (qnorm(.975) * (pool$std.error[NewVarRow]))
+    CIForestUpperNewVar <- forestNewVar + (qnorm(.975) * (pool$std.error[NewVarRow]))
+
     covereageForestTreat <- 1*between(c (trueTreat), CIForestLowerTreat, CIForestUpperTreat)
     covereageForestEcog <- 1*between(c (trueEcog), CIForestLowerEcog, CIForestUpperEcog)
+    covereageForestNewVar <- 1*between(c (trueNewVar), CIForestLowerNewVar, CIForestUpperNewVar)
 
     # compare complete dataset to OS1 estimates
-    CompleteFit <- coxph(Surv(time, event) ~ treat + genderf + reth_black + reth_hisp + reth_oth + practypec + b.ecogvalue + smokey + dgradeh + surgery + site_ureter + site_renal + site_urethra + age, data = cData)
+    CompleteFit <- coxph(Surv(time, event) ~ treat + genderf + reth_black + reth_hisp + reth_oth + practypec + b.ecogvalue + smokey + dgradeh + surgery + site_ureter + site_renal + site_urethra + age + newVar, data = cData)
 
     TreatRow <- which(names (CompleteFit$coefficients) == "treat")
     EcogRow <- which(names (CompleteFit$coefficients) == "b.ecogvalue")
+    NewVarRow <- which(names (CompleteFit$coefficients) == "newVar")
 
     Completetreat <- CompleteFit$coefficients[TreatRow]
     CompleteEcog <- CompleteFit$coefficients[EcogRow]
+    CompleteNewVar <- CompleteFit$coefficients[NewVarRow]
 
     CICompleteLowerTreat <- Completetreat - (qnorm(.975) * (summary(CompleteFit)$coefficients[TreatRow, 3]))
     CICompleteUpperTreat <- Completetreat + (qnorm(.975) * (summary(CompleteFit)$coefficients[TreatRow, 3]))
@@ -210,59 +233,81 @@ for (w in 1:3) {
     CICompleteLowerEcog <- CompleteEcog - (qnorm(.975) * (summary(CompleteFit)$coefficients[EcogRow, 3]))
     CICompleteUpperEcog <- CompleteEcog + (qnorm(.975) * (summary(CompleteFit)$coefficients[EcogRow, 3]))
 
+    CICompleteLowerNewVar <- CompleteNewVar - (qnorm(.975) * (summary(CompleteFit)$coefficients[NewVarRow, 3]))
+    CICompleteUpperNewVar <- CompleteNewVar + (qnorm(.975) * (summary(CompleteFit)$coefficients[NewVarRow, 3]))
+
     covereageCompleteTreat <- 1*between(c (trueTreat), CICompleteLowerTreat, CICompleteUpperTreat)
     covereageCompleteEcog <- 1*between(c (trueEcog), CICompleteLowerEcog, CICompleteUpperEcog)
+    covereageCompleteNewVar <- 1*between(c (trueNewVar), CICompleteLowerNewVar, CICompleteUpperNewVar)
 
     biasTreatComplete <- as.numeric(Completetreat - trueTreat)
     biasEcogComplete <- as.numeric(CompleteEcog - trueEcog)
+    biasNewVarComplete <- as.numeric(CompleteNewVar - trueNewVar)
 
     VarTreatComplete <- (summary(CompleteFit)$coefficients[TreatRow, 3])^2
     VarEcogComplete <- (summary(CompleteFit)$coefficients[EcogRow, 3])^2
+    VarNewVarComplete <- (summary(CompleteFit)$coefficients[NewVarRow, 3])^2
 
     # compare exclude missingness dataset to OS1 estimates
     mData <- read.csv(file.path(rootdir, "datasets/mDats", mech, propName, paste0("mData", i, ".csv")))
 
     ExcludeData <- mData[complete.cases(mData), ]
 
-    ExcludeFit <- coxph(Surv(time, event) ~ treat + genderf + reth_black + reth_hisp + reth_oth + practypec + b.ecogvalue + smokey + dgradeh + surgery + site_ureter + site_renal + site_urethra + age, data = ExcludeData)
+    ExcludeFit <- coxph(Surv(time, event) ~ treat + genderf + reth_black + reth_hisp + reth_oth + practypec + b.ecogvalue + smokey + dgradeh + surgery + site_ureter + site_renal + site_urethra + age + newVar, data = ExcludeData)
 
     TreatRow <- which(names (ExcludeFit$coefficients) == "treat")
     EcogRow <- which(names (ExcludeFit$coefficients) == "b.ecogvalue")
+    NewVarRow <- which(names (ExcludeFit$coefficients) == "newVar")
 
     Excludetreat <- ExcludeFit$coefficients[TreatRow]
     ExcludeEcog <- ExcludeFit$coefficients[EcogRow]
+    ExcludeNewVar <- ExcludeFit$coefficients[NewVarRow]
 
     biasTreatExclude <- as.numeric(Excludetreat - trueTreat)
     biasEcogExclude <- as.numeric(ExcludeEcog - trueEcog)
+    biasNewVarExclude <- as.numeric(ExcludeNewVar - trueNewVar)
 
     VarTreatExclude <- (summary(ExcludeFit)$coefficients[TreatRow, 3])^2
     VarEcogExclude <- (summary(ExcludeFit)$coefficients[EcogRow, 3])^2
+    VarNewVarExclude <- (summary(ExcludeFit)$coefficients[NewVarRow, 3])^2
 
     CIExcludeLowerTreat <- ExcludeFit$coefficients[TreatRow] - (qnorm(.975) * (summary(ExcludeFit)$coefficients[TreatRow, 3]))
     CIExcludeUpperTreat <- ExcludeFit$coefficients[TreatRow] + (qnorm(.975) * (summary(ExcludeFit)$coefficients[TreatRow, 3]))
 
     CIExcludeLowerEcog <- ExcludeFit$coefficients[EcogRow] - (qnorm(.975) * (summary(ExcludeFit)$coefficients[EcogRow, 3]))
     CIExcludeUpperEcog <- ExcludeFit$coefficients[EcogRow] + (qnorm(.975) * (summary(ExcludeFit)$coefficients[EcogRow, 3]))
+    
+    CIExcludeLowerNewVar <- ExcludeFit$coefficients[NewVarRow] - (qnorm(.975) * (summary(ExcludeFit)$coefficients[NewVarRow, 3]))
+    CIExcludeUpperNewVar <- ExcludeFit$coefficients[NewVarRow] + (qnorm(.975) * (summary(ExcludeFit)$coefficients[NewVarRow, 3]))
 
     covereageExcludeTreat <- 1*between(c (trueTreat), CIExcludeLowerTreat, CIExcludeUpperTreat)
     covereageExcludeEcog <- 1*between(c (trueEcog), CIExcludeLowerEcog, CIExcludeUpperEcog)
+    covereageExcludeNewVar <- 1*between(c (trueNewVar), CIExcludeLowerNewVar, CIExcludeUpperNewVar)
 
     mseOracleTreat <- VarTreatComplete + biasTreatComplete^2
     mseOracleEcog <- VarEcogComplete + biasEcogComplete^2
+    mseOracleNewVar <- VarNewVarComplete + biasNewVarComplete^2
     mseCCTreat <- VarTreatExclude + biasTreatExclude^2
     mseCCEcog <- VarEcogExclude + biasEcogExclude^2
+    mseCCNewVar <- VarNewVarExclude + biasNewVarExclude^2
+
     mseMiceTreat <- VarTreatMICE + biasTreatMICE^2
     mseMiceEcog <- VarEcogMICE + biasEcogMICE^2
-    mseForestTreat <- VarTreatforest + biasTreatForest^2
-    mseForestEcog <- VarEcogforest + biasEcogForest^2
+    mseMiceNewVar <- VarNewVarMICE + biasNewVarMICE^2
+    mseForestTreat <- VarTreatForest + biasTreatForest^2
+    mseForestEcog <- VarEcogForest + biasEcogForest^2
+    mseForestNewVar <- VarNewVarForest + biasNewVarForest^2
 
-    names <- c("oracleTreat", "oracleEcog", "complete-caseTreat", "complete-caseEcog", "MiceTreat", "MiceEcog", "forestTreat", "forestEcog")
-    bias <- c(biasTreatComplete, biasEcogComplete, biasTreatExclude, biasEcogExclude, biasTreatMICE, biasEcogMICE, biasTreatForest, biasEcogForest)
-    se <- c(sqrt(VarTreatComplete), sqrt(VarEcogComplete), sqrt(VarTreatExclude), sqrt(VarEcogExclude), sqrt(VarTreatMICE), sqrt(VarEcogMICE), sqrt(VarTreatforest), sqrt(VarEcogforest))
-    coverage <- c(covereageCompleteTreat, covereageCompleteEcog, covereageExcludeTreat, covereageExcludeEcog, covereageMICETreat, covereageMICEEcog, covereageForestTreat, covereageForestEcog)
-    MSE <- c(mseOracleTreat, mseOracleEcog, mseCCTreat, mseCCEcog, mseMiceTreat, mseMiceEcog, mseForestTreat, mseForestEcog)
+    names <- c("oracleTreat", "oracleEcog", "oracleNewVar", "complete-caseTreat", "complete-caseEcog", "complete-caseNewVar", "MiceTreat", "MiceEcog", "MiceNewVar", "forestTreat", "forestEcog", "forestNewVar")
+    bias <- c(biasTreatComplete, biasEcogComplete, biasNewVarComplete, biasTreatExclude, biasEcogExclude, biasNewVarExclude, biasTreatMICE, biasEcogMICE, biasNewVarMICE, biasTreatForest, biasEcogForest, biasNewVarForest)
+    se <- c(sqrt(VarTreatComplete), sqrt(VarEcogComplete), sqrt(VarNewVarComplete), sqrt(VarTreatExclude), sqrt(VarEcogExclude), sqrt(VarNewVarExclude), sqrt(VarTreatMICE), sqrt(VarEcogMICE), sqrt(VarNewVarMICE), sqrt(VarTreatForest), sqrt(VarEcogForest), sqrt(VarNewVarForest))
+    coverage <- c(covereageCompleteTreat, covereageCompleteEcog, covereageCompleteNewVar, covereageExcludeTreat, covereageExcludeEcog, covereageExcludeNewVar, covereageMICETreat, covereageMICEEcog, covereageMICENewVar, covereageForestTreat, covereageForestEcog, covereageForestNewVar)
+    MSE <- c(mseOracleTreat, mseOracleEcog, mseOracleNewVar, mseCCTreat, mseCCEcog, mseCCNewVar, mseMiceTreat, mseMiceEcog, mseMiceNewVar, mseForestTreat, mseForestEcog, mseForestNewVar)
     results <- t(cbind(bias, se, coverage, MSE))
     colnames(results) <- names
+    wdir = file.path (rootdir, 'final_results')
+    system (paste0 ('mkdir ', file.path (wdir, mech)))
+    system (paste0 ('mkdir ', file.path (wdir, mech, propName)))
     write.csv(results, file.path(rootdir, "final_results", mech, propName, paste0("result", i, ".csv")))
   }
 }

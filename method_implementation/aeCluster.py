@@ -14,14 +14,14 @@ import tensorflow
 import session_info
 os.chdir("/project/flatiron_ucc")
 
-mechList = ("MCAR","MAR","MNAR")
+mechList = ("MCAR","MAR","MNAR1","MNAR2")
 proportionList = (10,30,50)
-for w in range(0,3):
+for w in range(0,len(mechList)):
     mech = mechList[w]
-    for k in range(0,3):
+    for k in range(0,len(proportionList)):
         propName = proportionList[k]
         i = sys.argv[1]
-        filename = "".join(("programs/kylie/RunMe/datasets/mDats/",mech,"/",str(propName),"/","mData",str(i),".csv"))
+        filename = "".join(("programs/kylie/RunMe2/datasets/mDats/",mech,"/",str(propName),"/","mData",str(i),".csv"))
         train = pd.read_csv(filename)
         time = train["time"]
         train = train.drop("time",axis=1)
@@ -49,7 +49,7 @@ for w in range(0,3):
             final = miss
             final.insert(loc=2,column="time",value=time)
             final = pd.DataFrame(final)
-            filename = "".join(("programs/kylie/RunMe/final_results/","AE",mech,"/",str(propName),"/","result",str(i),"_num_",str(x),".csv"))
+            filename = "".join(("programs/kylie/RunMe2/final_results/","AE",mech,"/",str(propName),"/","result",str(i),"_num_",str(x),".csv"))
             final.to_csv(filename)
 
 
