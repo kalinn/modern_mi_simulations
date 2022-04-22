@@ -25,11 +25,11 @@ nsim <- 1
 
 # Magic intercepts for missingness proportions
 # in ECOG to be 10/30/50%
-b0 <- c(-17.4, -12.95, -10.25)
+b0 <- c(-33.5, -21.7, -18.9)
 
 # Magic intercepts for missingness proportions
 # in newVar to be 10/30/50%
-b0nv <- c(-9.73, -8.26, -7.285)
+b0nv <- c(-12.1, -10.87, -10.175)
 
 for (w in 1:3) {
   set.seed(123)
@@ -161,14 +161,12 @@ for (w in 1:3) {
     miss.nv[newVarInd] = 0
     # Computes columnwise prob of missing to reach
     # Pr(missing at least 1) = 10/30/50%
-    # EXCLUDE ECOG and newVar which 
-    # will have MARGINAL missingness of 10/30/50%
-    # Also exclude treat
+    # Exclude treat
     # Subtract 4 because race and site categories
-    # each only count as 1. Subtract 3 for 
-    # treat, ECOG, newVar
+    # each only count as 1. 
     # Subtract 2 for event and time
-    nvars = ncol (X) - 4 - 2 - 3
+    # Subtract 1 for treat
+    nvars = ncol (X) - 4 - 2 - 1
     multiplier = 1 - exp (log (1 - proportionList[w]/100)/nvars)
 
     X <- as.matrix(X)

@@ -146,21 +146,17 @@ for (w in 1:3) {
     # Computes columnwise prob of missing to reach
     # Pr(missing at least 1) = 10/30/50%
     # No missingness in txt
-    # EXCLUDE ECOG and newVar which will have
-    # MARGINAL missingness of 10/30/50%
     # Subtract 4 for race and site categories
     # Subtract 3 to exclude event, time, hazard
-    # Subtract 3 for treat, ECOG, newVar
-    nvars = ncol (wdat) - 4 - 3 - 3
+    # Subtract 1 for treat
+    nvars = ncol (wdat) - 4 - 3 - 1
     multiplier <- 1 - exp(log(1 - proportionList[w] / 100) / nvars)
 
     # Add MCAR missingness to ECOG and newVar
-    # Marginal 10/30/50%
-    pEcog = proportionList[w]/100
-    miss.ind <- rbinom(wdat, 1, pEcog)
+    miss.ind <- rbinom(wdat, 1, multiplier)
     NAEcog <- wdat$b.ecogvalue
     NAEcog[miss.ind == 1] <- NA
-    miss.ind <- rbinom(wdat, 1, pEcog)
+    miss.ind <- rbinom(wdat, 1, multiplier)
     NAnewVar <- wdat$newVar
     NAnewVar[miss.ind == 1] <- NA
 

@@ -12,10 +12,13 @@ proportionList <- c(10, 30, 50)
 set.seed(100)
 for (w in 1:length (mechList)) {
   mech <- mechList[w]
+  print (mech)
   for (k in 1:length (proportionList)) {
     propName <- proportionList[k]
-    args <- commandArgs(trailingOnly = F)
-    i <- args[6]
+    print (propName)
+#    args <- commandArgs(trailingOnly = F)
+#    i <- args[6]
+    i <- 22
     mData <- read.csv(file.path(rootdir, "datasets/mDats", mech, propName, paste0("mData", i, ".csv")))
     cData <- read.csv(file.path(rootdir, "datasets/cDats", mech, propName, paste0("cData", i, ".csv")))
     cData <- cData[, -1]
@@ -118,6 +121,8 @@ for (w in 1:length (mechList)) {
     covereageMICEEcog <- 1*between(c (trueEcog), CIMICELowerEcog, CIMICEUpperEcog)
     covereageMICENewVar <- 1*between(c (trueNewVar), CIMICELowerNewVar, CIMICEUpperNewVar)
 
+    print ("RF imputation")
+
     mData <- read.csv(file.path(rootdir, "datasets/mDats", mech, propName, paste0("mData", i, ".csv")))
 
     mCat = mData
@@ -216,6 +221,8 @@ for (w in 1:length (mechList)) {
     covereageForestEcog <- 1*between(c (trueEcog), CIForestLowerEcog, CIForestUpperEcog)
     covereageForestNewVar <- 1*between(c (trueNewVar), CIForestLowerNewVar, CIForestUpperNewVar)
 
+    print ("Oracle")
+
     # compare complete dataset to OS1 estimates
     CompleteFit <- coxph(Surv(time, event) ~ treat + genderf + reth_black + reth_hisp + reth_oth + practypec + b.ecogvalue + smokey + dgradeh + surgery + site_ureter + site_renal + site_urethra + age + newVar, data = cData)
 
@@ -247,6 +254,8 @@ for (w in 1:length (mechList)) {
     VarTreatComplete <- (summary(CompleteFit)$coefficients[TreatRow, 3])^2
     VarEcogComplete <- (summary(CompleteFit)$coefficients[EcogRow, 3])^2
     VarNewVarComplete <- (summary(CompleteFit)$coefficients[NewVarRow, 3])^2
+
+    print ("Complete Case")
 
     # compare exclude missingness dataset to OS1 estimates
     mData <- read.csv(file.path(rootdir, "datasets/mDats", mech, propName, paste0("mData", i, ".csv")))
