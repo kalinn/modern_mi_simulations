@@ -8,15 +8,15 @@ rootdir <- "/project/flatiron_ucc/programs/kylie/RunMe2"
 system(paste0("mkdir ", file.path(rootdir, "datasets")))
 system(paste0("mkdir ", file.path(rootdir, "datasets", "mDats")))
 system(paste0("mkdir ", file.path(rootdir, "datasets", "cDats")))
-system (paste0 ('mkdir ', file.path (rootdir, 'datasets', 'trueEff')))
+system(paste0("mkdir ", file.path(rootdir, "datasets", "trueEff")))
 system(paste0("mkdir ", file.path(rootdir, "datasets", "mDats", "MNAR1")))
 system(paste0("mkdir ", file.path(rootdir, "datasets", "cDats", "MNAR1")))
-system (paste0 ('mkdir ', file.path (rootdir, 'datasets', 'trueEff', 'MNAR1')))
+system(paste0("mkdir ", file.path(rootdir, "datasets", "trueEff", "MNAR1")))
 
 proportionList <- c(10, 30, 50)
-system (paste0 ('mkdir ', file.path (rootdir, 'datasets', 'trueEff', 'MNAR1', proportionList[1])))
-system (paste0 ('mkdir ', file.path (rootdir, 'datasets', 'trueEff', 'MNAR1', proportionList[2])))
-system (paste0 ('mkdir ', file.path (rootdir, 'datasets', 'trueEff', 'MNAR1', proportionList[3])))
+system(paste0("mkdir ", file.path(rootdir, "datasets", "trueEff", "MNAR1", proportionList[1])))
+system(paste0("mkdir ", file.path(rootdir, "datasets", "trueEff", "MNAR1", proportionList[2])))
+system(paste0("mkdir ", file.path(rootdir, "datasets", "trueEff", "MNAR1", proportionList[3])))
 iter <- 1000
 effOR <- 0.5
 
@@ -25,11 +25,11 @@ nsim <- 1
 
 # Magic intercepts for missingness proportions
 # in ECOG to be 10/30/50%
-b0 <- c(-19.32, -14.64, -11.77)
+b0 <- c(-35, -23.65, -20.9)
 
 # Magic intercepts for missingness proportions
 # in newVar to be 10/30/50%
-b0nv <- c(-9.728, -8.264, -7.285)
+b0nv <- c(-12.15, -10.88, -10.18)
 
 for (w in 1:3) {
   set.seed(123)
@@ -85,10 +85,10 @@ for (w in 1:3) {
 
   # Here we generate a new variable for the outcome model that has a nonlinear age terms and interactions age x smokey and age x surgery.
   # We will include this term in the outcome model so it is correctly specified, but imputation model for this variable will be misspecified by MICE
-  sdat.c$newVar <- 0.5*(sdat.c$age - 70) + 0.5 * (sdat.c$age - 70)^2 - 5 * sdat.c$smokey + 8 * sdat.c$surgery - 1 * (sdat.c$age - 70) * sdat.c$smokey + 0.5 * (sdat.c$age - 70) * sdat.c$surgery + rnorm(nrow(sdat.c), sd = 20)
+  sdat.c$newVar <- 0.5 * (sdat.c$age - 70) + 0.5 * (sdat.c$age - 70)^2 - 5 * sdat.c$smokey + 8 * sdat.c$surgery - 1 * (sdat.c$age - 70) * sdat.c$smokey + 0.5 * (sdat.c$age - 70) * sdat.c$surgery + rnorm(nrow(sdat.c), sd = 20)
 
-  if (FALSE){
-    cor (cbind (sdat.c$age, sdat.c$age^2, sdat.c$smokey, sdat.c$surgery, sdat.c$newVar), method='spearman')
+  if (FALSE) {
+    cor(cbind(sdat.c$age, sdat.c$age^2, sdat.c$smokey, sdat.c$surgery, sdat.c$newVar), method = "spearman")
   }
 
   # Step 2: Estimate associations with outcome and censoring
@@ -137,12 +137,12 @@ for (w in 1:3) {
     sdat.m <- sdat.c %>% select(-ndead)
 
     # Attach full data to simulation i
-    colnames(sor$Sim_Data)[1] = "patientid"
-    wdat <- dplyr::left_join(sor$Sim_Data, sdat.m, by = "patientid") 
+    colnames(sor$Sim_Data)[1] <- "patientid"
+    wdat <- dplyr::left_join(sor$Sim_Data, sdat.m, by = "patientid")
     wdat$event <- wdat$EVENT1 * 1
-    wdat$EVENT1 = NULL
-    wdat$time = wdat$TIME1
-    wdat$TIME1 = NULL
+    wdat$EVENT1 <- NULL
+    wdat$time <- wdat$TIME1
+    wdat$TIME1 <- NULL
     wdat$dead <- NULL
     wdat$cmonth <- NULL
 
@@ -153,31 +153,29 @@ for (w in 1:3) {
 
     X <- wdat
     X$hazard <- NULL
-    etInd = which (names(X)%in%c('event', 'time'))
-    ecogInd = which (names(X)%in%c('b.ecogvalue'))
-    newVarInd = which (names(X)%in%c('newVar'))
-    miss.coef <- c(rep(log(1.1), ncol (X)))
-    miss.coef[etInd] = 0
-    miss.coef[ecogInd] = log(5)
-    miss.nv <- c(rep(log(1.1), ncol (X)))
-    miss.nv[etInd] = 0
-    miss.nv[newVarInd] = 0
+    etInd <- which(names(X) %in% c("event", "time"))
+    ecogInd <- which(names(X) %in% c("b.ecogvalue"))
+    newVarInd <- which(names(X) %in% c("newVar"))
+    miss.coef <- c(rep(log(1.1), ncol(X)))
+    miss.coef[etInd] <- 0
+    miss.coef[ecogInd] <- log(5)
+    miss.nv <- c(rep(log(1.1), ncol(X)))
+    miss.nv[etInd] <- 0
+    miss.nv[newVarInd] <- 0
     # Computes columnwise prob of missing to reach
     # Pr(missing at least 1) = 10/30/50%
-    # EXCLUDE ECOG and newVar which 
-    # will have MARGINAL missingness of 10/30/50%
-    # Also exclude treat
+    # Exclude treat
     # Subtract 4 because race and site categories
-    # each only count as 1. Subtract 3 for 
-    # treat, ECOG, newVar
+    # each only count as 1.
     # Subtract 2 for event and time
-    nvars = ncol (X) - 4 - 2 - 3
-    multiplier = 1 - exp (log (1 - proportionList[w]/100)/nvars)
+    # Subtract 1 for treat
+    nvars <- ncol(X) - 4 - 2 - 1
+    multiplier <- 1 - exp(log(1 - proportionList[w] / 100) / nvars)
 
     X <- as.matrix(X)
     # Add MAR missingness to ECOG
-    expit = function (x) exp (x)/(1 + exp (x))
-    logit = function (x) log (x/(1-x))
+    expit <- function(x) exp(x) / (1 + exp(x))
+    logit <- function(x) log(x / (1 - x))
     beta0 <- b0[w]
     p <- expit(beta0 + X %*% miss.coef)
     miss.ind <- rbinom(nrow(X), 1, p)
@@ -226,12 +224,12 @@ for (w in 1:3) {
 
     # Induce MCAR missingness in race
     # Treat 3 dummies as 1
-    raceNA <- select (wdat, reth_black, reth_hisp, reth_oth)
-    s = sample(c(1:nrow(raceNA)), floor(nrow(raceNA) * multiplier))
+    raceNA <- select(wdat, reth_black, reth_hisp, reth_oth)
+    s <- sample(c(1:nrow(raceNA)), floor(nrow(raceNA) * multiplier))
     raceNA <- apply(raceNA, 2, function(x) {
       x[s] <- NA
       x
-    })    
+    })
     raceNA <- data.frame(raceNA)
     wdatNA <- add_column(wdatNA, reth_black = raceNA$reth_black, .after = "genderf")
     wdatNA <- add_column(wdatNA, reth_hisp = raceNA$reth_hisp, .after = "reth_black")
@@ -239,19 +237,19 @@ for (w in 1:3) {
 
     # Induce MCAR missingness in site
     # Treat 3 dummies as 1
-    siteNA <- select (wdat, site_ureter, site_renal, site_urethra)
-    s = sample(c(1:nrow(siteNA)), floor(nrow(siteNA) * multiplier))
+    siteNA <- select(wdat, site_ureter, site_renal, site_urethra)
+    s <- sample(c(1:nrow(siteNA)), floor(nrow(siteNA) * multiplier))
     siteNA <- apply(siteNA, 2, function(x) {
       x[s] <- NA
       x
-    })    
+    })
     siteNA <- data.frame(siteNA)
     wdatNA <- add_column(wdatNA, site_ureter = siteNA$site_ureter, .after = "practypec")
     wdatNA <- add_column(wdatNA, site_renal = siteNA$site_renal, .after = "site_ureter")
     wdatNA <- add_column(wdatNA, site_urethra = siteNA$site_urethra, .after = "site_renal")
 
-    wdatNA <- add_column(wdatNA, b.ecogvalue = NAEcog, .after = 'treat')
-    wdatNA <- add_column(wdatNA, newVar = NAnewVar, .after = 'b.ecogvalue')
+    wdatNA <- add_column(wdatNA, b.ecogvalue = NAEcog, .after = "treat")
+    wdatNA <- add_column(wdatNA, newVar = NAnewVar, .after = "b.ecogvalue")
 
     nas <- wdatNA
     nas$reth_hisp <- NULL
@@ -262,7 +260,7 @@ for (w in 1:3) {
     # INCLUDING ECOG and newVar
     prop <- mean(apply(nas, 1, function(x) any(is.na(x))))
 
-    s.list = list ()
+    s.list <- list()
     s.list[[paste("MissingSim", nsim, sep = "")]] <- cbind(id, wdatNA)
     s.list[[paste("FullSim", nsim, sep = "")]] <- cbind(id, wdat)
 
