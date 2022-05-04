@@ -233,7 +233,18 @@ for (w in 1:length(mechList)) {
     trueTreat <- truth[1]
     trueEcog <- truth[2]
     trueNewVar <- truth[3]
-    fileListName <- paste0("files", mech, propName)
+    if (mech=='MCAR'){
+      fileListName <- paste0("filesMCAR", propName)
+    }
+    if (mech=='MAR'){
+      fileListName <- paste0("filesMAR", propName)
+    }
+    if (mech=='MNAR1'){
+      fileListName <- paste0("filesMNAR", propName, "a")
+    }
+    if (mech=='MNAR2'){
+      fileListName <- paste0("filesMNAR", propName, "b")
+    }
     fileCur <- get(fileListName)
 
     biasTreatAE <- c()
