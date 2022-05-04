@@ -2,6 +2,8 @@ library(dplyr)
 library(survival)
 
 rootdir <- "/project/flatiron_ucc/programs/kylie/RunMe2/final_results"
+iter = 1000
+
 filesMCAR10 <- list.files(file.path(rootdir, "MCAR/10"), full.names = TRUE)
 filesMCAR30 <- list.files(file.path(rootdir, "MCAR/30"), full.names = TRUE)
 filesMCAR50 <- list.files(file.path(rootdir, "MCAR/50"), full.names = TRUE)
@@ -23,30 +25,44 @@ makeTable <- function(data) {
   biasList <- (lapply(df, function(x) x <- x[1, ]))
   biasTable <- bind_rows(biasList, .id = "column_label")
   biasTable <- biasTable[, -1]
-  PercentileOracleTreat <- data.frame(quantile(biasTable[, 1], c(0.025, 0.975)))
-  PercentileOracleEcog <- data.frame(quantile(biasTable[, 2], c(0.025, 0.975)))
-  PercentileOracleNewVar <- data.frame(quantile(biasTable[, 3], c(0.025, 0.975)))
-  PercentileCCTreat <- data.frame(quantile(biasTable[, 4], c(0.025, 0.975)))
-  PercentileCCEcog <- data.frame(quantile(biasTable[, 5], c(0.025, 0.975)))
-  PercentileCCNewVar <- data.frame(quantile(biasTable[, 6], c(0.025, 0.975)))
-  PercentileMICETreat <- data.frame(quantile(biasTable[, 7], c(0.025, 0.975)))
-  PercentileMICEEcog <- data.frame(quantile(biasTable[, 8], c(0.025, 0.975)))
-  PercentileMICENewVar <- data.frame(quantile(biasTable[, 9], c(0.025, 0.975)))
-  PercentileForestTreat <- data.frame(quantile(biasTable[, 10], c(0.025, 0.975)))
-  PercentileForestEcog <- data.frame(quantile(biasTable[, 11], c(0.025, 0.975)))
-  PercentileForestNewVar <- data.frame(quantile(biasTable[, 12], c(0.025, 0.975)))
-  colnames(PercentileOracleTreat) <- "Percentile"
-  colnames(PercentileOracleEcog) <- "Percentile"
-  colnames(PercentileOracleNewVar) <- "Percentile"
-  colnames(PercentileCCTreat) <- "Percentile"
-  colnames(PercentileCCEcog) <- "Percentile"
-  colnames(PercentileCCNewVar) <- "Percentile"
-  colnames(PercentileMICETreat) <- "Percentile"
-  colnames(PercentileMICEEcog) <- "Percentile"
-  colnames(PercentileMICENewVar) <- "Percentile"
-  colnames(PercentileForestTreat) <- "Percentile"
-  colnames(PercentileForestEcog) <- "Percentile"
-  colnames(PercentileForestNewVar) <- "Percentile"
+#  PercentileOracleTreat <- data.frame(quantile(biasTable[, 1], c(0.025, 0.975)))
+#  PercentileOracleEcog <- data.frame(quantile(biasTable[, 2], c(0.025, 0.975)))
+#  PercentileOracleNewVar <- data.frame(quantile(biasTable[, 3], c(0.025, 0.975)))
+#  PercentileCCTreat <- data.frame(quantile(biasTable[, 4], c(0.025, 0.975)))
+#  PercentileCCEcog <- data.frame(quantile(biasTable[, 5], c(0.025, 0.975)))
+#  PercentileCCNewVar <- data.frame(quantile(biasTable[, 6], c(0.025, 0.975)))
+#  PercentileMICETreat <- data.frame(quantile(biasTable[, 7], c(0.025, 0.975)))
+#  PercentileMICEEcog <- data.frame(quantile(biasTable[, 8], c(0.025, 0.975)))
+#  PercentileMICENewVar <- data.frame(quantile(biasTable[, 9], c(0.025, 0.975)))
+#  PercentileForestTreat <- data.frame(quantile(biasTable[, 10], c(0.025, 0.975)))
+#  PercentileForestEcog <- data.frame(quantile(biasTable[, 11], c(0.025, 0.975)))
+#  PercentileForestNewVar <- data.frame(quantile(biasTable[, 12], c(0.025, 0.975)))
+
+  # Asymptotic CIs:
+  PercentileOracleTreat <- data.frame(c (mean(biasTable[, 1]) - 1.96*sd (biasTable[, 1])/sqrt (iter), mean(biasTable[, 1]) + 1.96*sd (biasTable[, 1])/sqrt (iter)))
+  PercentileOracleEcog <- data.frame(c (mean(biasTable[, 2]) - 1.96*sd (biasTable[, 2])/sqrt (iter), mean(biasTable[, 2]) + 1.96*sd (biasTable[, 2])/sqrt (iter)))
+  PercentileOracleNewVar <- data.frame(c (mean(biasTable[, 3]) - 1.96*sd (biasTable[, 3])/sqrt (iter), mean(biasTable[, 3]) + 1.96*sd (biasTable[, 3])/sqrt (iter)))
+  PercentileCCTreat <- data.frame(c (mean(biasTable[, 4]) - 1.96*sd (biasTable[, 4])/sqrt (iter), mean(biasTable[, 4]) + 1.96*sd (biasTable[, 4])/sqrt (iter)))
+  PercentileCCEcog <- data.frame(c(mean(biasTable[, 5]) - 1.96*sd (biasTable[, 5])/sqrt (iter), mean(biasTable[, 5]) + 1.96*sd (biasTable[, 5])/sqrt (iter)))
+  PercentileCCNewVar <- data.frame(c(mean(biasTable[, 6]) - 1.96*sd (biasTable[, 6])/sqrt (iter), mean(biasTable[, 6]) + 1.96*sd (biasTable[, 6])/sqrt (iter)))
+  PercentileMICETreat <- data.frame(c(mean(biasTable[, 7]) - 1.96*sd (biasTable[, 7])/sqrt (iter), mean(biasTable[, 7]) + 1.96*sd (biasTable[, 7])/sqrt (iter)))
+  PercentileMICEEcog <- data.frame(c(mean(biasTable[, 8]) - 1.96*sd (biasTable[, 8])/sqrt (iter), mean(biasTable[, 8]) + 1.96*sd (biasTable[, 8])/sqrt (iter)))
+  PercentileMICENewVar <- data.frame(c(mean(biasTable[, 9]) - 1.96*sd (biasTable[, 9])/sqrt (iter), mean(biasTable[, 9]) + 1.96*sd (biasTable[, 9])/sqrt (iter)))
+  PercentileForestTreat <- data.frame(c(mean(biasTable[, 10]) - 1.96*sd (biasTable[, 10])/sqrt (iter), mean(biasTable[, 10]) + 1.96*sd (biasTable[, 10])/sqrt (iter)))
+  PercentileForestEcog <- data.frame(c(mean(biasTable[, 11]) - 1.96*sd (biasTable[, 11])/sqrt (iter), mean(biasTable[, 11]) + 1.96*sd (biasTable[, 11])/sqrt (iter)))
+  PercentileForestNewVar <- data.frame(c(mean(biasTable[, 12]) - 1.96*sd (biasTable[, 12])/sqrt (iter), mean(biasTable[, 12]) + 1.96*sd (biasTable[, 12])/sqrt (iter)))
+  colnames(PercentileOracleTreat) <- ""
+  colnames(PercentileOracleEcog) <- ""
+  colnames(PercentileOracleNewVar) <- ""
+  colnames(PercentileCCTreat) <- ""
+  colnames(PercentileCCEcog) <- ""
+  colnames(PercentileCCNewVar) <- ""
+  colnames(PercentileMICETreat) <- ""
+  colnames(PercentileMICEEcog) <- ""
+  colnames(PercentileMICENewVar) <- ""
+  colnames(PercentileForestTreat) <- ""
+  colnames(PercentileForestEcog) <- ""
+  colnames(PercentileForestNewVar) <- ""
 
   PercentileTreatDf <- rbind(PercentileOracleTreat, PercentileCCTreat, PercentileMICETreat, PercentileForestTreat)
   rownames(PercentileTreatDf) <- c("OracleLower", "OracleUpper", "CCLower", "CCUpper", "MICELower", "MICEUpper", "ForestLower", "ForestUpper")
@@ -179,12 +195,12 @@ write.csv(MCAR50Avg, file.path(rootdir, "MCAR50Avg10TreeV2.csv"))
 write.csv(MAR10Avg, file.path(rootdir, "MAR10Avg10TreeV2.csv"))
 write.csv(MAR30Avg, file.path(rootdir, "MAR30Avg10TreeV2.csv"))
 write.csv(MAR50Avg, file.path(rootdir, "MAR50Avg10TreeV2.csv"))
-write.csv(MNAR10aAvg, file.path(rootdir, "MNAR10Avg10TreeV2.csv"))
-write.csv(MNAR30aAvg, file.path(rootdir, "MNAR30Avg10TreeV2.csv"))
-write.csv(MNAR50aAvg, file.path(rootdir, "MNAR50Avg10TreeV2.csv"))
-write.csv(MNAR10bAvg, file.path(rootdir, "MNAR10Avg10TreeV2.csv"))
-write.csv(MNAR30bAvg, file.path(rootdir, "MNAR30Avg10TreeV2.csv"))
-write.csv(MNAR50bAvg, file.path(rootdir, "MNAR50Avg10TreeV2.csv"))
+write.csv(MNAR10aAvg, file.path(rootdir, "MNAR10aAvg10TreeV2.csv"))
+write.csv(MNAR30aAvg, file.path(rootdir, "MNAR30aAvg10TreeV2.csv"))
+write.csv(MNAR50aAvg, file.path(rootdir, "MNAR50aAvg10TreeV2.csv"))
+write.csv(MNAR10bAvg, file.path(rootdir, "MNAR10bAvg10TreeV2.csv"))
+write.csv(MNAR30bAvg, file.path(rootdir, "MNAR30bAvg10TreeV2.csv"))
+write.csv(MNAR50bAvg, file.path(rootdir, "MNAR50bAvg10TreeV2.csv"))
 
 
 # Autoencoder
@@ -294,9 +310,9 @@ for (w in 1:length(mechList)) {
       mseAENewVar[i] <- VarNewVarAE[i] + biasNewVarAE[i]^2
     }
 
-    PercentileTreatAE <- quantile(biasTreatAE, c(0.025, 0.975))
-    PercentileEcogAE <- quantile(biasEcogAE, c(0.025, 0.975))
-    PercentileNewVarAE <- quantile(biasNewVarAE, c(0.025, 0.975))
+    PercentileTreatAE <- data.frame (c(mean (biasTreatAE)-1.96*sd(biasTreatAE)/sqrt (iter),mean (biasTreatAE)+1.96*sd(biasTreatAE)/sqrt (iter)))
+    PercentileEcogAE <- data.frame (c(mean (biasEcogAE)-1.96*sd(biasEcogAE)/sqrt (iter),mean (biasEcogAE)+1.96*sd(biasEcogAE)/sqrt (iter)))
+    PercentileNewVarAE <- data.frame (c(mean (biasNewVarAE)-1.96*sd(biasNewVarAE)/sqrt (iter),mean (biasNewVarAE)+1.96*sd(biasNewVarAE)/sqrt (iter)))
     biasTreatAvg <- mean(biasTreatAE)
     biasEcogAvg <- mean(biasEcogAE)
     biasNewVarAvg <- mean(biasNewVarAE)

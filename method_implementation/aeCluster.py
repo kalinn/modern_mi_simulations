@@ -14,8 +14,8 @@ import tensorflow
 import session_info
 os.chdir("/project/flatiron_ucc")
 rootdir = "/project/flatiron_ucc/programs/kylie/RunMe2/final_results"
-if os.path.isdir(rootdir)==False:
-    os.mkdir (rootdir)
+#if os.path.isdir(rootdir)==False:
+#    os.mkdir (rootdir)
 
 mechList = ("MCAR","MAR","MNAR1","MNAR2")
 proportionList = (10,30,50)
@@ -23,13 +23,13 @@ for w in range(0,len(mechList)):
     mech = mechList[w]
     foldName = "AE" + mech
     path = rootdir + "/" + foldName
-    if os.path.isdir (path)==False:
-        os.mkdir (path)
+#    if os.path.isdir (path)==False:
+#        os.mkdir (path)
     for k in range(0,len(proportionList)):
         propName = proportionList[k]
         path = rootdir + "/" + foldName + "/" + str (propName)
-        if os.path.isdir (path)==False:
-            os.mkdir (path)
+#        if os.path.isdir (path)==False:
+#            os.mkdir (path)
         i = sys.argv[1]
         filename = "".join(("programs/kylie/RunMe2/datasets/mDats/",mech,"/",str(propName),"/","mData",str(i),".csv"))
         train = pd.read_csv(filename)

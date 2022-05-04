@@ -16,9 +16,8 @@ for (w in 1:length (mechList)) {
   for (k in 1:length (proportionList)) {
     propName <- proportionList[k]
     print (propName)
-#    args <- commandArgs(trailingOnly = F)
-#    i <- args[6]
-    i <- 22
+    args <- commandArgs(trailingOnly = TRUE)
+    i <- as.numeric (args[1])
     mData <- read.csv(file.path(rootdir, "datasets/mDats", mech, propName, paste0("mData", i, ".csv")))
     cData <- read.csv(file.path(rootdir, "datasets/cDats", mech, propName, paste0("cData", i, ".csv")))
     cData <- cData[, -1]
