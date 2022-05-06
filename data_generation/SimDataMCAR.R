@@ -78,6 +78,8 @@ for (w in 1:3) {
   # Here we generate a new variable for the outcome model that has a nonlinear age terms and interactions age x smokey and age x surgery.
   # We will include this term in the outcome model so it is correctly specified, but imputation model for this variable will be misspecified by MICE
   sdat.c$newVar <- 0.5*(sdat.c$age - 70) + 0.5 * (sdat.c$age - 70)^2 - 5 * sdat.c$smokey + 8 * sdat.c$surgery - 1 * (sdat.c$age - 70) * sdat.c$smokey + 0.5 * (sdat.c$age - 70) * sdat.c$surgery + rnorm(nrow(sdat.c), sd = 20)
+  # Scale it
+#  sdat.c$newVar = sdat.c$newVar/sd (sdat.c$newVar)
 
   if (FALSE){
     cor (cbind (sdat.c$age, sdat.c$age^2, sdat.c$smokey, sdat.c$surgery, sdat.c$newVar), method='spearman')

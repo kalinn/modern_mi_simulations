@@ -283,6 +283,6 @@ for (w in 1:3) {
     system(paste0("mkdir ", file.path(rootdir, "datasets", "cDats", "MNAR1", propName)))
     write.csv(train, file.path(rootdir, "datasets/mDats/MNAR1", propName, filename), row.names = F)
     write.csv(cData, file.path(rootdir, "datasets/cDats/MNAR1", propName, Cfilename), row.names = F)
-    write.csv(trueEffect, file.path(rootdir, "datasets/trueEff/MNAR1", propName, effname), row.names = F)
+    write.csv(t (trueEffect), file.path(rootdir, "datasets/trueEff/MNAR1", propName, effname), row.names = F)
   }
 }

@@ -21,10 +21,11 @@ for (w in 1:length (mechList)) {
     mData <- read.csv(file.path(rootdir, "datasets/mDats", mech, propName, paste0("mData", i, ".csv")))
     cData <- read.csv(file.path(rootdir, "datasets/cDats", mech, propName, paste0("cData", i, ".csv")))
     cData <- cData[, -1]
-    truth <- read.csv(file.path(rootdir, "datasets/trueEff", mech, propName, "propMiss_trueEffs1.csv"))
-    trueTreat <- truth$x[1]
-    trueEcog <- truth$x[2]
-    trueNewVar <- truth$x[3]
+    truth <- read.csv(file.path(rootdir, "datasets/trueEff", mech, propName, "propMiss_trueEffs1.csv"))$x
+    tnames = read.csv (file.path(rootdir, "datasets/names.csv"))
+    trueTreat <- truth[which (tnames$x=='TREAT')]
+    trueEcog <- truth[which (tnames$x=='b.ecogvalue')]
+    trueNewVar <- truth[which (tnames$x=='newVar')]
 
     mCat = mData
     mCat$race = rep (NA, nrow (mData))
