@@ -35,7 +35,7 @@ b0 <- c(-31.93990, -23.84802, -19.41728)
 # Magic intercepts for rowwise missingness proportions
 # in var1 and var2 to be 10/30/50%
 b0var1 <- c(-16.53657, -13.74374, -12.31444)
-b0var2 <- c(-79.29215 - 44.40384 - 35.16690)
+b0var2 <- c(-79.29215, -44.40384, -35.16690)
 
 
 for (w in 1:3) {
