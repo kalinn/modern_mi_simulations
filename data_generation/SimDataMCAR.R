@@ -4,7 +4,8 @@ library(dplyr)
 library(mice)
 library(tidyverse)
 
-rootdir <- "/project/flatiron_ucc/programs/kylie/RunMe2"
+rootdir <- "/project/flatiron_ucc/programs/kylie/RunMe3"
+system (paste0 ('mkdir ', rootdir))
 system (paste0 ('mkdir ', file.path (rootdir, 'datasets')))
 system (paste0 ('mkdir ', file.path (rootdir, 'datasets', 'mDats')))
 system (paste0 ('mkdir ', file.path (rootdir, 'datasets', 'cDats')))
@@ -22,7 +23,7 @@ ecogList <- c(10, 20, 30)
 system (paste0 ('mkdir ', file.path (rootdir, 'datasets', 'trueEff', 'MCAR', proportionList[1])))
 system (paste0 ('mkdir ', file.path (rootdir, 'datasets', 'trueEff', 'MCAR', proportionList[2])))
 system (paste0 ('mkdir ', file.path (rootdir, 'datasets', 'trueEff', 'MCAR', proportionList[3])))
-iter <- 1000
+iter <- 500
 effOR <- 0.5
 
 # set number of Plasmode simulations
@@ -84,10 +85,12 @@ for (w in 1:3) {
   # Here we generate a new variables for the outcome model that are nonlinear and involve interactions
   # We will include these terms in the outcome model so it is correctly specified, but imputation models will be misspecified by MICE
   sdat.c$var1 <- (sdat.c$age - 73)^2 + rnorm (nrow (sdat.c), sd=100)
-  sdat.c$var2 <- (sdat.c$age - 73)*sdat.c$smokey - (sdat.c$age - 73)*sdat.c$surgery - 5*(sdat.c$age - 73)*sdat.c$smokey*sdat.c$surgery + rnorm (nrow (sdat.c), sd=10)
+  sdat.c$var1 <- sdat.c$var1/sd (sdat.c$var1) 
+  sdat.c$var2 <- (sdat.c$age - 73)*(sdat.c$b.ecogvalue > 0) - (sdat.c$age - 73)*sdat.c$surgery - 5*(sdat.c$age - 73)*(sdat.c$b.ecogvalue > 0)*sdat.c$surgery + rnorm (nrow (sdat.c), sd=10)
+  sdat.c$var2 <- sdat.c$var2/sd (sdat.c$var2) 
 
   if (FALSE){
-    cor (cbind (sdat.c$age, sdat.c$smokey, sdat.c$surgery, sdat.c$var1, sdat.c$var2), method='spearman')
+    cor (cbind (sdat.c$age, sdat.c$b.ecogvalue, sdat.c$surgery, sdat.c$var1, sdat.c$var2), method='spearman')
 
     age2 = sdat.c$age^2
     a = lm(sdat.c$var1~sdat.c$age + age2)
@@ -97,8 +100,8 @@ for (w in 1:3) {
     sum ((a$fitted.values - sdat.c$var1)^2)
     sum ((b$fitted.values - sdat.c$var1)^2)
 
-    a = lm(var2~age*smokey*surgery,data=sdat.c)
-    b = lm(var2~age+smokey+surgery,data=sdat.c)
+    a = lm(var2~age*b.ecogvalue*surgery,data=sdat.c)
+    b = lm(var2~age+b.ecogvalue+surgery,data=sdat.c)
     summary(a)
     summary(b)
     sum ((a$fitted.values - sdat.c$var2)^2)
@@ -124,8 +127,8 @@ for (w in 1:3) {
     # Increase effect of vars on outcome using MMOut
     outEff <- rep(1, length(coef(os1)))
     lc = length (outEff)
-    outEff[lc-1] <- 40
-    outEff[lc] <- 20
+    outEff[lc-1] <- 20
+    outEff[lc] <- 10
     sor <- PlasmodeSur(
       objectOut = os1,
       objectCen = oc1,

@@ -6,7 +6,7 @@ library(tidyverse)
 args <- commandArgs(trailingOnly = TRUE)
 mech = as.character(args[2])
 
-rootdir <- "/project/flatiron_ucc/programs/kylie/RunMe2"
+rootdir <- "/project/flatiron_ucc/programs/kylie/RunMe3"
 system (paste0 ('mkdir ', file.path (rootdir, 'final_results')))
 
 proportionList <- c(10, 30, 50)

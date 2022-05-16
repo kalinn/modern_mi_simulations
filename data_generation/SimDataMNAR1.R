@@ -4,7 +4,7 @@ library(dplyr)
 library(mice)
 library(tidyverse)
 
-rootdir <- "/project/flatiron_ucc/programs/kylie/RunMe2"
+rootdir <- "/project/flatiron_ucc/programs/kylie/RunMe3"
 system(paste0("mkdir ", file.path(rootdir, "datasets")))
 system(paste0("mkdir ", file.path(rootdir, "datasets", "mDats")))
 system(paste0("mkdir ", file.path(rootdir, "datasets", "cDats")))
@@ -22,7 +22,7 @@ ecogList <- c(10, 20, 30)
 system(paste0("mkdir ", file.path(rootdir, "datasets", "trueEff", "MNAR1", proportionList[1])))
 system(paste0("mkdir ", file.path(rootdir, "datasets", "trueEff", "MNAR1", proportionList[2])))
 system(paste0("mkdir ", file.path(rootdir, "datasets", "trueEff", "MNAR1", proportionList[3])))
-iter <- 1000
+iter <- 500
 effOR <- 0.5
 
 # set number of Plasmode simulations
@@ -30,12 +30,12 @@ nsim <- 1
 
 # Magic intercepts for columnwise missingness proportions
 # in ECOG to be 10/20/30%
-b0 = c (-33.46638, -25.50097, -21.02351)
+b0 = c (-37.53653, -35.93894, -34.70900)
 
 # Magic intercepts for rowwise missingness proportions
 # in var1 and var2 to be 10/30/50%
-b0var1 = c (-16.53435, -13.74626, -12.31848)
-b0var2 = c (-79.31157, -44.40518, -35.16614)
+b0var1 = c (-38.65038, -37.26411, -36.39782)
+b0var2 = c (-38.96550, -37.55989, -36.67841)
 
 for (w in 1:3) {
   set.seed(123)
@@ -92,7 +92,9 @@ for (w in 1:3) {
   # Here we generate a new variables for the outcome model that are nonlinear and involve interactions
   # We will include these terms in the outcome model so it is correctly specified, but imputation models will be misspecified by MICE
   sdat.c$var1 <- (sdat.c$age - 73)^2 + rnorm (nrow (sdat.c), sd=100)
-  sdat.c$var2 <- (sdat.c$age - 73)*sdat.c$smokey - (sdat.c$age - 73)*sdat.c$surgery - 5*(sdat.c$age - 73)*sdat.c$smokey*sdat.c$surgery + rnorm (nrow (sdat.c), sd=10)
+  sdat.c$var1 <- sdat.c$var1/sd (sdat.c$var1) 
+  sdat.c$var2 <- (sdat.c$age - 73)*(sdat.c$b.ecogvalue > 0) - (sdat.c$age - 73)*sdat.c$surgery - 5*(sdat.c$age - 73)*(sdat.c$b.ecogvalue > 0)*sdat.c$surgery + rnorm (nrow (sdat.c), sd=10)
+  sdat.c$var2 <- sdat.c$var2/sd (sdat.c$var2) 
 
   if (FALSE){
     cor (cbind (sdat.c$age, sdat.c$smokey, sdat.c$surgery, sdat.c$var1, sdat.c$var2), method='spearman')
@@ -132,8 +134,8 @@ for (w in 1:3) {
     # Increase effect of vars on outcome using MMOut
     outEff <- rep(1, length(coef(os1)))
     lc = length (outEff)
-    outEff[lc-1] <- 40
-    outEff[lc] <- 20
+    outEff[lc-1] <- 20
+    outEff[lc] <- 10
     sor <- PlasmodeSur(
       objectOut = os1,
       objectCen = oc1,
@@ -197,13 +199,13 @@ for (w in 1:3) {
     var1Ind <- which(names(X) %in% c("var1"))
     var2Ind <- which(names(X) %in% c("var2"))
 
-    miss.coef <- c(rep(log(1.1), ncol(X)))
+    miss.coef <- c(rep(log(1.5), ncol(X)))
     miss.coef[etInd] <- 0
     miss.coef[ecogInd] <- log(5)
-    miss.nv1 <- c(rep(log(1.1), ncol(X)))
+    miss.nv1 <- c(rep(log(1.5), ncol(X)))
     miss.nv1[etInd] <- 0
     miss.nv1[var1Ind] <- 0
-    miss.nv2 <- c(rep(log(1.1), ncol(X)))
+    miss.nv2 <- c(rep(log(1.5), ncol(X)))
     miss.nv2[etInd] <- 0
     miss.nv2[var2Ind] <- 0
 
@@ -266,7 +268,7 @@ for (w in 1:3) {
       }
       b0 = rep (NA, 3)
       for (r in 1:3){
-        b0[r] = binsearch (-100, 0, miss.coef, ecogList[r]/100)
+        b0[r] = binsearch (-1000, 0, miss.coef, ecogList[r]/100)
       }
       b0
     }
@@ -283,7 +285,7 @@ for (w in 1:3) {
     if (FALSE){
       b0var1 = rep (NA, 3)
       for (r in 1:3){
-        b0var1[r] = binsearch (-100, 0, miss.nv1, mult[r])
+        b0var1[r] = binsearch (-1000, 0, miss.nv1, mult[r])
       }
       b0var1
     }
@@ -299,7 +301,7 @@ for (w in 1:3) {
     if (FALSE){
       b0var2 = rep (NA, 3)
       for (r in 1:3){
-        b0var2[r] = binsearch (-100, 0, miss.nv2, mult[r])
+        b0var2[r] = binsearch (-1000, 0, miss.nv2, mult[r])
       }
       b0var2
     }

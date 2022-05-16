@@ -13,7 +13,7 @@ import desc
 import tensorflow
 import session_info
 os.chdir("/project/flatiron_ucc")
-rootdir = "/project/flatiron_ucc/programs/kylie/RunMe2/final_results"
+rootdir = "/project/flatiron_ucc/programs/kylie/RunMe3/final_results"
 #if os.path.isdir(rootdir)==False:
 #    os.mkdir (rootdir)
 
