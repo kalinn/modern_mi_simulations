@@ -9,7 +9,7 @@ Results using 1000 simulations, 10 MI
 trueTreatment approx -0.69, trueEcog appox 0.4
 
 os1 <- coxph(Surv(cmonth, dead) ~ treat + genderf +  
-reth_black + reth_hisp + reth_oth + practypec + b.ecogvalue + smokey +  dgradeh + surgery + site_ureter + site_renal + site_urethra + age + newVar, data=sdat.c, x=T)
+reth_black + reth_hisp + reth_oth + practypec + b.ecogvalue + smokey +  dgradeh + surgery + site_ureter + site_renal + site_urethra + age + var1 + var2, data=sdat.c, x=T)
 
 
 ```{r echo=F, include=F}
@@ -20,7 +20,7 @@ library(xtable)
 library(kableExtra)
 
 rootdir = "~/Box Sync/Mentoring/Students/Getz_Kylie/results"
-fdir = file.path (rootdir, "2022_05_06")
+fdir = file.path (rootdir, "2022_05_15")
 MCAR10 <- read.csv(file.path (fdir, "MCAR10Avg10TreeV2.csv"),row.names = 1)
 MCAR30 <- read.csv(file.path (fdir,"MCAR30Avg10TreeV2.csv"),row.names = 1)
 MCAR50 <- read.csv(file.path (fdir,"MCAR50Avg10TreeV2.csv"),row.names = 1)
@@ -89,12 +89,19 @@ colnames(AErow) <- c("10","30","50")
 rownames(AErow) <- c("AELower","AEUpper")
 PercEcogMCAR <- rbind(PercEcogMCAR,AErow)
 
-PercNewVarMCAR <- read.csv(file.path (fdir,"PercentileNewVarMCAR10TreeV2.csv"),row.names=1 )
-colnames(PercNewVarMCAR)  <- c("10","30","50")
+PercVar1MCAR <- read.csv(file.path (fdir,"PercentileVar1MCAR10TreeV2.csv"),row.names=1 )
+colnames(PercVar1MCAR)  <- c("10","30","50")
 AErow <- cbind(MCAR10AEPerc[,2],MCAR30AEPerc[,2],MCAR50AEPerc[,2])
 colnames(AErow) <- c("10","30","50")
 rownames(AErow) <- c("AELower","AEUpper")
-PercNewVarMCAR <- rbind(PercNewVarMCAR,AErow)
+PercVar1MCAR <- rbind(PercVar1MCAR,AErow)
+
+PercVar2MCAR <- read.csv(file.path (fdir,"PercentileVar2MCAR10TreeV2.csv"),row.names=1 )
+colnames(PercVar2MCAR)  <- c("10","30","50")
+AErow <- cbind(MCAR10AEPerc[,2],MCAR30AEPerc[,2],MCAR50AEPerc[,2])
+colnames(AErow) <- c("10","30","50")
+rownames(AErow) <- c("AELower","AEUpper")
+PercVar2MCAR <- rbind(PercVar2MCAR,AErow)
 
 PercTreatMAR <- read.csv(file.path (fdir,"PercentileTreatMAR10TreeV2.csv"),row.names=1 )
 colnames(PercTreatMAR)  <- c("10","30","50")
@@ -110,12 +117,19 @@ colnames(AErow) <- c("10","30","50")
 rownames(AErow) <- c("AELower","AEUpper")
 PercEcogMAR <- rbind(PercEcogMAR,AErow)
 
-PercNewVarMAR <- read.csv(file.path (fdir,"PercentileNewVarMAR10TreeV2.csv"),row.names=1 )
-colnames(PercNewVarMAR)  <- c("10","30","50")
+PercVar1MAR <- read.csv(file.path (fdir,"PercentileVar1MAR10TreeV2.csv"),row.names=1 )
+colnames(PercVar1MAR)  <- c("10","30","50")
 AErow <- cbind(MAR10AEPerc[,2],MAR30AEPerc[,2],MAR50AEPerc[,2])
 colnames(AErow) <- c("10","30","50")
 rownames(AErow) <- c("AELower","AEUpper")
-PercNewVarMAR <- rbind(PercNewVarMAR,AErow)
+PercVar1MAR <- rbind(PercVar1MAR,AErow)
+
+PercVar2MAR <- read.csv(file.path (fdir,"PercentileVar2MAR10TreeV2.csv"),row.names=1 )
+colnames(PercVar2MAR)  <- c("10","30","50")
+AErow <- cbind(MAR10AEPerc[,2],MAR30AEPerc[,2],MAR50AEPerc[,2])
+colnames(AErow) <- c("10","30","50")
+rownames(AErow) <- c("AELower","AEUpper")
+PercVar2MAR <- rbind(PercVar2MAR,AErow)
 
 PercTreatMNAR1 <- read.csv(file.path (fdir,"PercentileTreatMNAR10aTreeV2.csv"),row.names=1 )
 colnames(PercTreatMNAR1)  <- c("10","30","50")
@@ -131,12 +145,19 @@ colnames(AErow) <- c("10","30","50")
 rownames(AErow) <- c("AELower","AEUpper")
 PercEcogMNAR1 <- rbind(PercEcogMNAR1,AErow)
 
-PercNewVarMNAR1 <- read.csv(file.path (fdir,"PercentileNewVarMNAR10aTreeV2.csv"),row.names=1 )
-colnames(PercNewVarMNAR1)  <- c("10","30","50")
+PercVar1MNAR1 <- read.csv(file.path (fdir,"PercentileVar1MNAR10aTreeV2.csv"),row.names=1 )
+colnames(PercVar1MNAR1)  <- c("10","30","50")
 AErow <- cbind(MNAR10aAEPerc[,2],MNAR30aAEPerc[,2],MNAR50aAEPerc[,2])
 colnames(AErow) <- c("10","30","50")
 rownames(AErow) <- c("AELower","AEUpper")
-PercNewVarMNAR1 <- rbind(PercNewVarMNAR1,AErow)
+PercVar1MNAR1 <- rbind(PercVar1MNAR1,AErow)
+
+PercVar2MNAR1 <- read.csv(file.path (fdir,"PercentileVar2MNAR10aTreeV2.csv"),row.names=1 )
+colnames(PercVar2MNAR1)  <- c("10","30","50")
+AErow <- cbind(MNAR10aAEPerc[,2],MNAR30aAEPerc[,2],MNAR50aAEPerc[,2])
+colnames(AErow) <- c("10","30","50")
+rownames(AErow) <- c("AELower","AEUpper")
+PercVar2MNAR1 <- rbind(PercVar2MNAR1,AErow)
 
 PercTreatMNAR2 <- read.csv(file.path (fdir,"PercentileTreatMNAR10bTreeV2.csv"),row.names=1 )
 colnames(PercTreatMNAR2)  <- c("10","30","50")
@@ -152,19 +173,33 @@ colnames(AErow) <- c("10","30","50")
 rownames(AErow) <- c("AELower","AEUpper")
 PercEcogMNAR2 <- rbind(PercEcogMNAR2,AErow)
 
-PercNewVarMNAR2 <- read.csv(file.path (fdir,"PercentileNewVarMNAR10bTreeV2.csv"),row.names=1 )
-colnames(PercNewVarMNAR2)  <- c("10","30","50")
+PercVar1MNAR2 <- read.csv(file.path (fdir,"PercentileVar1MNAR10bTreeV2.csv"),row.names=1 )
+colnames(PercVar1MNAR2)  <- c("10","30","50")
 AErow <- cbind(MNAR10bAEPerc[,1],MNAR30bAEPerc[,1],MNAR50bAEPerc[,1])
 colnames(AErow) <- c("10","30","50")
 rownames(AErow) <- c("AELower","AEUpper")
-PercNewVarMNAR2 <- rbind(PercNewVarMNAR2,AErow)
+PercVar1MNAR2 <- rbind(PercVar1MNAR2,AErow)
 
-################################
+PercVar2MNAR2 <- read.csv(file.path (fdir,"PercentileVar2MNAR10bTreeV2.csv"),row.names=1 )
+colnames(PercVar2MNAR2)  <- c("10","30","50")
+AErow <- cbind(MNAR10bAEPerc[,1],MNAR30bAEPerc[,1],MNAR50bAEPerc[,1])
+colnames(AErow) <- c("10","30","50")
+rownames(AErow) <- c("AELower","AEUpper")
+PercVar2MNAR2 <- rbind(PercVar2MNAR2,AErow)
+```
+
+```{r echo=F, include=F}
+TreatInds = c (1,5,9,13)
+EcogInds = c (2,6,10,14)
+Var1Inds = c (3,7,11,15)
+Var2Inds = c (4,8,12,16)
+```
+
+```{r echo=F, include=F}
 # Table 1: Treat Bias and MSE
-################################
-tab1MCAR10 <-t(MCAR10[c(1,4),c(1,4,7,10)])
-tab1MCAR30 <- t(MCAR30[c(1,4),c(1,4,7,10)])
-tab1MCAR50 <- t(MCAR50[c(1,4),c(1,4,7,10)])
+tab1MCAR10 <-t(MCAR10[c(1,4),TreatInds])
+tab1MCAR30 <- t(MCAR30[c(1,4),TreatInds])
+tab1MCAR50 <- t(MCAR50[c(1,4),TreatInds])
 tab1MCAR <- cbind(tab1MCAR10[,1],tab1MCAR30[,1],tab1MCAR50[,1],tab1MCAR10[,2],tab1MCAR30[,2],tab1MCAR50[,2])
 prop <- c(10,30,50,10,30,50)
 tab1MCAR <- rbind(prop,tab1MCAR)
@@ -173,27 +208,27 @@ AEBiasMSE <- cbind(t(MCAR10AE)[1,1],t(MCAR30AE)[1,1],t(MCAR50AE)[1,1],t(MCAR10AE
 tab1MCAR <- rbind(tab1MCAR,AEBiasMSE)
 rownames(tab1MCAR) <- c("prop","ORACLE", "CC", "MICE", "RF", "DAE")
 
-tab1MAR10 <-t(MAR10[c(1,4),c(1,4,7,10)])
-tab1MAR30 <- t(MAR30[c(1,4),c(1,4,7,10)])
-tab1MAR50 <- t(MAR50[c(1,4),c(1,4,7,10)])
+tab1MAR10 <-t(MAR10[c(1,4),TreatInds])
+tab1MAR30 <- t(MAR30[c(1,4),TreatInds])
+tab1MAR50 <- t(MAR50[c(1,4),TreatInds])
 tab1MAR <- cbind(tab1MAR10[,1],tab1MAR30[,1],tab1MAR50[,1],tab1MAR10[,2],tab1MAR30[,2],tab1MAR50[,2])
 
 AEBiasMSE <- cbind(t(MAR10AE)[1,1],t(MAR30AE)[1,1],t(MAR50AE)[1,1],t(MAR10AE)[1,4],t(MAR30AE)[1,4],t(MAR50AE)[1,4])
 tab1MAR <- rbind(tab1MAR,AEBiasMSE)
 rownames(tab1MAR) <- c("ORACLE", "CC", "MICE", "RF", "DAE")
 
-tab1MNAR10a <-t(MNAR10a[c(1,4),c(1,4,7,10)])
-tab1MNAR30a <- t(MNAR30a[c(1,4),c(1,4,7,10)])
-tab1MNAR50a <- t(MNAR50a[c(1,4),c(1,4,7,10)])
+tab1MNAR10a <-t(MNAR10a[c(1,4),TreatInds])
+tab1MNAR30a <- t(MNAR30a[c(1,4),TreatInds])
+tab1MNAR50a <- t(MNAR50a[c(1,4),TreatInds])
 tab1MNARa <- cbind(tab1MNAR10a[,1],tab1MNAR30a[,1],tab1MNAR50a[,1],tab1MNAR10a[,2],tab1MNAR30a[,2],tab1MNAR50a[,2])
 
 AEBiasMSEa <- cbind(t(MNAR10aAE)[1,1],t(MNAR30aAE)[1,1],t(MNAR50aAE)[1,1],t(MNAR10aAE)[1,4],t(MNAR30aAE)[1,4],t(MNAR50aAE)[1,4])
 tab1MNARa <- rbind(tab1MNARa,AEBiasMSEa)
 rownames(tab1MNARa) <- c("ORACLE", "CC", "MICE", "RF", "DAE")
 
-tab1MNAR10b <-t(MNAR10b[c(1,4),c(1,4,7,10)])
-tab1MNAR30b <- t(MNAR30b[c(1,4),c(1,4,7,10)])
-tab1MNAR50b <- t(MNAR50b[c(1,4),c(1,4,7,10)])
+tab1MNAR10b <-t(MNAR10b[c(1,4),TreatInds])
+tab1MNAR30b <- t(MNAR30b[c(1,4),TreatInds])
+tab1MNAR50b <- t(MNAR50b[c(1,4),TreatInds])
 tab1MNARb <- cbind(tab1MNAR10b[,1],tab1MNAR30b[,1],tab1MNAR50b[,1],tab1MNAR10b[,2],tab1MNAR30b[,2],tab1MNAR50b[,2])
 
 AEBiasMSEb <- cbind(t(MNAR10bAE)[1,1],t(MNAR30bAE)[1,1],t(MNAR50bAE)[1,1],t(MNAR10bAE)[1,4],t(MNAR30bAE)[1,4],t(MNAR50bAE)[1,4])
@@ -203,58 +238,10 @@ rownames(tab1MNARb) <- c("ORACLE", "CC", "MICE", "RF", "DAE")
 tab1final <- rbind(tab1MCAR,tab1MAR,tab1MNARa,tab1MNARb)
 print(tab1final)
 
-
-################################
-# Table 3: ECOG Bias and MSE
-################################
-tab3MCAR10 <-t(MCAR10[c(1,4),c(2,5,8,11)])
-tab3MCAR30 <- t(MCAR30[c(1,4),c(2,5,8,11)])
-tab3MCAR50 <- t(MCAR50[c(1,4),c(2,5,8,11)])
-tab3MCAR <- cbind(tab3MCAR10[,1],tab3MCAR30[,1],tab3MCAR50[,1],tab3MCAR10[,2],tab3MCAR30[,2],tab3MCAR50[,2])
-prop <- c(10,30,50,10,30,50)
-tab3MCAR <- rbind(prop,tab3MCAR)
-
-AEBiasMSE <- cbind(t(MCAR10AE)[2,1],t(MCAR30AE)[2,1],t(MCAR50AE)[2,1],t(MCAR10AE)[2,4],t(MCAR30AE)[2,4],t(MCAR50AE)[2,4])
-tab3MCAR <- rbind(tab3MCAR,AEBiasMSE)
-rownames(tab3MCAR) <- c("prop","ORACLE", "CC", "MICE", "RF", "DAE")
-
-tab3MAR10 <-t(MAR10[c(1,4),c(2,5,8,11)])
-tab3MAR30 <- t(MAR30[c(1,4),c(2,5,8,11)])
-tab3MAR50 <- t(MAR50[c(1,4),c(2,5,8,11)])
-tab3MAR <- cbind(tab3MAR10[,1],tab3MAR30[,1],tab3MAR50[,1],tab3MAR10[,2],tab3MAR30[,2],tab3MAR50[,2])
-
-AEBiasMSE <- cbind(t(MAR10AE)[2,1],t(MAR30AE)[2,1],t(MAR50AE)[2,1],t(MAR10AE)[2,4],t(MAR30AE)[2,4],t(MAR50AE)[2,4])
-tab3MAR <- rbind(tab3MAR,AEBiasMSE)
-rownames(tab3MAR) <- c("ORACLE", "CC", "MICE", "RF", "DAE")
-
-tab3MNAR10a <-t(MNAR10a[c(1,4),c(2,5,8,11)])
-tab3MNAR30a <- t(MNAR30a[c(1,4),c(2,5,8,11)])
-tab3MNAR50a <- t(MNAR50a[c(1,4),c(2,5,8,11)])
-tab3MNARa <- cbind(tab3MNAR10a[,1],tab3MNAR30a[,1],tab3MNAR50a[,1],tab3MNAR10a[,2],tab3MNAR30a[,2],tab3MNAR50a[,2])
-
-AEBiasMSEa <- cbind(t(MNAR10aAE)[2,1],t(MNAR30aAE)[2,1],t(MNAR50aAE)[2,1],t(MNAR10aAE)[2,4],t(MNAR30aAE)[2,4],t(MNAR50aAE)[2,4])
-tab3MNARa <- rbind(tab3MNARa,AEBiasMSEa)
-rownames(tab3MNARa) <- c("ORACLE", "CC", "MICE", "RF", "DAE")
-
-tab3MNAR10b <-t(MNAR10b[c(1,4),c(2,5,8,11)])
-tab3MNAR30b <- t(MNAR30b[c(1,4),c(2,5,8,11)])
-tab3MNAR50b <- t(MNAR50b[c(1,4),c(2,5,8,11)])
-tab3MNARb <- cbind(tab3MNAR10b[,1],tab3MNAR30b[,1],tab3MNAR50b[,1],tab3MNAR10b[,2],tab3MNAR30b[,2],tab3MNAR50b[,2])
-
-AEBiasMSEb <- cbind(t(MNAR10bAE)[2,1],t(MNAR30bAE)[2,1],t(MNAR50bAE)[2,1],t(MNAR10bAE)[2,4],t(MNAR30bAE)[2,4],t(MNAR50bAE)[2,4])
-tab3MNARb <- rbind(tab3MNARb,AEBiasMSEb)
-rownames(tab3MNARb) <- c("ORACLE", "CC", "MICE", "RF", "DAE")
-
-tab3final <- rbind(tab3MCAR,tab3MAR,tab3MNARa,tab3MNARb)
-print(tab3final)
-
-
-#################################
 # Table 2: Treat SE and coverage
-#################################
-tab2MCAR10 <-t(MCAR10[c(2,3),c(1,4,7,10)])
-tab2MCAR30 <- t(MCAR30[c(2,3),c(1,4,7,10)])
-tab2MCAR50 <- t(MCAR50[c(2,3),c(1,4,7,10)])
+tab2MCAR10 <-t(MCAR10[c(2,3),TreatInds])
+tab2MCAR30 <- t(MCAR30[c(2,3),TreatInds])
+tab2MCAR50 <- t(MCAR50[c(2,3),TreatInds])
 tab2MCAR <- cbind(tab2MCAR10[,1],tab2MCAR30[,1],tab2MCAR50[,1],tab2MCAR10[,2],tab2MCAR30[,2],tab2MCAR50[,2])
 prop <- c(10,30,50,10,30,50)
 tab2MCAR <- rbind(prop,tab2MCAR)
@@ -263,27 +250,27 @@ AEseCov <- cbind(t(MCAR10AE)[1,2],t(MCAR30AE)[1,2],t(MCAR50AE)[1,2],t(MCAR10AE)[
 tab2MCAR <- rbind(tab2MCAR,AEseCov)
 rownames(tab2MCAR) <- c("prop","ORACLE", "CC", "MICE", "RF", "DAE")
 
-tab2MAR10 <-t(MAR10[c(2,3),c(1,4,7,10)])
-tab2MAR30 <- t(MAR30[c(2,3),c(1,4,7,10)])
-tab2MAR50 <- t(MAR50[c(2,3),c(1,4,7,10)])
+tab2MAR10 <-t(MAR10[c(2,3),TreatInds])
+tab2MAR30 <- t(MAR30[c(2,3),TreatInds])
+tab2MAR50 <- t(MAR50[c(2,3),TreatInds])
 tab2MAR <- cbind(tab2MAR10[,1],tab2MAR30[,1],tab2MAR50[,1],tab2MAR10[,2],tab2MAR30[,2],tab2MAR50[,2])
 
 AEseCov <- cbind(t(MAR10AE)[1,2],t(MAR30AE)[1,2],t(MAR50AE)[1,2],t(MAR10AE)[1,3],t(MAR30AE)[1,3],t(MAR50AE)[1,3])
 tab2MAR <- rbind(tab2MAR,AEseCov)
 rownames(tab2MAR) <- c("ORACLE", "CC", "MICE", "RF", "DAE")
 
-tab2MNAR10a <-t(MNAR10a[c(2,3),c(1,4,7,10)])
-tab2MNAR30a <- t(MNAR30a[c(2,3),c(1,4,7,10)])
-tab2MNAR50a <- t(MNAR50a[c(2,3),c(1,4,7,10)])
+tab2MNAR10a <-t(MNAR10a[c(2,3),TreatInds])
+tab2MNAR30a <- t(MNAR30a[c(2,3),TreatInds])
+tab2MNAR50a <- t(MNAR50a[c(2,3),TreatInds])
 tab2MNARa <- cbind(tab2MNAR10a[,1],tab2MNAR30a[,1],tab2MNAR50a[,1],tab2MNAR10a[,2],tab2MNAR30a[,2],tab2MNAR50a[,2])
 
 AEseCov <- cbind(t(MNAR10aAE)[1,2],t(MNAR30aAE)[1,2],t(MNAR50aAE)[1,2],t(MNAR10aAE)[1,3],t(MNAR30aAE)[1,3],t(MNAR50aAE)[1,3])
 tab2MNARa <- rbind(tab2MNARa,AEseCov)
 rownames(tab2MNARa) <- c("ORACLE", "CC", "MICE", "RF", "DAE")
 
-tab2MNAR10b <-t(MNAR10b[c(2,3),c(1,4,7,10)])
-tab2MNAR30b <- t(MNAR30b[c(2,3),c(1,4,7,10)])
-tab2MNAR50b <- t(MNAR50b[c(2,3),c(1,4,7,10)])
+tab2MNAR10b <-t(MNAR10b[c(2,3),TreatInds])
+tab2MNAR30b <- t(MNAR30b[c(2,3),TreatInds])
+tab2MNAR50b <- t(MNAR50b[c(2,3),TreatInds])
 tab2MNARb <- cbind(tab2MNAR10b[,1],tab2MNAR30b[,1],tab2MNAR50b[,1],tab2MNAR10b[,2],tab2MNAR30b[,2],tab2MNAR50b[,2])
 
 AEseCov <- cbind(t(MNAR10bAE)[1,2],t(MNAR30bAE)[1,2],t(MNAR50bAE)[1,2],t(MNAR10bAE)[1,3],t(MNAR30bAE)[1,3],t(MNAR50bAE)[1,3])
@@ -293,13 +280,79 @@ rownames(tab2MNARb) <- c("ORACLE", "CC", "MICE", "RF", "DAE")
 tab2final <- rbind(tab2MCAR,tab2MAR,tab2MNARa,tab2MNARb)
 print(tab2final)
 
+tab1Treat <- round (tab1final, 4)
+tab2Treat <- round (tab2final, 4)
+tab1Treat = tab1Treat[-c (1,7,12,17),]
+tab2Treat = tab2Treat[-c (1,7,12,17),]
+```
 
-#################################
+\newpage
+
+# Treat
+```{r echo=FALSE}
+lsep = c("\\addlinespace", "", "", "", "\\addlinespace", "", "", "", "\\addlinespace", "", "", "", "")
+
+kable(tab1Treat, row.names=TRUE, align=c("l", "c", "c", "c", "c", "c", "c"), format = "latex", booktabs = T, linesep = lsep, caption = "Treatment") %>%
+  kable_styling(latex_options = c("striped", "hold_position"), full_width = F) %>%
+  add_header_above(c(" "=1, "Low"=1, "Medium"=1, "High"=1, "Low"=1, "Medium"=1, "High"=1)) %>% add_header_above(c(" "=1, "Bias"=3, "MSE"=3)) %>% group_rows (index=c (" "=1, "MCAR"=4, "MAR"=4, "MNAR 1"=4, "MNAR 2"=4))
+```
+
+\newpage
+
+```{r echo=FALSE}
+kable(tab2Treat, row.names=TRUE, align=c("l", "c", "c", "c", "c", "c", "c"), format = "latex", booktabs = T, linesep = lsep, caption = "Treatment") %>%
+  kable_styling(latex_options = c("striped", "hold_position"), full_width = F) %>%
+  add_header_above(c(" "=1, "Low"=1, "Medium"=1, "High"=1, "Low"=1, "Medium"=1, "High"=1)) %>% add_header_above(c(" "=1, "SE"=3, "Coverage"=3)) %>% group_rows (index=c (" "=1, "MCAR"=4, "MAR"=4, "MNAR 1"=4, "MNAR 2"=4))
+```
+
+
+```{r echo=F, include=F}
+# Table 3: ECOG Bias and MSE
+tab3MCAR10 <-t(MCAR10[c(1,4),EcogInds])
+tab3MCAR30 <- t(MCAR30[c(1,4),EcogInds])
+tab3MCAR50 <- t(MCAR50[c(1,4),EcogInds])
+tab3MCAR <- cbind(tab3MCAR10[,1],tab3MCAR30[,1],tab3MCAR50[,1],tab3MCAR10[,2],tab3MCAR30[,2],tab3MCAR50[,2])
+prop <- c(10,30,50,10,30,50)
+tab3MCAR <- rbind(prop,tab3MCAR)
+
+AEBiasMSE <- cbind(t(MCAR10AE)[2,1],t(MCAR30AE)[2,1],t(MCAR50AE)[2,1],t(MCAR10AE)[2,4],t(MCAR30AE)[2,4],t(MCAR50AE)[2,4])
+tab3MCAR <- rbind(tab3MCAR,AEBiasMSE)
+rownames(tab3MCAR) <- c("prop","ORACLE", "CC", "MICE", "RF", "DAE")
+
+tab3MAR10 <-t(MAR10[c(1,4),EcogInds])
+tab3MAR30 <- t(MAR30[c(1,4),EcogInds])
+tab3MAR50 <- t(MAR50[c(1,4),EcogInds])
+tab3MAR <- cbind(tab3MAR10[,1],tab3MAR30[,1],tab3MAR50[,1],tab3MAR10[,2],tab3MAR30[,2],tab3MAR50[,2])
+
+AEBiasMSE <- cbind(t(MAR10AE)[2,1],t(MAR30AE)[2,1],t(MAR50AE)[2,1],t(MAR10AE)[2,4],t(MAR30AE)[2,4],t(MAR50AE)[2,4])
+tab3MAR <- rbind(tab3MAR,AEBiasMSE)
+rownames(tab3MAR) <- c("ORACLE", "CC", "MICE", "RF", "DAE")
+
+tab3MNAR10a <-t(MNAR10a[c(1,4),EcogInds])
+tab3MNAR30a <- t(MNAR30a[c(1,4),EcogInds])
+tab3MNAR50a <- t(MNAR50a[c(1,4),EcogInds])
+tab3MNARa <- cbind(tab3MNAR10a[,1],tab3MNAR30a[,1],tab3MNAR50a[,1],tab3MNAR10a[,2],tab3MNAR30a[,2],tab3MNAR50a[,2])
+
+AEBiasMSEa <- cbind(t(MNAR10aAE)[2,1],t(MNAR30aAE)[2,1],t(MNAR50aAE)[2,1],t(MNAR10aAE)[2,4],t(MNAR30aAE)[2,4],t(MNAR50aAE)[2,4])
+tab3MNARa <- rbind(tab3MNARa,AEBiasMSEa)
+rownames(tab3MNARa) <- c("ORACLE", "CC", "MICE", "RF", "DAE")
+
+tab3MNAR10b <-t(MNAR10b[c(1,4),EcogInds])
+tab3MNAR30b <- t(MNAR30b[c(1,4),EcogInds])
+tab3MNAR50b <- t(MNAR50b[c(1,4),EcogInds])
+tab3MNARb <- cbind(tab3MNAR10b[,1],tab3MNAR30b[,1],tab3MNAR50b[,1],tab3MNAR10b[,2],tab3MNAR30b[,2],tab3MNAR50b[,2])
+
+AEBiasMSEb <- cbind(t(MNAR10bAE)[2,1],t(MNAR30bAE)[2,1],t(MNAR50bAE)[2,1],t(MNAR10bAE)[2,4],t(MNAR30bAE)[2,4],t(MNAR50bAE)[2,4])
+tab3MNARb <- rbind(tab3MNARb,AEBiasMSEb)
+rownames(tab3MNARb) <- c("ORACLE", "CC", "MICE", "RF", "DAE")
+
+tab3final <- rbind(tab3MCAR,tab3MAR,tab3MNARa,tab3MNARb)
+print(tab3final)
+
 # Table 4: ECOG SE and coverage
-#################################
-tab4MCAR10 <-t(MCAR10[c(2,3),c(2,5,8,11)])
-tab4MCAR30 <- t(MCAR30[c(2,3),c(2,5,8,11)])
-tab4MCAR50 <- t(MCAR50[c(2,3),c(2,5,8,11)])
+tab4MCAR10 <-t(MCAR10[c(2,3),EcogInds])
+tab4MCAR30 <- t(MCAR30[c(2,3),EcogInds])
+tab4MCAR50 <- t(MCAR50[c(2,3),EcogInds])
 tab4MCAR <- cbind(tab4MCAR10[,1],tab4MCAR30[,1],tab4MCAR50[,1],tab4MCAR10[,2],tab4MCAR30[,2],tab4MCAR50[,2])
 prop <- c(10,30,50,10,30,50)
 tab4MCAR <- rbind(prop,tab4MCAR)
@@ -308,27 +361,27 @@ AEseCov <- cbind(t(MCAR10AE)[2,2],t(MCAR30AE)[2,2],t(MCAR50AE)[2,2],t(MCAR10AE)[
 tab4MCAR <- rbind(tab4MCAR,AEseCov)
 rownames(tab4MCAR) <- c("prop","ORACLE", "CC", "MICE", "RF", "DAE")
 
-tab4MAR10 <-t(MAR10[c(2,3),c(2,5,8,11)])
-tab4MAR30 <- t(MAR30[c(2,3),c(2,5,8,11)])
-tab4MAR50 <- t(MAR50[c(2,3),c(2,5,8,11)])
+tab4MAR10 <-t(MAR10[c(2,3),EcogInds])
+tab4MAR30 <- t(MAR30[c(2,3),EcogInds])
+tab4MAR50 <- t(MAR50[c(2,3),EcogInds])
 tab4MAR <- cbind(tab4MAR10[,1],tab4MAR30[,1],tab4MAR50[,1],tab4MAR10[,2],tab4MAR30[,2],tab4MAR50[,2])
 
 AEseCov <- cbind(t(MAR10AE)[2,2],t(MAR30AE)[2,2],t(MAR50AE)[2,2],t(MAR10AE)[2,3],t(MAR30AE)[2,3],t(MAR50AE)[2,3])
 tab4MAR <- rbind(tab4MAR,AEseCov)
 rownames(tab4MAR) <- c("ORACLE", "CC", "MICE", "RF", "DAE")
 
-tab4MNAR10a <-t(MNAR10a[c(2,3),c(2,5,8,11)])
-tab4MNAR30a <- t(MNAR30a[c(2,3),c(2,5,8,11)])
-tab4MNAR50a <- t(MNAR50a[c(2,3),c(2,5,8,11)])
+tab4MNAR10a <-t(MNAR10a[c(2,3),EcogInds])
+tab4MNAR30a <- t(MNAR30a[c(2,3),EcogInds])
+tab4MNAR50a <- t(MNAR50a[c(2,3),EcogInds])
 tab4MNARa <- cbind(tab4MNAR10a[,1],tab4MNAR30a[,1],tab4MNAR50a[,1],tab4MNAR10a[,2],tab4MNAR30a[,2],tab4MNAR50a[,2])
 
 AEseCov <- cbind(t(MNAR10aAE)[2,2],t(MNAR30aAE)[2,2],t(MNAR50aAE)[2,2],t(MNAR10aAE)[2,3],t(MNAR30aAE)[2,3],t(MNAR50aAE)[2,3])
 tab4MNARa <- rbind(tab4MNARa,AEseCov)
 rownames(tab4MNARa) <- c("ORACLE", "CC", "MICE", "RF", "DAE")
 
-tab4MNAR10b <-t(MNAR10b[c(2,3),c(2,5,8,11)])
-tab4MNAR30b <- t(MNAR30b[c(2,3),c(2,5,8,11)])
-tab4MNAR50b <- t(MNAR50b[c(2,3),c(2,5,8,11)])
+tab4MNAR10b <-t(MNAR10b[c(2,3),EcogInds])
+tab4MNAR30b <- t(MNAR30b[c(2,3),EcogInds])
+tab4MNAR50b <- t(MNAR50b[c(2,3),EcogInds])
 tab4MNARb <- cbind(tab4MNAR10b[,1],tab4MNAR30b[,1],tab4MNAR50b[,1],tab4MNAR10b[,2],tab4MNAR30b[,2],tab4MNAR50b[,2])
 
 AEseCov <- cbind(t(MNAR10bAE)[2,2],t(MNAR30bAE)[2,2],t(MNAR50bAE)[2,2],t(MNAR10bAE)[2,3],t(MNAR30bAE)[2,3],t(MNAR50bAE)[2,3])
@@ -338,44 +391,256 @@ rownames(tab4MNARb) <- c("ORACLE", "CC", "MICE", "RF", "DAE")
 tab4final <- rbind(tab4MCAR,tab4MAR,tab4MNARa,tab4MNARb)
 print(tab4final)
 
-tab1Treat <- round (tab1final, 4)
-tab2Treat <- round (tab3final, 4)
-tab3Ecog <- round (tab2final, 4)
+tab3Ecog <- round (tab3final, 4)
 tab4Ecog <- round (tab4final, 4)
-
-```
-
-\newpage
-
-## Treatment
-```{r echo=F}
-lsep = c("\\addlinespace", "", "", "", "\\addlinespace", "", "", "", "\\addlinespace", "", "", "", "")
-
-kable(tab1Treat, row.names=TRUE, align=c("l", "c", "c", "c", "c", "c", "c"), format = "latex", booktabs = T, linesep = lsep, caption = "Treatment") %>%
-  kable_styling(latex_options = c("striped", "hold_position"), full_width = F) %>%
-  add_header_above(c(" "=1, "Low"=1, "Medium"=1, "High"=1, "Low"=1, "Medium"=1, "High"=1)) %>% add_header_above(c(" "=1, "Bias"=3, "MSE"=3)) %>% group_rows (index=c (" "=1, "MCAR"=4, "MAR"=4, "MNAR"=4))
-
-kable(tab2Treat, row.names=TRUE, align=c("l", "c", "c", "c", "c", "c", "c"), format = "latex", booktabs = T, linesep = lsep, caption = "Treatment") %>%
-  kable_styling(latex_options = c("striped", "hold_position"), full_width = F) %>%
-  add_header_above(c(" "=1, "Low"=1, "Medium"=1, "High"=1, "Low"=1, "Medium"=1, "High"=1)) %>% add_header_above(c(" "=1, "SE"=3, "Coverage"=3)) %>% group_rows (index=c (" "=1, "MCAR"=4, "MAR"=4, "MNAR"=4))
+tab3Ecog = tab3Ecog[-c (1,7,12,17),]
+tab4Ecog = tab4Ecog[-c (1,7,12,17),]
 ```
 
 \newpage 
 
-## Ecog
-```{r echo=F}
+# ECOG 
+```{r echo=FALSE}
 kable(tab3Ecog, row.names=TRUE, align=c("l", "c", "c", "c", "c", "c", "c"), format = "latex", booktabs = T, linesep = lsep, caption = "ECOG") %>%
   kable_styling(latex_options = c("striped", "hold_position"), full_width = F) %>%
-  add_header_above(c(" "=1, "Low"=1, "Medium"=1, "High"=1, "Low"=1, "Medium"=1, "High"=1)) %>% add_header_above(c(" "=1, "Bias"=3, "MSE"=3)) %>% group_rows (index=c (" "=1, "MCAR"=4, "MAR"=4, "MNAR"=4))
+  add_header_above(c(" "=1, "Low"=1, "Medium"=1, "High"=1, "Low"=1, "Medium"=1, "High"=1)) %>% add_header_above(c(" "=1, "Bias"=3, "MSE"=3)) %>% group_rows (index=c (" "=1, "MCAR"=4, "MAR"=4, "MNAR 1"=4, "MNAR 2"=4))
+```
 
+\newpage 
+
+```{r echo=FALSE}
 kable(tab4Ecog, row.names=TRUE, align=c("l", "c", "c", "c", "c", "c", "c"), format = "latex", booktabs = T, linesep = lsep, caption = "ECOG") %>%
   kable_styling(latex_options = c("striped", "hold_position"), full_width = F) %>%
-  add_header_above(c(" "=1, "Low"=1, "Medium"=1, "High"=1, "Low"=1, "Medium"=1, "High"=1)) %>% add_header_above(c(" "=1, "SE"=3, "Coverage"=3)) %>% group_rows (index=c (" "=1, "MCAR"=4, "MAR"=4, "MNAR"=4))
+  add_header_above(c(" "=1, "Low"=1, "Medium"=1, "High"=1, "Low"=1, "Medium"=1, "High"=1)) %>% add_header_above(c(" "=1, "SE"=3, "Coverage"=3)) %>% group_rows (index=c (" "=1, "MCAR"=4, "MAR"=4, "MNAR 1"=4, "MNAR 2"=4))
+```
+
+```{r echo=F, include=F}
+# Table 5: Var1 Bias and MSE
+tab5MCAR10 <-t(MCAR10[c(1,4),Var1Inds])
+tab5MCAR30 <- t(MCAR30[c(1,4),Var1Inds])
+tab5MCAR50 <- t(MCAR50[c(1,4),Var1Inds])
+tab5MCAR <- cbind(tab5MCAR10[,1],tab5MCAR30[,1],tab5MCAR50[,1],tab5MCAR10[,2],tab5MCAR30[,2],tab5MCAR50[,2])
+prop <- c(10,30,50,10,30,50)
+tab5MCAR <- rbind(prop,tab5MCAR)
+
+AEBiasMSE <- cbind(t(MCAR10AE)[2,1],t(MCAR30AE)[2,1],t(MCAR50AE)[2,1],t(MCAR10AE)[2,4],t(MCAR30AE)[2,4],t(MCAR50AE)[2,4])
+tab5MCAR <- rbind(tab5MCAR,AEBiasMSE)
+rownames(tab5MCAR) <- c("prop","ORACLE", "CC", "MICE", "RF", "DAE")
+
+tab5MAR10 <-t(MAR10[c(1,4),Var1Inds])
+tab5MAR30 <- t(MAR30[c(1,4),Var1Inds])
+tab5MAR50 <- t(MAR50[c(1,4),Var1Inds])
+tab5MAR <- cbind(tab5MAR10[,1],tab5MAR30[,1],tab5MAR50[,1],tab5MAR10[,2],tab5MAR30[,2],tab5MAR50[,2])
+
+AEBiasMSE <- cbind(t(MAR10AE)[2,1],t(MAR30AE)[2,1],t(MAR50AE)[2,1],t(MAR10AE)[2,4],t(MAR30AE)[2,4],t(MAR50AE)[2,4])
+tab5MAR <- rbind(tab5MAR,AEBiasMSE)
+rownames(tab5MAR) <- c("ORACLE", "CC", "MICE", "RF", "DAE")
+
+tab5MNAR10a <-t(MNAR10a[c(1,4),Var1Inds])
+tab5MNAR30a <- t(MNAR30a[c(1,4),Var1Inds])
+tab5MNAR50a <- t(MNAR50a[c(1,4),Var1Inds])
+tab5MNARa <- cbind(tab5MNAR10a[,1],tab5MNAR30a[,1],tab5MNAR50a[,1],tab5MNAR10a[,2],tab5MNAR30a[,2],tab5MNAR50a[,2])
+
+AEBiasMSEa <- cbind(t(MNAR10aAE)[2,1],t(MNAR30aAE)[2,1],t(MNAR50aAE)[2,1],t(MNAR10aAE)[2,4],t(MNAR30aAE)[2,4],t(MNAR50aAE)[2,4])
+tab5MNARa <- rbind(tab5MNARa,AEBiasMSEa)
+rownames(tab5MNARa) <- c("ORACLE", "CC", "MICE", "RF", "DAE")
+
+tab5MNAR10b <-t(MNAR10b[c(1,4),Var1Inds])
+tab5MNAR30b <- t(MNAR30b[c(1,4),Var1Inds])
+tab5MNAR50b <- t(MNAR50b[c(1,4),Var1Inds])
+tab5MNARb <- cbind(tab5MNAR10b[,1],tab5MNAR30b[,1],tab5MNAR50b[,1],tab5MNAR10b[,2],tab5MNAR30b[,2],tab5MNAR50b[,2])
+
+AEBiasMSEb <- cbind(t(MNAR10bAE)[2,1],t(MNAR30bAE)[2,1],t(MNAR50bAE)[2,1],t(MNAR10bAE)[2,4],t(MNAR30bAE)[2,4],t(MNAR50bAE)[2,4])
+tab5MNARb <- rbind(tab5MNARb,AEBiasMSEb)
+rownames(tab5MNARb) <- c("ORACLE", "CC", "MICE", "RF", "DAE")
+
+tab5final <- rbind(tab5MCAR,tab5MAR,tab5MNARa,tab5MNARb)
+print(tab5final)
+
+# Table 6: Var1 SE and coverage
+tab6MCAR10 <-t(MCAR10[c(2,3),Var1Inds])
+tab6MCAR30 <- t(MCAR30[c(2,3),Var1Inds])
+tab6MCAR50 <- t(MCAR50[c(2,3),Var1Inds])
+tab6MCAR <- cbind(tab6MCAR10[,1],tab6MCAR30[,1],tab6MCAR50[,1],tab6MCAR10[,2],tab6MCAR30[,2],tab6MCAR50[,2])
+prop <- c(10,30,50,10,30,50)
+tab6MCAR <- rbind(prop,tab6MCAR)
+
+AEseCov <- cbind(t(MCAR10AE)[2,2],t(MCAR30AE)[2,2],t(MCAR50AE)[2,2],t(MCAR10AE)[2,3],t(MCAR30AE)[2,3],t(MCAR50AE)[2,3])
+tab6MCAR <- rbind(tab6MCAR,AEseCov)
+rownames(tab6MCAR) <- c("prop","ORACLE", "CC", "MICE", "RF", "DAE")
+
+tab6MAR10 <-t(MAR10[c(2,3),Var1Inds])
+tab6MAR30 <- t(MAR30[c(2,3),Var1Inds])
+tab6MAR50 <- t(MAR50[c(2,3),Var1Inds])
+tab6MAR <- cbind(tab6MAR10[,1],tab6MAR30[,1],tab6MAR50[,1],tab6MAR10[,2],tab6MAR30[,2],tab6MAR50[,2])
+
+AEseCov <- cbind(t(MAR10AE)[2,2],t(MAR30AE)[2,2],t(MAR50AE)[2,2],t(MAR10AE)[2,3],t(MAR30AE)[2,3],t(MAR50AE)[2,3])
+tab6MAR <- rbind(tab6MAR,AEseCov)
+rownames(tab6MAR) <- c("ORACLE", "CC", "MICE", "RF", "DAE")
+
+tab6MNAR10a <-t(MNAR10a[c(2,3),Var1Inds])
+tab6MNAR30a <- t(MNAR30a[c(2,3),Var1Inds])
+tab6MNAR50a <- t(MNAR50a[c(2,3),Var1Inds])
+tab6MNARa <- cbind(tab6MNAR10a[,1],tab6MNAR30a[,1],tab6MNAR50a[,1],tab6MNAR10a[,2],tab6MNAR30a[,2],tab6MNAR50a[,2])
+
+AEseCov <- cbind(t(MNAR10aAE)[2,2],t(MNAR30aAE)[2,2],t(MNAR50aAE)[2,2],t(MNAR10aAE)[2,3],t(MNAR30aAE)[2,3],t(MNAR50aAE)[2,3])
+tab6MNARa <- rbind(tab6MNARa,AEseCov)
+rownames(tab6MNARa) <- c("ORACLE", "CC", "MICE", "RF", "DAE")
+
+tab6MNAR10b <-t(MNAR10b[c(2,3),Var1Inds])
+tab6MNAR30b <- t(MNAR30b[c(2,3),Var1Inds])
+tab6MNAR50b <- t(MNAR50b[c(2,3),Var1Inds])
+tab6MNARb <- cbind(tab6MNAR10b[,1],tab6MNAR30b[,1],tab6MNAR50b[,1],tab6MNAR10b[,2],tab6MNAR30b[,2],tab6MNAR50b[,2])
+
+AEseCov <- cbind(t(MNAR10bAE)[2,2],t(MNAR30bAE)[2,2],t(MNAR50bAE)[2,2],t(MNAR10bAE)[2,3],t(MNAR30bAE)[2,3],t(MNAR50bAE)[2,3])
+tab6MNARb <- rbind(tab6MNARb,AEseCov)
+rownames(tab6MNARb) <- c("ORACLE", "CC", "MICE", "RF", "DAE")
+
+tab6final <- rbind(tab6MCAR,tab6MAR,tab6MNARa,tab6MNARb)
+print(tab6final)
+
+tab5Var1 <- round (tab5final, 4)
+tab6Var1 <- round (tab6final, 4)
+tab5Var1 = tab5Var1[-c (1,7,12,17),]
+tab6Var1 = tab6Var1[-c (1,7,12,17),]
+```
+
+\newpage 
+
+# Var 1
+```{r echo=FALSE}
+kable(tab5Var1, row.names=TRUE, align=c("l", "c", "c", "c", "c", "c", "c"), format = "latex", booktabs = T, linesep = lsep, caption = "Var 1") %>%
+  kable_styling(latex_options = c("striped", "hold_position"), full_width = F) %>%
+  add_header_above(c(" "=1, "Low"=1, "Medium"=1, "High"=1, "Low"=1, "Medium"=1, "High"=1)) %>% add_header_above(c(" "=1, "Bias"=3, "MSE"=3)) %>% group_rows (index=c (" "=1, "MCAR"=4, "MAR"=4, "MNAR 1"=4, "MNAR 2"=4))
+```
+
+\newpage 
+
+```{r echo=FALSE}
+kable(tab6Var1, row.names=TRUE, align=c("l", "c", "c", "c", "c", "c", "c"), format = "latex", booktabs = T, linesep = lsep, caption = "Var 1") %>%
+  kable_styling(latex_options = c("striped", "hold_position"), full_width = F) %>%
+  add_header_above(c(" "=1, "Low"=1, "Medium"=1, "High"=1, "Low"=1, "Medium"=1, "High"=1)) %>% add_header_above(c(" "=1, "SE"=3, "Coverage"=3)) %>% group_rows (index=c (" "=1, "MCAR"=4, "MAR"=4, "MNAR 1"=4, "MNAR 2"=4))
+```
+
+```{r echo=F, include=F}
+# Table 7: Var2 Bias and MSE
+tab7MCAR10 <-t(MCAR10[c(1,4),Var2Inds])
+tab7MCAR30 <- t(MCAR30[c(1,4),Var2Inds])
+tab7MCAR50 <- t(MCAR50[c(1,4),Var2Inds])
+tab7MCAR <- cbind(tab7MCAR10[,1],tab7MCAR30[,1],tab7MCAR50[,1],tab7MCAR10[,2],tab7MCAR30[,2],tab7MCAR50[,2])
+prop <- c(10,30,50,10,30,50)
+tab7MCAR <- rbind(prop,tab7MCAR)
+
+AEBiasMSE <- cbind(t(MCAR10AE)[2,1],t(MCAR30AE)[2,1],t(MCAR50AE)[2,1],t(MCAR10AE)[2,4],t(MCAR30AE)[2,4],t(MCAR50AE)[2,4])
+tab7MCAR <- rbind(tab7MCAR,AEBiasMSE)
+rownames(tab7MCAR) <- c("prop","ORACLE", "CC", "MICE", "RF", "DAE")
+
+tab7MAR10 <-t(MAR10[c(1,4),Var2Inds])
+tab7MAR30 <- t(MAR30[c(1,4),Var2Inds])
+tab7MAR50 <- t(MAR50[c(1,4),Var2Inds])
+tab7MAR <- cbind(tab7MAR10[,1],tab7MAR30[,1],tab7MAR50[,1],tab7MAR10[,2],tab7MAR30[,2],tab7MAR50[,2])
+
+AEBiasMSE <- cbind(t(MAR10AE)[2,1],t(MAR30AE)[2,1],t(MAR50AE)[2,1],t(MAR10AE)[2,4],t(MAR30AE)[2,4],t(MAR50AE)[2,4])
+tab7MAR <- rbind(tab7MAR,AEBiasMSE)
+rownames(tab7MAR) <- c("ORACLE", "CC", "MICE", "RF", "DAE")
+
+tab7MNAR10a <-t(MNAR10a[c(1,4),Var2Inds])
+tab7MNAR30a <- t(MNAR30a[c(1,4),Var2Inds])
+tab7MNAR50a <- t(MNAR50a[c(1,4),Var2Inds])
+tab7MNARa <- cbind(tab7MNAR10a[,1],tab7MNAR30a[,1],tab7MNAR50a[,1],tab7MNAR10a[,2],tab7MNAR30a[,2],tab7MNAR50a[,2])
+
+AEBiasMSEa <- cbind(t(MNAR10aAE)[2,1],t(MNAR30aAE)[2,1],t(MNAR50aAE)[2,1],t(MNAR10aAE)[2,4],t(MNAR30aAE)[2,4],t(MNAR50aAE)[2,4])
+tab7MNARa <- rbind(tab7MNARa,AEBiasMSEa)
+rownames(tab7MNARa) <- c("ORACLE", "CC", "MICE", "RF", "DAE")
+
+tab7MNAR10b <-t(MNAR10b[c(1,4),Var2Inds])
+tab7MNAR30b <- t(MNAR30b[c(1,4),Var2Inds])
+tab7MNAR50b <- t(MNAR50b[c(1,4),Var2Inds])
+tab7MNARb <- cbind(tab7MNAR10b[,1],tab7MNAR30b[,1],tab7MNAR50b[,1],tab7MNAR10b[,2],tab7MNAR30b[,2],tab7MNAR50b[,2])
+
+AEBiasMSEb <- cbind(t(MNAR10bAE)[2,1],t(MNAR30bAE)[2,1],t(MNAR50bAE)[2,1],t(MNAR10bAE)[2,4],t(MNAR30bAE)[2,4],t(MNAR50bAE)[2,4])
+tab7MNARb <- rbind(tab7MNARb,AEBiasMSEb)
+rownames(tab7MNARb) <- c("ORACLE", "CC", "MICE", "RF", "DAE")
+
+tab7final <- rbind(tab7MCAR,tab7MAR,tab7MNARa,tab7MNARb)
+print(tab7final)
+
+# Table 8: Var2 SE and coverage
+tab8MCAR10 <-t(MCAR10[c(2,3),Var2Inds])
+tab8MCAR30 <- t(MCAR30[c(2,3),Var2Inds])
+tab8MCAR50 <- t(MCAR50[c(2,3),Var2Inds])
+tab8MCAR <- cbind(tab8MCAR10[,1],tab8MCAR30[,1],tab8MCAR50[,1],tab8MCAR10[,2],tab8MCAR30[,2],tab8MCAR50[,2])
+prop <- c(10,30,50,10,30,50)
+tab8MCAR <- rbind(prop,tab8MCAR)
+
+AEseCov <- cbind(t(MCAR10AE)[2,2],t(MCAR30AE)[2,2],t(MCAR50AE)[2,2],t(MCAR10AE)[2,3],t(MCAR30AE)[2,3],t(MCAR50AE)[2,3])
+tab8MCAR <- rbind(tab8MCAR,AEseCov)
+rownames(tab8MCAR) <- c("prop","ORACLE", "CC", "MICE", "RF", "DAE")
+
+tab8MAR10 <-t(MAR10[c(2,3),Var2Inds])
+tab8MAR30 <- t(MAR30[c(2,3),Var2Inds])
+tab8MAR50 <- t(MAR50[c(2,3),Var2Inds])
+tab8MAR <- cbind(tab8MAR10[,1],tab8MAR30[,1],tab8MAR50[,1],tab8MAR10[,2],tab8MAR30[,2],tab8MAR50[,2])
+
+AEseCov <- cbind(t(MAR10AE)[2,2],t(MAR30AE)[2,2],t(MAR50AE)[2,2],t(MAR10AE)[2,3],t(MAR30AE)[2,3],t(MAR50AE)[2,3])
+tab8MAR <- rbind(tab8MAR,AEseCov)
+rownames(tab8MAR) <- c("ORACLE", "CC", "MICE", "RF", "DAE")
+
+tab8MNAR10a <-t(MNAR10a[c(2,3),Var2Inds])
+tab8MNAR30a <- t(MNAR30a[c(2,3),Var2Inds])
+tab8MNAR50a <- t(MNAR50a[c(2,3),Var2Inds])
+tab8MNARa <- cbind(tab8MNAR10a[,1],tab8MNAR30a[,1],tab8MNAR50a[,1],tab8MNAR10a[,2],tab8MNAR30a[,2],tab8MNAR50a[,2])
+
+AEseCov <- cbind(t(MNAR10aAE)[2,2],t(MNAR30aAE)[2,2],t(MNAR50aAE)[2,2],t(MNAR10aAE)[2,3],t(MNAR30aAE)[2,3],t(MNAR50aAE)[2,3])
+tab8MNARa <- rbind(tab8MNARa,AEseCov)
+rownames(tab8MNARa) <- c("ORACLE", "CC", "MICE", "RF", "DAE")
+
+tab8MNAR10b <-t(MNAR10b[c(2,3),Var2Inds])
+tab8MNAR30b <- t(MNAR30b[c(2,3),Var2Inds])
+tab8MNAR50b <- t(MNAR50b[c(2,3),Var2Inds])
+tab8MNARb <- cbind(tab8MNAR10b[,1],tab8MNAR30b[,1],tab8MNAR50b[,1],tab8MNAR10b[,2],tab8MNAR30b[,2],tab8MNAR50b[,2])
+
+AEseCov <- cbind(t(MNAR10bAE)[2,2],t(MNAR30bAE)[2,2],t(MNAR50bAE)[2,2],t(MNAR10bAE)[2,3],t(MNAR30bAE)[2,3],t(MNAR50bAE)[2,3])
+tab8MNARb <- rbind(tab8MNARb,AEseCov)
+rownames(tab8MNARb) <- c("ORACLE", "CC", "MICE", "RF", "DAE")
+
+tab8final <- rbind(tab8MCAR,tab8MAR,tab8MNARa,tab8MNARb)
+print(tab8final)
+
+tab7Var2 <- round (tab7final, 4)
+tab8Var2 <- round (tab8final, 4)
+tab7Var2 = tab7Var2[-c (1,7,12,17),]
+tab8Var2 = tab8Var2[-c (1,7,12,17),]
 ```
 
 \newpage
 
-## Treat MCAR
+# Var 2
+```{r echo=FALSE}
+kable(tab7Var2, row.names=TRUE, align=c("l", "c", "c", "c", "c", "c", "c"), format = "latex", booktabs = T, linesep = lsep, caption = "Var 2") %>%
+  kable_styling(latex_options = c("striped", "hold_position"), full_width = F) %>%
+  add_header_above(c(" "=1, "Low"=1, "Medium"=1, "High"=1, "Low"=1, "Medium"=1, "High"=1)) %>% add_header_above(c(" "=1, "Bias"=3, "MSE"=3)) %>% group_rows (index=c (" "=1, "MCAR"=4, "MAR"=4, "MNAR 1"=4, "MNAR 2"=4))
+```
+
+\newpage
+
+```{r echo=FALSE}
+kable(tab8Var2, row.names=TRUE, align=c("l", "c", "c", "c", "c", "c", "c"), format = "latex", booktabs = T, linesep = lsep, caption = "Var 2") %>%
+  kable_styling(latex_options = c("striped", "hold_position"), full_width = F) %>%
+  add_header_above(c(" "=1, "Low"=1, "Medium"=1, "High"=1, "Low"=1, "Medium"=1, "High"=1)) %>% add_header_above(c(" "=1, "SE"=3, "Coverage"=3)) %>% group_rows (index=c (" "=1, "MCAR"=4, "MAR"=4, "MNAR 1"=4, "MNAR 2"=4))
+```
+
+
+\newpage
+
+```{r,echo=F}
+TreatInds = c(1,5,9,13,17)
+EcogInds = c(2,6,10,14,18)
+Var1Inds = c(3,7,11,15,19)
+Var2Inds = c(4,8,12,16,20)
+```
+
+# Treat Percentiles of Est - Truth
 ```{r,echo=F}
 upperlim <- .03
 lowerlim <- -.03
@@ -385,9 +650,7 @@ colnames(lower) <- c()
 upper <- data.frame(c(PercTreatMCAR[c(2,4,6,8,10),1],PercTreatMCAR[c(2,4,6,8,10),2],PercTreatMCAR[c(2,4,6,8,10),3]))
 colnames(upper) <- c()
 
-
-
-dfMCAR<- data.frame(bias=rbind(t(MCAR10Full[1,c(1,4,7,10,13)]),t(MCAR30Full[1,c(1,4,7,10,13)]),t(MCAR50Full[1,c(1,4,7,10,13)])),sd=rbind(t(MCAR10Full[2,c(1,4,7,10,13)]),t(MCAR30Full[2,c(1,4,7,10,13)]),t(MCAR50Full[2,c(1,4,7,10,13)])),lower,upper,group=rep(c("ORACLE","CC","MICE", "RF","DAE"),3),prop=c(rep("10%",5),rep("30%",5),rep("50%",5)))  
+dfMCAR<- data.frame(bias=rbind(t(MCAR10Full[1,TreatInds]),t(MCAR30Full[1,TreatInds]),t(MCAR50Full[1,TreatInds])),sd=rbind(t(MCAR10Full[2,TreatInds]),t(MCAR30Full[2,TreatInds]),t(MCAR50Full[2,TreatInds])),lower,upper,group=rep(c("ORACLE","CC","MICE", "RF","DAE"),3),prop=c(rep("10%",5),rep("30%",5),rep("50%",5)))  
 feats= rownames(dfMCAR)
 dfMCAR <- cbind(dfMCAR,feats)
 dfMCAR$feats <- factor(dfMCAR$feats, levels = dfMCAR$feats[order(dfMCAR$prop)])
@@ -411,21 +674,9 @@ plotMCAR <- ggplot(dfMCAR, aes(x = group,y=bias,color = group)) +
          axis.text.x = element_text(angle = 45, hjust = 1,size=10),
          panel.background = element_rect(fill = 'white', colour = 'white'))+ scale_x_discrete(breaks=c("CC","MICE","RF","DAE","ORACLE"))+ theme(legend.position = 'none')+scale_color_manual(values=mycols)
 
-
-plotMCARzoom <- ggplot(dfMCAR, aes(x = group,y=bias,color = group))  +ylim(lowerlim,upperlim)+
-        ylab("Bias")+ xlab("")+
-  geom_errorbar(aes(ymax =upper, ymin = lower),
-                position = "dodge",size = 1.5)+ geom_hline(yintercept=0, linetype="dashed", color = "black")+geom_point(shape=16,colour="black",size=2)+   facet_grid(cols=vars(prop),scales = "free_x",space="free_x",switch="both") +theme(panel.spacing = unit(1, "lines"),
-         strip.background = element_blank(),
-         axis.line = element_line(colour = "grey"),
-         panel.grid.major.y =element_line(colour = "grey"),
-         strip.placement = "outside",
-         axis.text.x = element_text(angle = 45, hjust = 1,size=10),
-         panel.background = element_rect(fill = 'white', colour = 'white'))+ scale_x_discrete(breaks=c("CC","MICE","RF","DAE","ORACLE"))+ theme(legend.position = 'none')+scale_color_manual(values=mycols)
-
 ```
 
-## Treat MAR
+
 ```{R,echo=F}
 upperlim <- .03
 lowerlim <- -.03
@@ -437,7 +688,7 @@ colnames(upper) <- c()
 
 
 
-dfMAR<- data.frame(bias=rbind(t(MAR10Full[1,c(1,4,7,10,13)]),t(MAR30Full[1,c(1,4,7,10,13)]),t(MAR50Full[1,c(1,4,7,10,13)])),sd=rbind(t(MAR10Full[2,c(1,4,7,10,13)]),t(MAR30Full[2,c(1,4,7,10,13)]),t(MAR50Full[2,c(1,4,7,10,13)])),lower,upper,group=rep(c("ORACLE","CC","MICE", "RF","DAE"),3),prop=c(rep("10%",5),rep("30%",5),rep("50%",5)))  
+dfMAR<- data.frame(bias=rbind(t(MAR10Full[1,TreatInds]),t(MAR30Full[1,TreatInds]),t(MAR50Full[1,TreatInds])),sd=rbind(t(MAR10Full[2,TreatInds]),t(MAR30Full[2,TreatInds]),t(MAR50Full[2,TreatInds])),lower,upper,group=rep(c("ORACLE","CC","MICE", "RF","DAE"),3),prop=c(rep("10%",5),rep("30%",5),rep("50%",5)))  
 feats= rownames(dfMAR)
 dfMAR <- cbind(dfMAR,feats)
 dfMAR$feats <- factor(dfMAR$feats, levels = dfMAR$feats[order(dfMAR$prop)])
@@ -462,21 +713,9 @@ plotMAR <- ggplot(dfMAR, aes(x = group,y=bias,color = group)) +
          panel.background = element_rect(fill = 'white', colour = 'white'))+ scale_x_discrete(breaks=c("CC","MICE","RF","DAE","ORACLE"))+ theme(legend.position = 'none')+scale_color_manual(values=mycols)
 
 
-plotMARzoom <- ggplot(dfMAR, aes(x = group,y=bias,color = group))  +ylim(lowerlim,upperlim)+
-        ylab("Bias")+ xlab("")+
-  geom_errorbar(aes(ymax =upper, ymin = lower),
-                position = "dodge",size = 1.5)+ geom_hline(yintercept=0, linetype="dashed", color = "black")+geom_point(shape=16,colour="black",size=2)+   facet_grid(cols=vars(prop),scales = "free_x",space="free_x",switch="both") +theme(panel.spacing = unit(1, "lines"),
-         strip.background = element_blank(),
-         axis.line = element_line(colour = "grey"),
-         panel.grid.major.y =element_line(colour = "grey"),
-         strip.placement = "outside",
-         axis.text.x = element_text(angle = 45, hjust = 1,size=10),
-         panel.background = element_rect(fill = 'white', colour = 'white'))+ scale_x_discrete(breaks=c("CC","MICE","RF","DAE","ORACLE"))+ theme(legend.position = 'none')+scale_color_manual(values=mycols)
-
 ```
 
 
-## Treat MNAR Setting 1
 ```{R,echo=F}
 upperlim <- .03
 lowerlim <- -.03
@@ -488,7 +727,7 @@ colnames(upper) <- c()
 
 
 
-dfMNAR<- data.frame(bias=rbind(t(MNAR10aFull[1,c(1,4,7,10,13)]),t(MNAR30aFull[1,c(1,4,7,10,13)]),t(MNAR50aFull[1,c(1,4,7,10,13)])),sd=rbind(t(MNAR10aFull[2,c(1,4,7,10,13)]),t(MNAR30aFull[2,c(1,4,7,10,13)]),t(MNAR50aFull[2,c(1,4,7,10,13)])),lower,upper,group=rep(c("ORACLE","CC","MICE", "RF","DAE"),3),prop=c(rep("10%",5),rep("30%",5),rep("50%",5)))  
+dfMNAR<- data.frame(bias=rbind(t(MNAR10aFull[1,TreatInds]),t(MNAR30aFull[1,TreatInds]),t(MNAR50aFull[1,TreatInds])),sd=rbind(t(MNAR10aFull[2,TreatInds]),t(MNAR30aFull[2,TreatInds]),t(MNAR50aFull[2,TreatInds])),lower,upper,group=rep(c("ORACLE","CC","MICE", "RF","DAE"),3),prop=c(rep("10%",5),rep("30%",5),rep("50%",5)))  
 feats= rownames(dfMNAR)
 dfMNAR <- cbind(dfMNAR,feats)
 dfMNAR$feats <- factor(dfMNAR$feats, levels = dfMNAR$feats[order(dfMNAR$prop)])
@@ -512,21 +751,9 @@ plotMNAR1 <- ggplot(dfMNAR, aes(x = group,y=bias,color = group)) +
          axis.text.x = element_text(angle = 45, hjust = 1,size=10),
          panel.background = element_rect(fill = 'white', colour = 'white'))+ scale_x_discrete(breaks=c("CC","MICE","RF","DAE","ORACLE"))+ theme(legend.position = 'none')+scale_color_manual(values=mycols)
 
-
-plotMNAR1zoom <- ggplot(dfMNAR, aes(x = group,y=bias,color = group))  +ylim(lowerlim,upperlim)+
-        ylab("Bias")+ xlab("")+
-  geom_errorbar(aes(ymax =upper, ymin = lower),
-                position = "dodge",size = 1.5)+ geom_hline(yintercept=0, linetype="dashed", color = "black")+geom_point(shape=16,colour="black",size=2)+   facet_grid(cols=vars(prop),scales = "free_x",space="free_x",switch="both") +theme(panel.spacing = unit(1, "lines"),
-         strip.background = element_blank(),
-         axis.line = element_line(colour = "grey"),
-         panel.grid.major.y =element_line(colour = "grey"),
-         strip.placement = "outside",
-         axis.text.x = element_text(angle = 45, hjust = 1,size=10),
-         panel.background = element_rect(fill = 'white', colour = 'white'))+ scale_x_discrete(breaks=c("CC","MICE","RF","DAE","ORACLE"))+ theme(legend.position = 'none')+scale_color_manual(values=mycols)
-
 ```
 
-## Treat MNAR Setting 2
+
 ```{R,echo=F}
 upperlim <- .03
 lowerlim <- -.03
@@ -538,7 +765,7 @@ colnames(upper) <- c()
 
 
 
-dfMNAR<- data.frame(bias=rbind(t(MNAR10bFull[1,c(1,4,7,10,13)]),t(MNAR30bFull[1,c(1,4,7,10,13)]),t(MNAR50bFull[1,c(1,4,7,10,13)])),sd=rbind(t(MNAR10bFull[2,c(1,4,7,10,13)]),t(MNAR30bFull[2,c(1,4,7,10,13)]),t(MNAR50bFull[2,c(1,4,7,10,13)])),lower,upper,group=rep(c("ORACLE","CC","MICE", "RF","DAE"),3),prop=c(rep("10%",5),rep("30%",5),rep("50%",5)))  
+dfMNAR<- data.frame(bias=rbind(t(MNAR10bFull[1,TreatInds]),t(MNAR30bFull[1,TreatInds]),t(MNAR50bFull[1,TreatInds])),sd=rbind(t(MNAR10bFull[2,TreatInds]),t(MNAR30bFull[2,TreatInds]),t(MNAR50bFull[2,TreatInds])),lower,upper,group=rep(c("ORACLE","CC","MICE", "RF","DAE"),3),prop=c(rep("10%",5),rep("30%",5),rep("50%",5)))  
 feats= rownames(dfMNAR)
 dfMNAR <- cbind(dfMNAR,feats)
 dfMNAR$feats <- factor(dfMNAR$feats, levels = dfMNAR$feats[order(dfMNAR$prop)])
@@ -562,21 +789,9 @@ plotMNAR2 <- ggplot(dfMNAR, aes(x = group,y=bias,color = group)) +
          axis.text.x = element_text(angle = 45, hjust = 1,size=10),
          panel.background = element_rect(fill = 'white', colour = 'white'))+ scale_x_discrete(breaks=c("CC","MICE","RF","DAE","ORACLE"))+ theme(legend.position = 'none')+scale_color_manual(values=mycols)
 
-
-plotMNAR2zoom <- ggplot(dfMNAR, aes(x = group,y=bias,color = group))  +ylim(lowerlim,upperlim)+
-        ylab("Bias")+ xlab("")+
-  geom_errorbar(aes(ymax =upper, ymin = lower),
-                position = "dodge",size = 1.5)+ geom_hline(yintercept=0, linetype="dashed", color = "black")+geom_point(shape=16,colour="black",size=2)+   facet_grid(cols=vars(prop),scales = "free_x",space="free_x",switch="both") +theme(panel.spacing = unit(1, "lines"),
-         strip.background = element_blank(),
-         axis.line = element_line(colour = "grey"),
-         panel.grid.major.y =element_line(colour = "grey"),
-         strip.placement = "outside",
-         axis.text.x = element_text(angle = 45, hjust = 1,size=10),
-         panel.background = element_rect(fill = 'white', colour = 'white'))+ scale_x_discrete(breaks=c("CC","MICE","RF","DAE","ORACLE"))+ theme(legend.position = 'none')+scale_color_manual(values=mycols)
-
 ```
 
-## All Treat
+
 ```{r,echo=F}
 library (gridExtra)
 
@@ -585,23 +800,10 @@ plotMAR = plotMAR + ggtitle("MAR")
 plotMNAR1 = plotMNAR1 + ggtitle("MNAR1")
 plotMNAR2 = plotMNAR2 + ggtitle("MNAR2")
 plotTxt = grid.arrange(plotMCAR, plotMAR, plotMNAR1, plotMNAR2, nrow = 2)
-plot (plotTxt)
+#plot (plotTxt)
 
 png('~/Desktop/plotAllTreat.png', width=10, height=8, units="in", pointsize=2, res=300)
 plot (plotTxt)
-dev.off()
-
-
-
-plotMCARzoom = plotMCARzoom + ggtitle("MCAR")
-plotMARzoom = plotMARzoom + ggtitle("MAR")
-plotMNAR1zoom = plotMNAR1zoom + ggtitle("MNAR1")
-plotMNAR2zoom = plotMNAR2zoom + ggtitle("MNAR2")
-plotTxtZoom = grid.arrange(plotMCARzoom, plotMARzoom, plotMNAR1zoom, plotMNAR2zoom, nrow = 2)
-plot (plotTxtZoom)
-
-png('~/Desktop/plotAllTreatZoom.png', width=10, height=8, units="in", pointsize=2, res=300)
-plot (plotTxtZoom)
 dev.off()
 
 ```
@@ -649,10 +851,13 @@ dev.off()
 
 -->
 
-## ECOG MCAR
+
+\newpage
+
+# Ecog Percentiles of Est - Truth
 ```{r,echo=F}
-upperlim <- .02
-lowerlim <- -.02
+upperlim <- .03
+lowerlim <- -.03
 
 lower <- data.frame(c(PercEcogMCAR[c(1,3,5,7,9),1],PercEcogMCAR[c(1,3,5,7,9),2],PercEcogMCAR[c(1,3,5,7,9),3]))
 colnames(lower) <- c()
@@ -661,7 +866,7 @@ colnames(upper) <- c()
 
 
 
-dfMCAR<- data.frame(bias=rbind(t(MCAR10Full[1,c(2,5,8,11,14)]),t(MCAR30Full[1,c(2,5,8,11,14)]),t(MCAR50Full[1,c(2,5,8,11,14)])),sd=rbind(t(MCAR10Full[2,c(2,5,8,11,14)]),t(MCAR30Full[2,c(2,5,8,11,14)]),t(MCAR50Full[2,c(2,5,8,11,14)])),lower,upper,group=rep(c("ORACLE","CC","MICE", "RF","DAE"),3),prop=c(rep("10%",5),rep("30%",5),rep("50%",5)))  
+dfMCAR<- data.frame(bias=rbind(t(MCAR10Full[1,EcogInds]),t(MCAR30Full[1,EcogInds]),t(MCAR50Full[1,EcogInds])),sd=rbind(t(MCAR10Full[2,EcogInds]),t(MCAR30Full[2,EcogInds]),t(MCAR50Full[2,EcogInds])),lower,upper,group=rep(c("ORACLE","CC","MICE", "RF","DAE"),3),prop=c(rep("10%",5),rep("30%",5),rep("50%",5)))  
 feats= rownames(dfMCAR)
 dfMCAR <- cbind(dfMCAR,feats)
 dfMCAR$feats <- factor(dfMCAR$feats, levels = dfMCAR$feats[order(dfMCAR$prop)])
@@ -686,23 +891,12 @@ plotMCAR <- ggplot(dfMCAR, aes(x = group,y=bias,color = group)) +
          panel.background = element_rect(fill = 'white', colour = 'white'))+ scale_x_discrete(breaks=c("CC","MICE","RF","DAE","ORACLE"))+ theme(legend.position = 'none')+scale_color_manual(values=mycols)
 
 
-plotMCARzoom <- ggplot(dfMCAR, aes(x = group,y=bias,color = group))  +ylim(lowerlim,upperlim)+
-        ylab("Bias")+ xlab("")+
-  geom_errorbar(aes(ymax =upper, ymin = lower),
-                position = "dodge",size = 1.5)+ geom_hline(yintercept=0, linetype="dashed", color = "black")+geom_point(shape=16,colour="black",size=2)+   facet_grid(cols=vars(prop),scales = "free_x",space="free_x",switch="both") +theme(panel.spacing = unit(1, "lines"),
-         strip.background = element_blank(),
-         axis.line = element_line(colour = "grey"),
-         panel.grid.major.y =element_line(colour = "grey"),
-         strip.placement = "outside",
-         axis.text.x = element_text(angle = 45, hjust = 1,size=10),
-         panel.background = element_rect(fill = 'white', colour = 'white'))+ scale_x_discrete(breaks=c("CC","MICE","RF","DAE","ORACLE"))+ theme(legend.position = 'none')+scale_color_manual(values=mycols)
-
 ```
 
-## ECOG MAR
+
 ```{R,echo=F}
-upperlim <- .02
-lowerlim <- -.02
+upperlim <- .03
+lowerlim <- -.03
 
 lower <- data.frame(c(PercEcogMAR[c(1,3,5,7,9),1],PercEcogMAR[c(1,3,5,7,9),2],PercEcogMAR[c(1,3,5,7,9),3]))
 colnames(lower) <- c()
@@ -711,7 +905,7 @@ colnames(upper) <- c()
 
 
 
-dfMAR<- data.frame(bias=rbind(t(MAR10Full[1,c(2,5,8,11,14)]),t(MAR30Full[1,c(2,5,8,11,14)]),t(MAR50Full[1,c(2,5,8,11,14)])),sd=rbind(t(MAR10Full[2,c(2,5,8,11,14)]),t(MAR30Full[2,c(2,5,8,11,14)]),t(MAR50Full[2,c(2,5,8,11,14)])),lower,upper,group=rep(c("ORACLE","CC","MICE", "RF","DAE"),3),prop=c(rep("10%",5),rep("30%",5),rep("50%",5)))  
+dfMAR<- data.frame(bias=rbind(t(MAR10Full[1,EcogInds]),t(MAR30Full[1,EcogInds]),t(MAR50Full[1,EcogInds])),sd=rbind(t(MAR10Full[2,EcogInds]),t(MAR30Full[2,EcogInds]),t(MAR50Full[2,EcogInds])),lower,upper,group=rep(c("ORACLE","CC","MICE", "RF","DAE"),3),prop=c(rep("10%",5),rep("30%",5),rep("50%",5)))  
 feats= rownames(dfMAR)
 dfMAR <- cbind(dfMAR,feats)
 dfMAR$feats <- factor(dfMAR$feats, levels = dfMAR$feats[order(dfMAR$prop)])
@@ -736,24 +930,12 @@ plotMAR <- ggplot(dfMAR, aes(x = group,y=bias,color = group)) +
          panel.background = element_rect(fill = 'white', colour = 'white'))+ scale_x_discrete(breaks=c("CC","MICE","RF","DAE","ORACLE"))+ theme(legend.position = 'none')+scale_color_manual(values=mycols)
 
 
-plotMARzoom <- ggplot(dfMAR, aes(x = group,y=bias,color = group))  +ylim(lowerlim,upperlim)+
-        ylab("Bias")+ xlab("")+
-  geom_errorbar(aes(ymax =upper, ymin = lower),
-                position = "dodge",size = 1.5)+ geom_hline(yintercept=0, linetype="dashed", color = "black")+geom_point(shape=16,colour="black",size=2)+   facet_grid(cols=vars(prop),scales = "free_x",space="free_x",switch="both") +theme(panel.spacing = unit(1, "lines"),
-         strip.background = element_blank(),
-         axis.line = element_line(colour = "grey"),
-         panel.grid.major.y =element_line(colour = "grey"),
-         strip.placement = "outside",
-         axis.text.x = element_text(angle = 45, hjust = 1,size=10),
-         panel.background = element_rect(fill = 'white', colour = 'white'))+ scale_x_discrete(breaks=c("CC","MICE","RF","DAE","ORACLE"))+ theme(legend.position = 'none')+scale_color_manual(values=mycols)
-
 ```
 
 
-## ECOG MNAR Setting 1
 ```{R,echo=F}
-upperlim <- .02
-lowerlim <- -.02
+upperlim <- .03
+lowerlim <- -.03
 
 lower <- data.frame(c(PercEcogMNAR1[c(1,3,5,7,9),1],PercEcogMNAR1[c(1,3,5,7,9),2],PercEcogMNAR1[c(1,3,5,7,9),3]))
 colnames(lower) <- c()
@@ -762,7 +944,7 @@ colnames(upper) <- c()
 
 
 
-dfMNAR<- data.frame(bias=rbind(t(MNAR10aFull[1,c(2,5,8,11,14)]),t(MNAR30aFull[1,c(2,5,8,11,14)]),t(MNAR50aFull[1,c(2,5,8,11,14)])),sd=rbind(t(MNAR10aFull[2,c(2,5,8,11,14)]),t(MNAR30aFull[2,c(2,5,8,11,14)]),t(MNAR50aFull[2,c(2,5,8,11,14)])),lower,upper,group=rep(c("ORACLE","CC","MICE", "RF","DAE"),3),prop=c(rep("10%",5),rep("30%",5),rep("50%",5)))  
+dfMNAR<- data.frame(bias=rbind(t(MNAR10aFull[1,EcogInds]),t(MNAR30aFull[1,EcogInds]),t(MNAR50aFull[1,EcogInds])),sd=rbind(t(MNAR10aFull[2,EcogInds]),t(MNAR30aFull[2,EcogInds]),t(MNAR50aFull[2,EcogInds])),lower,upper,group=rep(c("ORACLE","CC","MICE", "RF","DAE"),3),prop=c(rep("10%",5),rep("30%",5),rep("50%",5)))  
 feats= rownames(dfMNAR)
 dfMNAR <- cbind(dfMNAR,feats)
 dfMNAR$feats <- factor(dfMNAR$feats, levels = dfMNAR$feats[order(dfMNAR$prop)])
@@ -787,23 +969,12 @@ plotMNAR1 <- ggplot(dfMNAR, aes(x = group,y=bias,color = group)) +
          panel.background = element_rect(fill = 'white', colour = 'white'))+ scale_x_discrete(breaks=c("CC","MICE","RF","DAE","ORACLE"))+ theme(legend.position = 'none')+scale_color_manual(values=mycols)
 
 
-plotMNAR1zoom <- ggplot(dfMNAR, aes(x = group,y=bias,color = group))  +ylim(lowerlim,upperlim)+
-        ylab("Bias")+ xlab("")+
-  geom_errorbar(aes(ymax =upper, ymin = lower),
-                position = "dodge",size = 1.5)+ geom_hline(yintercept=0, linetype="dashed", color = "black")+geom_point(shape=16,colour="black",size=2)+   facet_grid(cols=vars(prop),scales = "free_x",space="free_x",switch="both") +theme(panel.spacing = unit(1, "lines"),
-         strip.background = element_blank(),
-         axis.line = element_line(colour = "grey"),
-         panel.grid.major.y =element_line(colour = "grey"),
-         strip.placement = "outside",
-         axis.text.x = element_text(angle = 45, hjust = 1,size=10),
-         panel.background = element_rect(fill = 'white', colour = 'white'))+ scale_x_discrete(breaks=c("CC","MICE","RF","DAE","ORACLE"))+ theme(legend.position = 'none')+scale_color_manual(values=mycols)
-
 ```
 
-## ECOG MNAR Setting 2
+
 ```{R,echo=F}
-upperlim <- .02
-lowerlim <- -.02
+upperlim <- .03
+lowerlim <- -.03
 
 lower <- data.frame(c(PercEcogMNAR2[c(1,3,5,7,9),1],PercEcogMNAR2[c(1,3,5,7,9),2],PercEcogMNAR2[c(1,3,5,7,9),3]))
 colnames(lower) <- c()
@@ -812,7 +983,7 @@ colnames(upper) <- c()
 
 
 
-dfMNAR<- data.frame(bias=rbind(t(MNAR10bFull[1,c(2,5,8,11,14)]),t(MNAR30bFull[1,c(2,5,8,11,14)]),t(MNAR50bFull[1,c(2,5,8,11,14)])),sd=rbind(t(MNAR10bFull[2,c(2,5,8,11,14)]),t(MNAR30bFull[2,c(2,5,8,11,14)]),t(MNAR50bFull[2,c(2,5,8,11,14)])),lower,upper,group=rep(c("ORACLE","CC","MICE", "RF","DAE"),3),prop=c(rep("10%",5),rep("30%",5),rep("50%",5)))  
+dfMNAR<- data.frame(bias=rbind(t(MNAR10bFull[1,EcogInds]),t(MNAR30bFull[1,EcogInds]),t(MNAR50bFull[1,EcogInds])),sd=rbind(t(MNAR10bFull[2,EcogInds]),t(MNAR30bFull[2,EcogInds]),t(MNAR50bFull[2,EcogInds])),lower,upper,group=rep(c("ORACLE","CC","MICE", "RF","DAE"),3),prop=c(rep("10%",5),rep("30%",5),rep("50%",5)))  
 feats= rownames(dfMNAR)
 dfMNAR <- cbind(dfMNAR,feats)
 dfMNAR$feats <- factor(dfMNAR$feats, levels = dfMNAR$feats[order(dfMNAR$prop)])
@@ -837,7 +1008,58 @@ plotMNAR2 <- ggplot(dfMNAR, aes(x = group,y=bias,color = group)) +
          panel.background = element_rect(fill = 'white', colour = 'white'))+ scale_x_discrete(breaks=c("CC","MICE","RF","DAE","ORACLE"))+ theme(legend.position = 'none')+scale_color_manual(values=mycols)
 
 
-plotMNAR2zoom <- ggplot(dfMNAR, aes(x = group,y=bias,color = group))  +ylim(lowerlim,upperlim)+
+```
+
+
+```{r,echo=F}
+library (gridExtra)
+
+plotMCAR = plotMCAR + ggtitle("MCAR")
+plotMAR = plotMAR + ggtitle("MAR")
+plotMNAR1 = plotMNAR1 + ggtitle("MNAR1")
+plotMNAR2 = plotMNAR2 + ggtitle("MNAR2")
+plotTxt = grid.arrange(plotMCAR, plotMAR, plotMNAR1, plotMNAR2, nrow = 2)
+#plot (plotTxt)
+
+png('~/Desktop/plotAllEcog.png', width=10, height=8, units="in", pointsize=2, res=300)
+plot (plotTxt)
+dev.off()
+
+```
+
+
+
+
+
+
+\newpage
+
+# Var1 Percentiles of Est - Truth
+```{r,echo=F}
+upperlim <- .03
+lowerlim <- -.03
+
+lower <- data.frame(c(PercVar1MCAR[c(1,3,5,7,9),1],PercVar1MCAR[c(1,3,5,7,9),2],PercVar1MCAR[c(1,3,5,7,9),3]))
+colnames(lower) <- c()
+upper <- data.frame(c(PercVar1MCAR[c(2,4,6,8,10),1],PercVar1MCAR[c(2,4,6,8,10),2],PercVar1MCAR[c(2,4,6,8,10),3]))
+colnames(upper) <- c()
+
+
+
+dfMCAR<- data.frame(bias=rbind(t(MCAR10Full[1,Var1Inds]),t(MCAR30Full[1,Var1Inds]),t(MCAR50Full[1,Var1Inds])),sd=rbind(t(MCAR10Full[2,Var1Inds]),t(MCAR30Full[2,Var1Inds]),t(MCAR50Full[2,Var1Inds])),lower,upper,group=rep(c("ORACLE","CC","MICE", "RF","DAE"),3),prop=c(rep("10%",5),rep("30%",5),rep("50%",5)))  
+feats= rownames(dfMCAR)
+dfMCAR <- cbind(dfMCAR,feats)
+dfMCAR$feats <- factor(dfMCAR$feats, levels = dfMCAR$feats[order(dfMCAR$prop)])
+
+dfMCAR <- dfMCAR[-c(6,11),]
+dfMCAR$prop <- as.character(dfMCAR$prop)
+dfMCAR[1,6]<- ""
+dfMCAR$group <- as.character(dfMCAR$group)
+dfMCAR$group <- factor(dfMCAR$group, levels=c("ORACLE", "CC", "MICE","RF","DAE"))
+
+mycols = c ("#D55E00", "#E69F00", "#2271B2", "#3DB7E9", "#359B73")
+
+plotMCAR <- ggplot(dfMCAR, aes(x = group,y=bias,color = group)) +
         ylab("Bias")+ xlab("")+
   geom_errorbar(aes(ymax =upper, ymin = lower),
                 position = "dodge",size = 1.5)+ geom_hline(yintercept=0, linetype="dashed", color = "black")+geom_point(shape=16,colour="black",size=2)+   facet_grid(cols=vars(prop),scales = "free_x",space="free_x",switch="both") +theme(panel.spacing = unit(1, "lines"),
@@ -850,7 +1072,120 @@ plotMNAR2zoom <- ggplot(dfMNAR, aes(x = group,y=bias,color = group))  +ylim(lowe
 
 ```
 
-## All ECOG
+```{R,echo=F}
+upperlim <- .03
+lowerlim <- -.03
+
+lower <- data.frame(c(PercVar1MAR[c(1,3,5,7,9),1],PercVar1MAR[c(1,3,5,7,9),2],PercVar1MAR[c(1,3,5,7,9),3]))
+colnames(lower) <- c()
+upper <- data.frame(c(PercVar1MAR[c(2,4,6,8,10),1],PercVar1MAR[c(2,4,6,8,10),2],PercVar1MAR[c(2,4,6,8,10),3]))
+colnames(upper) <- c()
+
+
+
+dfMAR<- data.frame(bias=rbind(t(MAR10Full[1,Var1Inds]),t(MAR30Full[1,Var1Inds]),t(MAR50Full[1,Var1Inds])),sd=rbind(t(MAR10Full[2,Var1Inds]),t(MAR30Full[2,Var1Inds]),t(MAR50Full[2,Var1Inds])),lower,upper,group=rep(c("ORACLE","CC","MICE", "RF","DAE"),3),prop=c(rep("10%",5),rep("30%",5),rep("50%",5)))  
+feats= rownames(dfMAR)
+dfMAR <- cbind(dfMAR,feats)
+dfMAR$feats <- factor(dfMAR$feats, levels = dfMAR$feats[order(dfMAR$prop)])
+
+dfMAR <- dfMAR[-c(6,11),]
+dfMAR$prop <- as.character(dfMAR$prop)
+dfMAR[1,6]<- ""
+dfMAR$group <- as.character(dfMAR$group)
+dfMAR$group <- factor(dfMAR$group, levels=c("ORACLE", "CC", "MICE","RF","DAE"))
+
+mycols = c ("#D55E00", "#E69F00", "#2271B2", "#3DB7E9", "#359B73")
+
+plotMAR <- ggplot(dfMAR, aes(x = group,y=bias,color = group)) +
+        ylab("Bias")+ xlab("")+
+  geom_errorbar(aes(ymax =upper, ymin = lower),
+                position = "dodge",size = 1.5)+ geom_hline(yintercept=0, linetype="dashed", color = "black")+geom_point(shape=16,colour="black",size=2)+   facet_grid(cols=vars(prop),scales = "free_x",space="free_x",switch="both") +theme(panel.spacing = unit(1, "lines"),
+         strip.background = element_blank(),
+         axis.line = element_line(colour = "grey"),
+         panel.grid.major.y =element_line(colour = "grey"),
+         strip.placement = "outside",
+         axis.text.x = element_text(angle = 45, hjust = 1,size=10),
+         panel.background = element_rect(fill = 'white', colour = 'white'))+ scale_x_discrete(breaks=c("CC","MICE","RF","DAE","ORACLE"))+ theme(legend.position = 'none')+scale_color_manual(values=mycols)
+
+
+```
+
+```{R,echo=F}
+upperlim <- .03
+lowerlim <- -.03
+
+lower <- data.frame(c(PercVar1MNAR1[c(1,3,5,7,9),1],PercVar1MNAR1[c(1,3,5,7,9),2],PercVar1MNAR1[c(1,3,5,7,9),3]))
+colnames(lower) <- c()
+upper <- data.frame(c(PercVar1MNAR1[c(2,4,6,8,10),1],PercVar1MNAR1[c(2,4,6,8,10),2],PercVar1MNAR1[c(2,4,6,8,10),3]))
+colnames(upper) <- c()
+
+
+
+dfMNAR<- data.frame(bias=rbind(t(MNAR10aFull[1,Var1Inds]),t(MNAR30aFull[1,Var1Inds]),t(MNAR50aFull[1,Var1Inds])),sd=rbind(t(MNAR10aFull[2,Var1Inds]),t(MNAR30aFull[2,Var1Inds]),t(MNAR50aFull[2,Var1Inds])),lower,upper,group=rep(c("ORACLE","CC","MICE", "RF","DAE"),3),prop=c(rep("10%",5),rep("30%",5),rep("50%",5)))  
+feats= rownames(dfMNAR)
+dfMNAR <- cbind(dfMNAR,feats)
+dfMNAR$feats <- factor(dfMNAR$feats, levels = dfMNAR$feats[order(dfMNAR$prop)])
+
+dfMNAR <- dfMNAR[-c(6,11),]
+dfMNAR$prop <- as.character(dfMNAR$prop)
+dfMNAR[1,6]<- ""
+dfMNAR$group <- as.character(dfMNAR$group)
+dfMNAR$group <- factor(dfMNAR$group, levels=c("ORACLE", "CC", "MICE","RF","DAE"))
+
+mycols = c ("#D55E00", "#E69F00", "#2271B2", "#3DB7E9", "#359B73")
+
+plotMNAR1 <- ggplot(dfMNAR, aes(x = group,y=bias,color = group)) +
+        ylab("Bias")+ xlab("")+
+  geom_errorbar(aes(ymax =upper, ymin = lower),
+                position = "dodge",size = 1.5)+ geom_hline(yintercept=0, linetype="dashed", color = "black")+geom_point(shape=16,colour="black",size=2)+   facet_grid(cols=vars(prop),scales = "free_x",space="free_x",switch="both") +theme(panel.spacing = unit(1, "lines"),
+         strip.background = element_blank(),
+         axis.line = element_line(colour = "grey"),
+         panel.grid.major.y =element_line(colour = "grey"),
+         strip.placement = "outside",
+         axis.text.x = element_text(angle = 45, hjust = 1,size=10),
+         panel.background = element_rect(fill = 'white', colour = 'white'))+ scale_x_discrete(breaks=c("CC","MICE","RF","DAE","ORACLE"))+ theme(legend.position = 'none')+scale_color_manual(values=mycols)
+
+
+```
+
+```{R,echo=F}
+upperlim <- .03
+lowerlim <- -.03
+
+lower <- data.frame(c(PercVar1MNAR2[c(1,3,5,7,9),1],PercVar1MNAR2[c(1,3,5,7,9),2],PercVar1MNAR2[c(1,3,5,7,9),3]))
+colnames(lower) <- c()
+upper <- data.frame(c(PercVar1MNAR2[c(2,4,6,8,10),1],PercVar1MNAR2[c(2,4,6,8,10),2],PercVar1MNAR2[c(2,4,6,8,10),3]))
+colnames(upper) <- c()
+
+
+
+dfMNAR<- data.frame(bias=rbind(t(MNAR10bFull[1,Var1Inds]),t(MNAR30bFull[1,Var1Inds]),t(MNAR50bFull[1,Var1Inds])),sd=rbind(t(MNAR10bFull[2,Var1Inds]),t(MNAR30bFull[2,Var1Inds]),t(MNAR50bFull[2,Var1Inds])),lower,upper,group=rep(c("ORACLE","CC","MICE", "RF","DAE"),3),prop=c(rep("10%",5),rep("30%",5),rep("50%",5)))  
+feats= rownames(dfMNAR)
+dfMNAR <- cbind(dfMNAR,feats)
+dfMNAR$feats <- factor(dfMNAR$feats, levels = dfMNAR$feats[order(dfMNAR$prop)])
+
+dfMNAR <- dfMNAR[-c(6,11),]
+dfMNAR$prop <- as.character(dfMNAR$prop)
+dfMNAR[1,6]<- ""
+dfMNAR$group <- as.character(dfMNAR$group)
+dfMNAR$group <- factor(dfMNAR$group, levels=c("ORACLE", "CC", "MICE","RF","DAE"))
+
+mycols = c ("#D55E00", "#E69F00", "#2271B2", "#3DB7E9", "#359B73")
+
+plotMNAR2 <- ggplot(dfMNAR, aes(x = group,y=bias,color = group)) +
+        ylab("Bias")+ xlab("")+
+  geom_errorbar(aes(ymax =upper, ymin = lower),
+                position = "dodge",size = 1.5)+ geom_hline(yintercept=0, linetype="dashed", color = "black")+geom_point(shape=16,colour="black",size=2)+   facet_grid(cols=vars(prop),scales = "free_x",space="free_x",switch="both") +theme(panel.spacing = unit(1, "lines"),
+         strip.background = element_blank(),
+         axis.line = element_line(colour = "grey"),
+         panel.grid.major.y =element_line(colour = "grey"),
+         strip.placement = "outside",
+         axis.text.x = element_text(angle = 45, hjust = 1,size=10),
+         panel.background = element_rect(fill = 'white', colour = 'white'))+ scale_x_discrete(breaks=c("CC","MICE","RF","DAE","ORACLE"))+ theme(legend.position = 'none')+scale_color_manual(values=mycols)
+
+
+```
+
 ```{r,echo=F}
 library (gridExtra)
 
@@ -859,24 +1194,197 @@ plotMAR = plotMAR + ggtitle("MAR")
 plotMNAR1 = plotMNAR1 + ggtitle("MNAR1")
 plotMNAR2 = plotMNAR2 + ggtitle("MNAR2")
 plotTxt = grid.arrange(plotMCAR, plotMAR, plotMNAR1, plotMNAR2, nrow = 2)
+#plot (plotTxt)
+
+png('~/Desktop/plotAllVar1.png', width=10, height=8, units="in", pointsize=2, res=300)
 plot (plotTxt)
-
-png('~/Desktop/plotAllECOG.png', width=10, height=8, units="in", pointsize=2, res=300)
-plot (plotTxt)
-dev.off()
-
-
-
-plotMCARzoom = plotMCARzoom + ggtitle("MCAR")
-plotMARzoom = plotMARzoom + ggtitle("MAR")
-plotMNAR1zoom = plotMNAR1zoom + ggtitle("MNAR1")
-plotMNAR2zoom = plotMNAR2zoom + ggtitle("MNAR2")
-plotTxtZoom = grid.arrange(plotMCARzoom, plotMARzoom, plotMNAR1zoom, plotMNAR2zoom, nrow = 2)
-plot (plotTxtZoom)
-
-png('~/Desktop/plotAllECOGZoom.png', width=10, height=8, units="in", pointsize=2, res=300)
-plot (plotTxtZoom)
 dev.off()
 
 ```
+
+
+
+\newpage
+
+# Var2 Percentiles of Est - Truth
+```{r,echo=F}
+upperlim <- .03
+lowerlim <- -.03
+
+lower <- data.frame(c(PercVar2MCAR[c(1,3,5,7,9),1],PercVar2MCAR[c(1,3,5,7,9),2],PercVar2MCAR[c(1,3,5,7,9),3]))
+colnames(lower) <- c()
+upper <- data.frame(c(PercVar2MCAR[c(2,4,6,8,10),1],PercVar2MCAR[c(2,4,6,8,10),2],PercVar2MCAR[c(2,4,6,8,10),3]))
+colnames(upper) <- c()
+
+dfMCAR<- data.frame(bias=rbind(t(MCAR10Full[1,Var2Inds]),t(MCAR30Full[1,Var2Inds]),t(MCAR50Full[1,Var2Inds])),sd=rbind(t(MCAR10Full[2,Var2Inds]),t(MCAR30Full[2,Var2Inds]),t(MCAR50Full[2,Var2Inds])),lower,upper,group=rep(c("ORACLE","CC","MICE", "RF","DAE"),3),prop=c(rep("10%",5),rep("30%",5),rep("50%",5)))  
+feats= rownames(dfMCAR)
+dfMCAR <- cbind(dfMCAR,feats)
+dfMCAR$feats <- factor(dfMCAR$feats, levels = dfMCAR$feats[order(dfMCAR$prop)])
+
+dfMCAR <- dfMCAR[-c(6,11),]
+dfMCAR$prop <- as.character(dfMCAR$prop)
+dfMCAR[1,6]<- ""
+dfMCAR$group <- as.character(dfMCAR$group)
+dfMCAR$group <- factor(dfMCAR$group, levels=c("ORACLE", "CC", "MICE","RF","DAE"))
+
+mycols = c ("#D55E00", "#E69F00", "#2271B2", "#3DB7E9", "#359B73")
+
+plotMCAR <- ggplot(dfMCAR, aes(x = group,y=bias,color = group)) +
+        ylab("Bias")+ xlab("")+
+  geom_errorbar(aes(ymax =upper, ymin = lower),
+                position = "dodge",size = 1.5)+ geom_hline(yintercept=0, linetype="dashed", color = "black")+geom_point(shape=16,colour="black",size=2)+   facet_grid(cols=vars(prop),scales = "free_x",space="free_x",switch="both") +theme(panel.spacing = unit(1, "lines"),
+         strip.background = element_blank(),
+         axis.line = element_line(colour = "grey"),
+         panel.grid.major.y =element_line(colour = "grey"),
+         strip.placement = "outside",
+         axis.text.x = element_text(angle = 45, hjust = 1,size=10),
+         panel.background = element_rect(fill = 'white', colour = 'white'))+ scale_x_discrete(breaks=c("CC","MICE","RF","DAE","ORACLE"))+ theme(legend.position = 'none')+scale_color_manual(values=mycols)
+
+
+```
+
+
+```{R,echo=F}
+upperlim <- .03
+lowerlim <- -.03
+
+lower <- data.frame(c(PercVar2MAR[c(1,3,5,7,9),1],PercVar2MAR[c(1,3,5,7,9),2],PercVar2MAR[c(1,3,5,7,9),3]))
+colnames(lower) <- c()
+upper <- data.frame(c(PercVar2MAR[c(2,4,6,8,10),1],PercVar2MAR[c(2,4,6,8,10),2],PercVar2MAR[c(2,4,6,8,10),3]))
+colnames(upper) <- c()
+
+dfMAR<- data.frame(bias=rbind(t(MAR10Full[1,Var2Inds]),t(MAR30Full[1,Var2Inds]),t(MAR50Full[1,Var2Inds])),sd=rbind(t(MAR10Full[2,Var2Inds]),t(MAR30Full[2,Var2Inds]),t(MAR50Full[2,Var2Inds])),lower,upper,group=rep(c("ORACLE","CC","MICE", "RF","DAE"),3),prop=c(rep("10%",5),rep("30%",5),rep("50%",5)))  
+feats= rownames(dfMAR)
+dfMAR <- cbind(dfMAR,feats)
+dfMAR$feats <- factor(dfMAR$feats, levels = dfMAR$feats[order(dfMAR$prop)])
+
+dfMAR <- dfMAR[-c(6,11),]
+dfMAR$prop <- as.character(dfMAR$prop)
+dfMAR[1,6]<- ""
+dfMAR$group <- as.character(dfMAR$group)
+dfMAR$group <- factor(dfMAR$group, levels=c("ORACLE", "CC", "MICE","RF","DAE"))
+
+mycols = c ("#D55E00", "#E69F00", "#2271B2", "#3DB7E9", "#359B73")
+
+plotMAR <- ggplot(dfMAR, aes(x = group,y=bias,color = group)) +
+        ylab("Bias")+ xlab("")+
+  geom_errorbar(aes(ymax =upper, ymin = lower),
+                position = "dodge",size = 1.5)+ geom_hline(yintercept=0, linetype="dashed", color = "black")+geom_point(shape=16,colour="black",size=2)+   facet_grid(cols=vars(prop),scales = "free_x",space="free_x",switch="both") +theme(panel.spacing = unit(1, "lines"),
+         strip.background = element_blank(),
+         axis.line = element_line(colour = "grey"),
+         panel.grid.major.y =element_line(colour = "grey"),
+         strip.placement = "outside",
+         axis.text.x = element_text(angle = 45, hjust = 1,size=10),
+         panel.background = element_rect(fill = 'white', colour = 'white'))+ scale_x_discrete(breaks=c("CC","MICE","RF","DAE","ORACLE"))+ theme(legend.position = 'none')+scale_color_manual(values=mycols)
+
+```
+
+
+```{R,echo=F}
+upperlim <- .03
+lowerlim <- -.03
+
+lower <- data.frame(c(PercVar2MNAR1[c(1,3,5,7,9),1],PercVar2MNAR1[c(1,3,5,7,9),2],PercVar2MNAR1[c(1,3,5,7,9),3]))
+colnames(lower) <- c()
+upper <- data.frame(c(PercVar2MNAR1[c(2,4,6,8,10),1],PercVar2MNAR1[c(2,4,6,8,10),2],PercVar2MNAR1[c(2,4,6,8,10),3]))
+colnames(upper) <- c()
+
+
+dfMNAR<- data.frame(bias=rbind(t(MNAR10aFull[1,Var2Inds]),t(MNAR30aFull[1,Var2Inds]),t(MNAR50aFull[1,Var2Inds])),sd=rbind(t(MNAR10aFull[2,Var2Inds]),t(MNAR30aFull[2,Var2Inds]),t(MNAR50aFull[2,Var2Inds])),lower,upper,group=rep(c("ORACLE","CC","MICE", "RF","DAE"),3),prop=c(rep("10%",5),rep("30%",5),rep("50%",5)))  
+feats= rownames(dfMNAR)
+dfMNAR <- cbind(dfMNAR,feats)
+dfMNAR$feats <- factor(dfMNAR$feats, levels = dfMNAR$feats[order(dfMNAR$prop)])
+
+dfMNAR <- dfMNAR[-c(6,11),]
+dfMNAR$prop <- as.character(dfMNAR$prop)
+dfMNAR[1,6]<- ""
+dfMNAR$group <- as.character(dfMNAR$group)
+dfMNAR$group <- factor(dfMNAR$group, levels=c("ORACLE", "CC", "MICE","RF","DAE"))
+
+mycols = c ("#D55E00", "#E69F00", "#2271B2", "#3DB7E9", "#359B73")
+
+plotMNAR1 <- ggplot(dfMNAR, aes(x = group,y=bias,color = group)) +
+        ylab("Bias")+ xlab("")+
+  geom_errorbar(aes(ymax =upper, ymin = lower),
+                position = "dodge",size = 1.5)+ geom_hline(yintercept=0, linetype="dashed", color = "black")+geom_point(shape=16,colour="black",size=2)+   facet_grid(cols=vars(prop),scales = "free_x",space="free_x",switch="both") +theme(panel.spacing = unit(1, "lines"),
+         strip.background = element_blank(),
+         axis.line = element_line(colour = "grey"),
+         panel.grid.major.y =element_line(colour = "grey"),
+         strip.placement = "outside",
+         axis.text.x = element_text(angle = 45, hjust = 1,size=10),
+         panel.background = element_rect(fill = 'white', colour = 'white'))+ scale_x_discrete(breaks=c("CC","MICE","RF","DAE","ORACLE"))+ theme(legend.position = 'none')+scale_color_manual(values=mycols)
+
+```
+
+
+```{R,echo=F}
+upperlim <- .03
+lowerlim <- -.03
+
+lower <- data.frame(c(PercVar2MNAR2[c(1,3,5,7,9),1],PercVar2MNAR2[c(1,3,5,7,9),2],PercVar2MNAR2[c(1,3,5,7,9),3]))
+colnames(lower) <- c()
+upper <- data.frame(c(PercVar2MNAR2[c(2,4,6,8,10),1],PercVar2MNAR2[c(2,4,6,8,10),2],PercVar2MNAR2[c(2,4,6,8,10),3]))
+colnames(upper) <- c()
+
+
+dfMNAR<- data.frame(bias=rbind(t(MNAR10bFull[1,Var2Inds]),t(MNAR30bFull[1,Var2Inds]),t(MNAR50bFull[1,Var2Inds])),sd=rbind(t(MNAR10bFull[2,Var2Inds]),t(MNAR30bFull[2,Var2Inds]),t(MNAR50bFull[2,Var2Inds])),lower,upper,group=rep(c("ORACLE","CC","MICE", "RF","DAE"),3),prop=c(rep("10%",5),rep("30%",5),rep("50%",5)))  
+feats= rownames(dfMNAR)
+dfMNAR <- cbind(dfMNAR,feats)
+dfMNAR$feats <- factor(dfMNAR$feats, levels = dfMNAR$feats[order(dfMNAR$prop)])
+
+dfMNAR <- dfMNAR[-c(6,11),]
+dfMNAR$prop <- as.character(dfMNAR$prop)
+dfMNAR[1,6]<- ""
+dfMNAR$group <- as.character(dfMNAR$group)
+dfMNAR$group <- factor(dfMNAR$group, levels=c("ORACLE", "CC", "MICE","RF","DAE"))
+
+mycols = c ("#D55E00", "#E69F00", "#2271B2", "#3DB7E9", "#359B73")
+
+plotMNAR2 <- ggplot(dfMNAR, aes(x = group,y=bias,color = group)) +
+        ylab("Bias")+ xlab("")+
+  geom_errorbar(aes(ymax =upper, ymin = lower),
+                position = "dodge",size = 1.5)+ geom_hline(yintercept=0, linetype="dashed", color = "black")+geom_point(shape=16,colour="black",size=2)+   facet_grid(cols=vars(prop),scales = "free_x",space="free_x",switch="both") +theme(panel.spacing = unit(1, "lines"),
+         strip.background = element_blank(),
+         axis.line = element_line(colour = "grey"),
+         panel.grid.major.y =element_line(colour = "grey"),
+         strip.placement = "outside",
+         axis.text.x = element_text(angle = 45, hjust = 1,size=10),
+         panel.background = element_rect(fill = 'white', colour = 'white'))+ scale_x_discrete(breaks=c("CC","MICE","RF","DAE","ORACLE"))+ theme(legend.position = 'none')+scale_color_manual(values=mycols)
+
+```
+
+
+```{r,echo=F}
+library (gridExtra)
+
+plotMCAR = plotMCAR + ggtitle("MCAR")
+plotMAR = plotMAR + ggtitle("MAR")
+plotMNAR1 = plotMNAR1 + ggtitle("MNAR1")
+plotMNAR2 = plotMNAR2 + ggtitle("MNAR2")
+plotTxt = grid.arrange(plotMCAR, plotMAR, plotMNAR1, plotMNAR2, nrow = 2)
+#plot (plotTxt)
+
+png('~/Desktop/plotAllVar2.png', width=10, height=8, units="in", pointsize=2, res=300)
+plot (plotTxt)
+dev.off()
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
