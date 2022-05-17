@@ -1,8 +1,9 @@
 library(dplyr)
 library(survival)
 
-rootdir <- "/project/flatiron_ucc/programs/kylie/RunMe2/final_results"
-iter = 1000
+rd <- "/project/flatiron_ucc/programs/kylie/RunMe3"
+rootdir <- file.path (rd, "final_results")
+iter = 500
 
 filesMCAR10 <- list.files(file.path(rootdir, "MCAR/10"), full.names = TRUE)
 filesMCAR30 <- list.files(file.path(rootdir, "MCAR/30"), full.names = TRUE)
@@ -257,7 +258,6 @@ filesMNAR10b <- list.files(file.path(rootdir, "AEMNAR2/10"), full.names = TRUE)
 filesMNAR30b <- list.files(file.path(rootdir, "AEMNAR2/30"), full.names = TRUE)
 filesMNAR50b <- list.files(file.path(rootdir, "AEMNAR2/50"), full.names = TRUE)
 
-iter <- 1000
 mechList <- c("MCAR", "MAR", "MNAR1", "MNAR2")
 proportionList <- c(10, 30, 50)
 # J is number of imputations
@@ -269,7 +269,7 @@ for (w in 1:length(mechList)) {
   for (y in 1:length(proportionList)) {
     propName <- proportionList[y]
     print (propName)
-    truth <- read.csv(file.path("/project/flatiron_ucc/programs/kylie/RunMe2/datasets/trueEff", mech, propName, "propMiss_trueEffs1.csv"))
+    truth <- read.csv(file.path(rd, "datasets/trueEff", mech, propName, "propMiss_trueEffs1.csv"))
     trueCoefs <- truth[names (truth)%in%c ("TREAT", "b.ecogvalue", "var1", "var2")]
     if (mech=='MCAR'){
       fileListName <- paste0("filesMCAR", propName)
@@ -313,7 +313,7 @@ for (w in 1:length(mechList)) {
       VarVar1daeList <- c()
       VarVar2daeList <- c()
       for (j in 1:J) {
-        data <- read.csv(file.path("/project/flatiron_ucc/programs/kylie/RunMe2/final_results", paste0("AE", mech), propName, paste0("result", i, "_num_", j, ".csv")), row.names = 1) # read in instead
+        data <- read.csv(file.path(rootdir, paste0("AE", mech), propName, paste0("result", i, "_num_", j, ".csv")), row.names = 1) # read in instead
 
         daeFit <- coxph(Surv(time, event) ~ treat + genderf + reth_black + reth_hisp + reth_oth + practypec + b.ecogvalue + smokey + dgradeh + surgery + site_ureter + site_renal + site_urethra + age + var1 + var2, data = data)
         treatRow <- which(names(daeFit$coefficients) == "treat")
