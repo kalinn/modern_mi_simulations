@@ -1,11 +1,11 @@
 ---
 title: "MIPaperFigures"
 author: "Kylie Getz and Kristin Linn"
-date: "5/7/2022"
+date: "5/17/2022"
 output: pdf_document
 ---
 
-Results using 1000 simulations, 10 MI
+Results using 500 simulations, 10 MI
 trueTreatment approx -0.69, trueEcog appox 0.4
 
 os1 <- coxph(Surv(cmonth, dead) ~ treat + genderf +  
@@ -20,7 +20,7 @@ library(xtable)
 library(kableExtra)
 
 rootdir = "~/Box Sync/Mentoring/Students/Getz_Kylie/results"
-fdir = file.path (rootdir, "2022_05_15")
+fdir = file.path (rootdir, "2022_05_17")
 MCAR10 <- read.csv(file.path (fdir, "MCAR10Avg10TreeV2.csv"),row.names = 1)
 MCAR30 <- read.csv(file.path (fdir,"MCAR30Avg10TreeV2.csv"),row.names = 1)
 MCAR50 <- read.csv(file.path (fdir,"MCAR50Avg10TreeV2.csv"),row.names = 1)
@@ -664,7 +664,7 @@ dfMCAR$group <- factor(dfMCAR$group, levels=c("ORACLE", "CC", "MICE","RF","DAE")
 mycols = c ("#D55E00", "#E69F00", "#2271B2", "#3DB7E9", "#359B73")
 
 plotMCAR <- ggplot(dfMCAR, aes(x = group,y=bias,color = group)) +
-        ylab("Bias")+ xlab("")+
+        ylab("Estimate - True")+ xlab("")+
   geom_errorbar(aes(ymax =upper, ymin = lower),
                 position = "dodge",size = 1.5)+ geom_hline(yintercept=0, linetype="dashed", color = "black")+geom_point(shape=16,colour="black",size=2)+   facet_grid(cols=vars(prop),scales = "free_x",space="free_x",switch="both") +theme(panel.spacing = unit(1, "lines"),
          strip.background = element_blank(),
@@ -702,7 +702,7 @@ dfMAR$group <- factor(dfMAR$group, levels=c("ORACLE", "CC", "MICE","RF","DAE"))
 mycols = c ("#D55E00", "#E69F00", "#2271B2", "#3DB7E9", "#359B73")
 
 plotMAR <- ggplot(dfMAR, aes(x = group,y=bias,color = group)) +
-        ylab("Bias")+ xlab("")+
+        ylab("Estimate - True")+ xlab("")+
   geom_errorbar(aes(ymax =upper, ymin = lower),
                 position = "dodge",size = 1.5)+ geom_hline(yintercept=0, linetype="dashed", color = "black")+geom_point(shape=16,colour="black",size=2)+   facet_grid(cols=vars(prop),scales = "free_x",space="free_x",switch="both") +theme(panel.spacing = unit(1, "lines"),
          strip.background = element_blank(),
@@ -741,7 +741,7 @@ dfMNAR$group <- factor(dfMNAR$group, levels=c("ORACLE", "CC", "MICE","RF","DAE")
 mycols = c ("#D55E00", "#E69F00", "#2271B2", "#3DB7E9", "#359B73")
 
 plotMNAR1 <- ggplot(dfMNAR, aes(x = group,y=bias,color = group)) +
-        ylab("Bias")+ xlab("")+
+        ylab("Estimate - True")+ xlab("")+
   geom_errorbar(aes(ymax =upper, ymin = lower),
                 position = "dodge",size = 1.5)+ geom_hline(yintercept=0, linetype="dashed", color = "black")+geom_point(shape=16,colour="black",size=2)+   facet_grid(cols=vars(prop),scales = "free_x",space="free_x",switch="both") +theme(panel.spacing = unit(1, "lines"),
          strip.background = element_blank(),
@@ -779,7 +779,7 @@ dfMNAR$group <- factor(dfMNAR$group, levels=c("ORACLE", "CC", "MICE","RF","DAE")
 mycols = c ("#D55E00", "#E69F00", "#2271B2", "#3DB7E9", "#359B73")
 
 plotMNAR2 <- ggplot(dfMNAR, aes(x = group,y=bias,color = group)) +
-        ylab("Bias")+ xlab("")+
+        ylab("Estimate - True")+ xlab("")+
   geom_errorbar(aes(ymax =upper, ymin = lower),
                 position = "dodge",size = 1.5)+ geom_hline(yintercept=0, linetype="dashed", color = "black")+geom_point(shape=16,colour="black",size=2)+   facet_grid(cols=vars(prop),scales = "free_x",space="free_x",switch="both") +theme(panel.spacing = unit(1, "lines"),
          strip.background = element_blank(),
@@ -820,7 +820,7 @@ tdf$mech = factor (tdf$mech, levels=c("MCAR", "MAR", "MNAR"))
 
 plotTxt <- ggplot(tdf, aes(x = group, y=bias, color = group))+
   ylim(lowerlim, upperlim)+
-  ylab("Bias")+ 
+  ylab("Estimate - True")+ 
   xlab("")+
   geom_errorbar(aes(ymax = upper, ymin = lower),
                 position = "dodge", size = 1.5)+
@@ -880,7 +880,7 @@ dfMCAR$group <- factor(dfMCAR$group, levels=c("ORACLE", "CC", "MICE","RF","DAE")
 mycols = c ("#D55E00", "#E69F00", "#2271B2", "#3DB7E9", "#359B73")
 
 plotMCAR <- ggplot(dfMCAR, aes(x = group,y=bias,color = group)) +
-        ylab("Bias")+ xlab("")+
+        ylab("Estimate - True")+ xlab("")+
   geom_errorbar(aes(ymax =upper, ymin = lower),
                 position = "dodge",size = 1.5)+ geom_hline(yintercept=0, linetype="dashed", color = "black")+geom_point(shape=16,colour="black",size=2)+   facet_grid(cols=vars(prop),scales = "free_x",space="free_x",switch="both") +theme(panel.spacing = unit(1, "lines"),
          strip.background = element_blank(),
@@ -919,7 +919,7 @@ dfMAR$group <- factor(dfMAR$group, levels=c("ORACLE", "CC", "MICE","RF","DAE"))
 mycols = c ("#D55E00", "#E69F00", "#2271B2", "#3DB7E9", "#359B73")
 
 plotMAR <- ggplot(dfMAR, aes(x = group,y=bias,color = group)) +
-        ylab("Bias")+ xlab("")+
+        ylab("Estimate - True")+ xlab("")+
   geom_errorbar(aes(ymax =upper, ymin = lower),
                 position = "dodge",size = 1.5)+ geom_hline(yintercept=0, linetype="dashed", color = "black")+geom_point(shape=16,colour="black",size=2)+   facet_grid(cols=vars(prop),scales = "free_x",space="free_x",switch="both") +theme(panel.spacing = unit(1, "lines"),
          strip.background = element_blank(),
@@ -958,7 +958,7 @@ dfMNAR$group <- factor(dfMNAR$group, levels=c("ORACLE", "CC", "MICE","RF","DAE")
 mycols = c ("#D55E00", "#E69F00", "#2271B2", "#3DB7E9", "#359B73")
 
 plotMNAR1 <- ggplot(dfMNAR, aes(x = group,y=bias,color = group)) +
-        ylab("Bias")+ xlab("")+
+        ylab("Estimate - True")+ xlab("")+
   geom_errorbar(aes(ymax =upper, ymin = lower),
                 position = "dodge",size = 1.5)+ geom_hline(yintercept=0, linetype="dashed", color = "black")+geom_point(shape=16,colour="black",size=2)+   facet_grid(cols=vars(prop),scales = "free_x",space="free_x",switch="both") +theme(panel.spacing = unit(1, "lines"),
          strip.background = element_blank(),
@@ -997,7 +997,7 @@ dfMNAR$group <- factor(dfMNAR$group, levels=c("ORACLE", "CC", "MICE","RF","DAE")
 mycols = c ("#D55E00", "#E69F00", "#2271B2", "#3DB7E9", "#359B73")
 
 plotMNAR2 <- ggplot(dfMNAR, aes(x = group,y=bias,color = group)) +
-        ylab("Bias")+ xlab("")+
+        ylab("Estimate - True")+ xlab("")+
   geom_errorbar(aes(ymax =upper, ymin = lower),
                 position = "dodge",size = 1.5)+ geom_hline(yintercept=0, linetype="dashed", color = "black")+geom_point(shape=16,colour="black",size=2)+   facet_grid(cols=vars(prop),scales = "free_x",space="free_x",switch="both") +theme(panel.spacing = unit(1, "lines"),
          strip.background = element_blank(),
@@ -1060,7 +1060,7 @@ dfMCAR$group <- factor(dfMCAR$group, levels=c("ORACLE", "CC", "MICE","RF","DAE")
 mycols = c ("#D55E00", "#E69F00", "#2271B2", "#3DB7E9", "#359B73")
 
 plotMCAR <- ggplot(dfMCAR, aes(x = group,y=bias,color = group)) +
-        ylab("Bias")+ xlab("")+
+        ylab("Estimate - True")+ xlab("")+
   geom_errorbar(aes(ymax =upper, ymin = lower),
                 position = "dodge",size = 1.5)+ geom_hline(yintercept=0, linetype="dashed", color = "black")+geom_point(shape=16,colour="black",size=2)+   facet_grid(cols=vars(prop),scales = "free_x",space="free_x",switch="both") +theme(panel.spacing = unit(1, "lines"),
          strip.background = element_blank(),
@@ -1097,7 +1097,7 @@ dfMAR$group <- factor(dfMAR$group, levels=c("ORACLE", "CC", "MICE","RF","DAE"))
 mycols = c ("#D55E00", "#E69F00", "#2271B2", "#3DB7E9", "#359B73")
 
 plotMAR <- ggplot(dfMAR, aes(x = group,y=bias,color = group)) +
-        ylab("Bias")+ xlab("")+
+        ylab("Estimate - True")+ xlab("")+
   geom_errorbar(aes(ymax =upper, ymin = lower),
                 position = "dodge",size = 1.5)+ geom_hline(yintercept=0, linetype="dashed", color = "black")+geom_point(shape=16,colour="black",size=2)+   facet_grid(cols=vars(prop),scales = "free_x",space="free_x",switch="both") +theme(panel.spacing = unit(1, "lines"),
          strip.background = element_blank(),
@@ -1135,7 +1135,7 @@ dfMNAR$group <- factor(dfMNAR$group, levels=c("ORACLE", "CC", "MICE","RF","DAE")
 mycols = c ("#D55E00", "#E69F00", "#2271B2", "#3DB7E9", "#359B73")
 
 plotMNAR1 <- ggplot(dfMNAR, aes(x = group,y=bias,color = group)) +
-        ylab("Bias")+ xlab("")+
+        ylab("Estimate - True")+ xlab("")+
   geom_errorbar(aes(ymax =upper, ymin = lower),
                 position = "dodge",size = 1.5)+ geom_hline(yintercept=0, linetype="dashed", color = "black")+geom_point(shape=16,colour="black",size=2)+   facet_grid(cols=vars(prop),scales = "free_x",space="free_x",switch="both") +theme(panel.spacing = unit(1, "lines"),
          strip.background = element_blank(),
@@ -1173,7 +1173,7 @@ dfMNAR$group <- factor(dfMNAR$group, levels=c("ORACLE", "CC", "MICE","RF","DAE")
 mycols = c ("#D55E00", "#E69F00", "#2271B2", "#3DB7E9", "#359B73")
 
 plotMNAR2 <- ggplot(dfMNAR, aes(x = group,y=bias,color = group)) +
-        ylab("Bias")+ xlab("")+
+        ylab("Estimate - True")+ xlab("")+
   geom_errorbar(aes(ymax =upper, ymin = lower),
                 position = "dodge",size = 1.5)+ geom_hline(yintercept=0, linetype="dashed", color = "black")+geom_point(shape=16,colour="black",size=2)+   facet_grid(cols=vars(prop),scales = "free_x",space="free_x",switch="both") +theme(panel.spacing = unit(1, "lines"),
          strip.background = element_blank(),
@@ -1230,7 +1230,7 @@ dfMCAR$group <- factor(dfMCAR$group, levels=c("ORACLE", "CC", "MICE","RF","DAE")
 mycols = c ("#D55E00", "#E69F00", "#2271B2", "#3DB7E9", "#359B73")
 
 plotMCAR <- ggplot(dfMCAR, aes(x = group,y=bias,color = group)) +
-        ylab("Bias")+ xlab("")+
+        ylab("Estimate - True")+ xlab("")+
   geom_errorbar(aes(ymax =upper, ymin = lower),
                 position = "dodge",size = 1.5)+ geom_hline(yintercept=0, linetype="dashed", color = "black")+geom_point(shape=16,colour="black",size=2)+   facet_grid(cols=vars(prop),scales = "free_x",space="free_x",switch="both") +theme(panel.spacing = unit(1, "lines"),
          strip.background = element_blank(),
@@ -1267,7 +1267,7 @@ dfMAR$group <- factor(dfMAR$group, levels=c("ORACLE", "CC", "MICE","RF","DAE"))
 mycols = c ("#D55E00", "#E69F00", "#2271B2", "#3DB7E9", "#359B73")
 
 plotMAR <- ggplot(dfMAR, aes(x = group,y=bias,color = group)) +
-        ylab("Bias")+ xlab("")+
+        ylab("Estimate - True")+ xlab("")+
   geom_errorbar(aes(ymax =upper, ymin = lower),
                 position = "dodge",size = 1.5)+ geom_hline(yintercept=0, linetype="dashed", color = "black")+geom_point(shape=16,colour="black",size=2)+   facet_grid(cols=vars(prop),scales = "free_x",space="free_x",switch="both") +theme(panel.spacing = unit(1, "lines"),
          strip.background = element_blank(),
@@ -1304,7 +1304,7 @@ dfMNAR$group <- factor(dfMNAR$group, levels=c("ORACLE", "CC", "MICE","RF","DAE")
 mycols = c ("#D55E00", "#E69F00", "#2271B2", "#3DB7E9", "#359B73")
 
 plotMNAR1 <- ggplot(dfMNAR, aes(x = group,y=bias,color = group)) +
-        ylab("Bias")+ xlab("")+
+        ylab("Estimate - True")+ xlab("")+
   geom_errorbar(aes(ymax =upper, ymin = lower),
                 position = "dodge",size = 1.5)+ geom_hline(yintercept=0, linetype="dashed", color = "black")+geom_point(shape=16,colour="black",size=2)+   facet_grid(cols=vars(prop),scales = "free_x",space="free_x",switch="both") +theme(panel.spacing = unit(1, "lines"),
          strip.background = element_blank(),
@@ -1341,7 +1341,7 @@ dfMNAR$group <- factor(dfMNAR$group, levels=c("ORACLE", "CC", "MICE","RF","DAE")
 mycols = c ("#D55E00", "#E69F00", "#2271B2", "#3DB7E9", "#359B73")
 
 plotMNAR2 <- ggplot(dfMNAR, aes(x = group,y=bias,color = group)) +
-        ylab("Bias")+ xlab("")+
+        ylab("Estimate - True")+ xlab("")+
   geom_errorbar(aes(ymax =upper, ymin = lower),
                 position = "dodge",size = 1.5)+ geom_hline(yintercept=0, linetype="dashed", color = "black")+geom_point(shape=16,colour="black",size=2)+   facet_grid(cols=vars(prop),scales = "free_x",space="free_x",switch="both") +theme(panel.spacing = unit(1, "lines"),
          strip.background = element_blank(),
