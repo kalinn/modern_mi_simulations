@@ -23,7 +23,7 @@ ecogList <- c(10, 20, 30)
 system (paste0 ('mkdir ', file.path (rootdir, 'datasets', 'trueEff', 'MCAR', proportionList[1])))
 system (paste0 ('mkdir ', file.path (rootdir, 'datasets', 'trueEff', 'MCAR', proportionList[2])))
 system (paste0 ('mkdir ', file.path (rootdir, 'datasets', 'trueEff', 'MCAR', proportionList[3])))
-iter <- 500
+iter <- 1000
 effOR <- 0.5
 
 # set number of Plasmode simulations
