@@ -1,7 +1,7 @@
 ---
-title: "MIPaperFigures"
+title: "MI Paper Tables"
 author: "Kylie Getz and Kristin Linn"
-date: "5/17/2022"
+date: "5/21/2022"
 output: pdf_document
 ---
 
@@ -14,13 +14,92 @@ reth_black + reth_hisp + reth_oth + practypec + b.ecogvalue + smokey +  dgradeh 
 
 ```{r echo=F, include=F}
 library(ggplot2)
-require(gridExtra)
+library(gridExtra)
 library(grid)
 library(xtable)
 library(kableExtra)
+library(dplyr)
+library(reshape2)
 
 rootdir = "~/Box Sync/Mentoring/Students/Getz_Kylie/results"
-fdir = file.path (rootdir, "2022_05_17")
+fdir = file.path (rootdir, "2022_05_22")
+
+getDfs <- function (mdm, pc){
+  # Oracle, CC, MICE, and RF
+  avgName = paste0 ("Avgs_", mdm, "_", pc, ".csv")
+  percName = paste0 ("Percentiles_", mdm, "_", pc, ".csv")
+  avgDf = read.csv (file.path (fdir, avgName))
+  percDf = read.csv (file.path (fdir, percName))
+  percDf$X = avgDf$X
+  # AE
+  avgName = paste0 ("AE", avgName)  
+  percName = paste0 ("AE", percName)  
+  aeAvg =  read.csv (file.path (fdir, avgName))
+  colnames (aeAvg) = c ("X", "biasAE", "seAE", "coverageAE", "mseAE")
+  aePerc =  read.csv (file.path (fdir, percName))
+  colnames (aePerc) = c ("X", "percAELower", "percAEUpper")
+  aeAvg$X = avgDf$X
+  aePerc$X = percDf$X
+  avgDf = left_join (avgDf, aeAvg, by='X')
+  percDf = left_join (percDf, aePerc, by='X')
+  
+  newdf = select (percDf, X, percOracleLower, percOracleUpper)
+  newdf$method = 'ORACLE'
+  colnames (newdf)[2:3] = c ("Lower", "Upper")
+  oracle = newdf
+  
+  newdf = select (percDf, X, percCCLower, percCCUpper)
+  newdf$method = 'CC'
+  colnames (newdf)[2:3] = c ("Lower", "Upper")
+  cc = newdf
+
+  newdf = select (percDf, X, percMICELower, percMICEUpper)
+  newdf$method = 'MICE'
+  colnames (newdf)[2:3] = c ("Lower", "Upper")
+  mice = newdf
+
+  newdf = select (percDf, X, percRFLower, percRFUpper)
+  newdf$method = 'RF'
+  colnames (newdf)[2:3] = c ("Lower", "Upper")
+  rf = newdf
+  
+  newdf = select (percDf, X, percAELower, percAEUpper)
+  newdf$method = 'DAE'
+  colnames (newdf)[2:3] = c ("Lower", "Upper")
+  dae = newdf
+  
+  final = rbind (oracle, cc, mice, rf, dae)
+  final$mech = mdm
+  final$prop = pc
+  return (list ('avg'=avgDf, 'perc'=final))
+}
+
+MCAR10 = getDfs ('MCAR', 10)
+MCAR30 = getDfs ('MCAR', 30)
+MCAR50 = getDfs ('MCAR', 50)
+MCAR = rbind (MCAR10$perc, MCAR30$perc, MCAR50$perc)
+
+MAR10 = getDfs ('MAR', 10)
+MAR30 = getDfs ('MAR', 30)
+MAR50 = getDfs ('MAR', 50)
+MAR = rbind (MAR10$perc, MAR30$perc, MAR50$perc)
+
+MNAR10a = getDfs ('MNAR1', 10)
+MNAR30a = getDfs ('MNAR1', 30)
+MNAR50a = getDfs ('MNAR1', 50)
+MNAR1 = rbind (MNAR10a$perc, MNAR30a$perc, MNAR50a$perc)
+
+MNAR10b = getDfs ('MNAR2', 10)
+MNAR30b = getDfs ('MNAR2', 30)
+MNAR50b = getDfs ('MNAR2', 50)
+MNAR2 = rbind (MNAR10b$perc, MNAR30b$perc, MNAR50b$perc)
+
+allData = rbind (MCAR, MAR, MNAR1, MNAR2)
+```
+
+
+
+```{r echo=F, include=F}
 MCAR10 <- read.csv(file.path (fdir, "MCAR10Avg10TreeV2.csv"),row.names = 1)
 MCAR30 <- read.csv(file.path (fdir,"MCAR30Avg10TreeV2.csv"),row.names = 1)
 MCAR50 <- read.csv(file.path (fdir,"MCAR50Avg10TreeV2.csv"),row.names = 1)

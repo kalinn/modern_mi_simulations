@@ -66,13 +66,7 @@ final = function (iter, mdm, pc){
     avgMSE = apply (allMSE, 2, mean)
     df = cbind (avgBias, avgSE, avgCoverage, avgMSE)
     write.csv (df, file=file.path (rootdir, paste0 ('AEAvgs_', mdm, '_', as.character(pc), '.csv')))
-    
-    lq = function (x) quantile (x, p=.025)
-    uq = function (x) quantile (x, p=.975)
-    percLower = apply (allBias, 2, lq)
-    percUpper = apply (allBias, 2, uq)
-    PercentileAE = cbind (percLower, percUpper)
-    write.csv (PercentileAE, file=file.path (rootdir, paste0 ('AEPercentiles_', mdm, '_', as.character(pc), '.csv')))
+    write.csv (allBias, file=file.path (rootdir, paste0 ('AEPercentiles_', mdm, '_', as.character(pc), '.csv')))
 }
 
 final (iter, 'MCAR', 10)

@@ -12,13 +12,13 @@ makeTable <- function(iter, mdm='MCAR', pc=10) {
 
   # For percentile plots
   percOracle = lapply (df, function (x) x$biasComplete)
-  percOracle = do.call ('cbind', percOracle)
+  percOracle = do.call ('rbind', percOracle)
   percCC = lapply (df, function (x) x$biasExclude)
-  percCC = do.call ('cbind', percCC)
+  percCC = do.call ('rbind', percCC)
   percMICE = lapply (df, function (x) x$biasMICE)
-  percMICE = do.call ('cbind', percMICE)
+  percMICE = do.call ('rbind', percMICE)
   percForest = lapply (df, function (x) x$biasForest)
-  percForest = do.call ('cbind', percForest)
+  percForest = do.call ('rbind', percForest)
 
   # Averages
   vars = df[[1]]$X
@@ -30,22 +30,19 @@ makeTable <- function(iter, mdm='MCAR', pc=10) {
   rownames(dfAvg) <- vars
   colnames(dfAvg) = c ('biasOracle', 'biasCC', 'biasMICE', 'biasRF', 'seOracle', 'seCC', 'seMICE', 'seRF', 'coverageOracle', 'coverageCC', 'coverageMICE', 'coverageRF', 'mseOracle', 'mseCC', 'mseMICE', 'mseRF')
 
-  lq = function (x) quantile (x, p=.025)
-  uq = function (x) quantile (x, p=.975)
-  percOracleLower = apply (percOracle, 1, lq)
-  percOracleUpper = apply (percOracle, 1, uq)
-  percCCLower = apply (percCC, 1, lq)
-  percCCUpper = apply (percCC, 1, uq)
-  percMICELower = apply (percMICE, 1, lq)
-  percMICEUpper = apply (percMICE, 1, uq)
-  percRFLower = apply (percForest, 1, lq)
-  percRFUpper = apply (percForest, 1, uq)
-
-  PercentileOracle = cbind (percOracleLower, percOracleUpper)
-  PercentileCC = cbind (percCCLower, percCCUpper)
-  PercentileMICE = cbind (percMICELower, percMICEUpper)
-  PercentileRF = cbind (percRFLower, percRFUpper)
-  PercentileDf <- cbind(PercentileOracle, PercentileCC, PercentileMICE, PercentileRF)
+  percOracle = as.data.frame (percOracle)
+  colnames (percOracle) = vars
+  percOracle$method = 'ORACLE'
+  percCC = as.data.frame (percCC)
+  colnames (percCC) = vars
+  percCC$method = 'CC'
+  percMICE = as.data.frame (percMICE)
+  colnames (percMICE) = vars
+  percMICE$method = 'MICE'
+  percRF = as.data.frame (percForest)
+  colnames (percRF) = vars
+  percRF$method = 'RF'
+  PercentileDf <- rbind(percOracle, percCC, percMICE, percRF)
 
   write.csv (PercentileDf, file=file.path (rootdir, paste0 ("Percentiles_", mdm, "_", as.character(pc), '.csv')))
   write.csv (dfAvg, file=file.path (rootdir, paste0 ("Avgs_", mdm, "_", as.character(pc), '.csv')))
