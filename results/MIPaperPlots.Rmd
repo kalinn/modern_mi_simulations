@@ -30,48 +30,22 @@ getDfs <- function (mdm, pc){
   percName = paste0 ("Percentiles_", mdm, "_", pc, ".csv")
   avgDf = read.csv (file.path (fdir, avgName))
   percDf = read.csv (file.path (fdir, percName))
-  percDf$X = avgDf$X
+  percDf$X = NULL
   # AE
   avgName = paste0 ("AE", avgName)  
   percName = paste0 ("AE", percName)  
   aeAvg =  read.csv (file.path (fdir, avgName))
   colnames (aeAvg) = c ("X", "biasAE", "seAE", "coverageAE", "mseAE")
-  aePerc =  read.csv (file.path (fdir, percName))
-  colnames (aePerc) = c ("X", "percAELower", "percAEMid", "percAEUpper")
   aeAvg$X = avgDf$X
-  aePerc$X = percDf$X
+  aePerc =  read.csv (file.path (fdir, percName))
+  aePerc$X = NULL
+  colnames(aePerc)[1] = 'treat'
+  aePerc$method = 'DAE'
   avgDf = left_join (avgDf, aeAvg, by='X')
-  percDf = left_join (percDf, aePerc, by='X')
-  
-  newdf = select (percDf, X, percOracleLower, percOracleMid, percOracleUpper)
-  newdf$method = 'ORACLE'
-  colnames (newdf)[2:4] = c ("Lower", "Median", "Upper")
-  oracle = newdf
-  
-  newdf = select (percDf, X, percCCLower, percCCMid, percCCUpper)
-  newdf$method = 'CC'
-  colnames (newdf)[2:4] = c ("Lower", "Median", "Upper")
-  cc = newdf
-
-  newdf = select (percDf, X, percMICELower, percMICEMid, percMICEUpper)
-  newdf$method = 'MICE'
-  colnames (newdf)[2:4] = c ("Lower", "Median", "Upper")
-  mice = newdf
-
-  newdf = select (percDf, X, percRFLower, percRFMid, percRFUpper)
-  newdf$method = 'RF'
-  colnames (newdf)[2:4] = c ("Lower", "Median", "Upper")
-  rf = newdf
-  
-  newdf = select (percDf, X, percAELower, percAEMid, percAEUpper)
-  newdf$method = 'DAE'
-  colnames (newdf)[2:4] = c ("Lower", "Median", "Upper")
-  dae = newdf
-  
-  final = rbind (oracle, cc, mice, rf, dae)
-  final$mech = mdm
-  final$prop = pc
-  return (list ('avg'=avgDf, 'perc'=final))
+  percDf = rbind (percDf, aePerc)
+  percDf$prop = pc
+  percDf$mech = mdm
+  return (list ('avg'=avgDf, 'perc'=percDf))
 }
 
 MCAR10 = getDfs ('MCAR', 10)
@@ -101,41 +75,47 @@ allData = rbind (MCAR, MAR, MNAR1, MNAR2)
 
 mycols = c ("#D55E00", "#E69F00", "#2271B2", "#3DB7E9", "#359B73")
 
-plotOne <- function (data, mdm){
+plotOne <- function (data, mdm, variable){
+  varnames = names (data)
+  keep = varnames[which (varnames==variable)]
   data$mech = factor (data$mech)
   data$method = factor (data$method, levels=c("ORACLE", "CC", "MICE", "RF", "DAE"))
+  data = dplyr::select (data, all_of(keep), mech, prop, method)
+  colnames (data)[1] = 'y'
   dat = dplyr::filter (data, mech==mdm)
-  datOracle = filter (dat, method=='ORACLE' & prop==10)
-  dat = filter (dat, !(method=='ORACLE'))
+  datOracle = dplyr::filter (dat, method=='ORACLE' & prop==10)
+  dat = dplyr::filter (dat, !(method=='ORACLE'))
   datOracle$prop = ""
   fdat = rbind (datOracle, dat)
-  gg = ggplot(fdat, aes(x=method, y=Median, color=method)) + 
+  gg = ggplot(fdat, aes(x=method, y=y, fill=method)) + 
     ylab("Estimate - True") +
     xlab("") +
-    geom_errorbar(aes(ymax = Upper, ymin = Lower), position = "dodge",size = 1.5) +
+    ggtitle(mdm) + 
+    geom_boxplot() + 
+#    geom_errorbar(aes(ymax = Upper, ymin = Lower), position = "dodge",size = 1.5) +
     geom_hline(yintercept=0, linetype="dashed", color="black") +
-    geom_point(shape=16,colour="black",size=2) +
-    facet_grid(cols=vars(prop), scales = "free_x", space="free_x", switch="both") +
+#    geom_point(shape=16,colour="black",size=2) +
+#    facet_grid(cols=vars(prop), scales = "free_x", space="free_x", switch="both") +
+    facet_grid(cols=vars(prop), scales = "free_x", space="free", switch="both") +
     theme(panel.spacing = unit(1, "lines"),
          strip.background = element_blank(),
          axis.line = element_line(colour = "grey"),
          panel.grid.major.y = element_line(colour = "grey"),
          strip.placement = "outside",
-         axis.text.x = element_text(angle = 45, hjust = 1,size=10),
+         axis.text.x = element_text(angle = 45, hjust = 1, size=8),
          panel.background = element_rect(fill = 'white', colour = 'white')) +
-#    scale_x_discrete(breaks=c("CC","MICE","RF","DAE","ORACLE")) + 
+    scale_x_discrete(breaks=c("CC","MICE","RF","DAE","ORACLE")) + 
     theme(legend.position = 'none') +
-    scale_color_manual(values=mycols)
+    scale_fill_manual(values=mycols)
   return (gg)
 }
 
 
 percPlot = function (data, variable){
-  red = filter (data, X==variable)
-  mcar = plotOne (red, mdm='MCAR')
-  mar = plotOne (red, mdm='MAR')
-  mnar1 = plotOne (red, mdm='MNAR1')
-  mnar2 = plotOne (red, mdm='MNAR2')
+  mcar = plotOne (data, mdm='MCAR', variable)
+  mar = plotOne (data, mdm='MAR', variable)
+  mnar1 = plotOne (data, mdm='MNAR1', variable)
+  mnar2 = plotOne (data, mdm='MNAR2', variable)
   op = grid.arrange(mcar, mar, mnar1, mnar2, nrow = 2)
   return (op)
 }
@@ -267,5 +247,16 @@ percPlot(allData, 'var1')
 # var2
 ```{r echo=F}
 percPlot(allData, 'var2')
+```
+
+# All Figures
+```{r echo=F}
+vars = names (allData)[1:16]
+for (i in 1:length (vars)){
+  print (i)
+  pdf (paste0 ('~/Desktop/mi_plots/', vars[i], '.pdf'))
+  percPlot(allData, vars[i])
+  dev.off()
+}
 ```
 

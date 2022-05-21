@@ -139,11 +139,14 @@ for (k in 1:length(proportionList)) {
   mData$var2 <- as.numeric(mData$var2)
   mData$race <- as.factor(mData$race)
   mData$site <- as.factor(mData$site)
+  keepTime = rep (mData$time, 11)
+  mData$time = NULL
 
-  forest <- mice(mData, method = c("rfcat", "rfcont", "rfcont", "rfcat", "rfcont", "rfcat", "rfcat", "rfcat", "rfcat", "rfcat", "rfcont", "rfcont", "rfcont", "rfcat", "rfcat"), m = 10, maxit = 5)
+  forest <- mice(mData, method = c("rfcat", "rfcont", "rfcat", "rfcont", "rfcat", "rfcat", "rfcat", "rfcat", "rfcat", "rfcont", "rfcont", "rfcont", "rfcat", "rfcat"), m = 10, maxit = 5)
 
   anesimp_long <- mice::complete(forest, action = "long", include = TRUE)
   anesimp_long$b.ecogvalue <- round(anesimp_long$b.ecogvalue)
+  anesimp_long <- add_column(anesimp_long, time = keepTime, .after = "hazard")
 
   reth_black <- 1 * (anesimp_long$race == "black")
   reth_hisp <- 1 * (anesimp_long$race == "hisp")
