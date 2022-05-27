@@ -3,6 +3,8 @@ library(survival)
 library(dplyr)
 library(mice)
 library(tidyverse)
+args = commandArgs(trailingOnly = TRUE)
+simple = as.character(args[1])=='TRUE'
 
 rootdir <- "/project/flatiron_ucc/programs/kylie/RunMe3"
 system (paste0 ('mkdir ', rootdir))
@@ -90,7 +92,7 @@ for (w in 1:3) {
   sdat.c$var2 <- sdat.c$var2/sd (sdat.c$var2) 
 
   if (FALSE){
-    cor (cbind (sdat.c$age, sdat.c$b.ecogvalue, sdat.c$surgery, sdat.c$var1, sdat.c$var2), method='spearman')
+    cor (cbind (sdat.c$age, sdat.c$b.ecogvalue, sdat.c$surgery, sdat.c$var1, sdat.c$var2, sdat.c$treat), method='spearman')
 
     age2 = sdat.c$age^2
     a = lm(sdat.c$var1~sdat.c$age + age2)
@@ -106,6 +108,10 @@ for (w in 1:3) {
     summary(b)
     sum ((a$fitted.values - sdat.c$var2)^2)
     sum ((b$fitted.values - sdat.c$var2)^2)
+
+    # Associations with treat
+    tfit = glm (treat ~ genderf + reth_black + reth_hisp + reth_oth + practypec + b.ecogvalue + smokey + dgradeh + surgery + site_ureter + site_renal + site_urethra + age + var1 + var2, data=sdat.c, family='binomial')
+    summary (tfit)
   }
 
   # Step 2: Estimate associations with outcome and censoring
@@ -117,18 +123,30 @@ for (w in 1:3) {
   # the formula for the exposure, rather than the first if you are having the
   # package run the model. If you run it yourself it gets it right.
 
-  # Build outcome hazard with newVar
-  os1 <- coxph(Surv(sdat.c$cmonth, sdat.c$dead) ~ treat + genderf + reth_black + reth_hisp + reth_oth + practypec + b.ecogvalue + smokey + dgradeh + surgery + site_ureter + site_renal + site_urethra + age + var1 + var2, data = sdat.c, x = TRUE)
 
-  # Censoring hazard with newVar
-  oc1 <- coxph(Surv(sdat.c$cmonth, sdat.c$ndead) ~ treat + genderf + reth_black + reth_hisp + reth_oth + practypec + b.ecogvalue + smokey + dgradeh + surgery + site_ureter + site_renal + site_urethra + age + var1 + var2, data = sdat.c, x = TRUE)
+  if (simple){
+    # Build outcome hazard with newVar
+    os1 <- coxph(Surv(sdat.c$cmonth, sdat.c$dead) ~ treat + b.ecogvalue, data = sdat.c, x = TRUE)
+
+    # Censoring hazard with newVar
+    oc1 <- coxph(Surv(sdat.c$cmonth, sdat.c$ndead) ~ treat + b.ecogvalue, data = sdat.c, x = TRUE)
+  } else{
+    # Build outcome hazard with newVar
+    os1 <- coxph(Surv(sdat.c$cmonth, sdat.c$dead) ~ treat + genderf + reth_black + reth_hisp + reth_oth + practypec + b.ecogvalue + smokey + dgradeh + surgery + site_ureter + site_renal + site_urethra + age + var1 + var2, data = sdat.c, x = TRUE)
+
+    # Censoring hazard with newVar
+    oc1 <- coxph(Surv(sdat.c$cmonth, sdat.c$ndead) ~ treat + genderf + reth_black + reth_hisp + reth_oth + practypec + b.ecogvalue + smokey + dgradeh + surgery + site_ureter + site_renal + site_urethra + age + var1 + var2, data = sdat.c, x = TRUE)
+  }
 
   genDat <- function (k){
-    # Increase effect of vars on outcome using MMOut
     outEff <- rep(1, length(coef(os1)))
-    lc = length (outEff)
-    outEff[lc-1] <- 20
-    outEff[lc] <- 10
+    if (!simple){
+      # Increase effect of vars on outcome using MMOut
+      lc = length (outEff)
+      outEff[lc-1] <- 20
+      outEff[lc] <- 10
+    }
+
     sor <- PlasmodeSur(
       objectOut = os1,
       objectCen = oc1,
@@ -287,6 +305,10 @@ for (w in 1:3) {
     system(paste0("mkdir ", file.path(rootdir, "datasets", "cDats", "MCAR", propName)))
     write.csv(train, file.path(rootdir, "datasets/mDats/MCAR", propName, filename), row.names = F)
     write.csv(cData, file.path(rootdir, "datasets/cDats/MCAR", propName, Cfilename), row.names = F)
-    write.csv(t (trueEffect), file.path(rootdir, "datasets/trueEff/MCAR", propName, effname), row.names = F)
+    if (simple){
+      write.csv(t (trueEffect), file.path(rootdir, "datasets/trueEff_simple/MCAR", propName, effname), row.names = F)
+    } else{
+      write.csv(t (trueEffect), file.path(rootdir, "datasets/trueEff/MCAR", propName, effname), row.names = F)
+    }
   }
 }

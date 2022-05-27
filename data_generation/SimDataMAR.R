@@ -3,6 +3,8 @@ library(survival)
 library(dplyr)
 library(mice)
 library(tidyverse)
+args = commandArgs(trailingOnly = TRUE)
+simple = as.character(args[1])=='TRUE'
 
 rootdir <- "/project/flatiron_ucc/programs/kylie/RunMe3"
 system (paste0 ('mkdir ', rootdir))
@@ -115,6 +117,23 @@ for (w in 1:3) {
     summary(b)
     sum((a$fitted.values - sdat.c$var2)^2)
     sum((b$fitted.values - sdat.c$var2)^2)
+
+
+    fitTxt = glm (treat~b.ecogvalue, data=sdat.c, family='binomial')
+    summary(fitTxt)
+    fitTxt = glm (treat~factor (b.ecogvalue), data=sdat.c, family='binomial')
+    summary(fitTxt)
+
+    os1 <- coxph(Surv(sdat.c$cmonth, sdat.c$dead) ~ treat + b.ecogvalue, data = sdat.c, x = TRUE)
+    summary(os1)
+    os1 <- coxph(Surv(sdat.c$cmonth, sdat.c$dead) ~ treat + factor (b.ecogvalue), data = sdat.c, x = TRUE)
+    summary(os1)
+
+    # Build outcome hazard
+    os1 <- coxph(Surv(sdat.c$cmonth, sdat.c$dead) ~ treat + genderf + reth_black + reth_hisp + reth_oth + practypec + b.ecogvalue + smokey + dgradeh + surgery + site_ureter + site_renal + site_urethra + age + var1 + var2, data = sdat.c, x = TRUE)
+
+    os1nc <- coxph(Surv(sdat.c$cmonth, sdat.c$dead) ~ treat + genderf + reth_black + reth_hisp + reth_oth + practypec + smokey + dgradeh + surgery + site_ureter + site_renal + site_urethra +  age + var1 + var2, data = sdat.c, x = TRUE)
+
   }
 
   # Step 2: Estimate associations with outcome and censoring
@@ -126,18 +145,29 @@ for (w in 1:3) {
   # the formula for the exposure, rather than the first if you are having the
   # package run the model. If you run it yourself it gets it right.
 
-  # Build outcome hazard
-  os1 <- coxph(Surv(sdat.c$cmonth, sdat.c$dead) ~ treat + genderf + reth_black + reth_hisp + reth_oth + practypec + b.ecogvalue + smokey + dgradeh + surgery + site_ureter + site_renal + site_urethra + age + var1 + var2, data = sdat.c, x = TRUE)
+  if (simple){
+    # Build outcome hazard with newVar
+    os1 <- coxph(Surv(sdat.c$cmonth, sdat.c$dead) ~ treat + b.ecogvalue, data = sdat.c, x = TRUE)
 
-  # Censoring hazard
-  oc1 <- coxph(Surv(sdat.c$cmonth, sdat.c$ndead) ~ treat + genderf + reth_black + reth_hisp + reth_oth + practypec + b.ecogvalue + smokey + dgradeh + surgery + site_ureter + site_renal + site_urethra + age + var1 + var2, data = sdat.c, x = TRUE)
+    # Censoring hazard with newVar
+    oc1 <- coxph(Surv(sdat.c$cmonth, sdat.c$ndead) ~ treat + b.ecogvalue, data = sdat.c, x = TRUE)
+  } else{
+    # Build outcome hazard with newVar
+    os1 <- coxph(Surv(sdat.c$cmonth, sdat.c$dead) ~ treat + genderf + reth_black + reth_hisp + reth_oth + practypec + b.ecogvalue + smokey + dgradeh + surgery + site_ureter + site_renal + site_urethra + age + var1 + var2, data = sdat.c, x = TRUE)
+
+    # Censoring hazard with newVar
+    oc1 <- coxph(Surv(sdat.c$cmonth, sdat.c$ndead) ~ treat + genderf + reth_black + reth_hisp + reth_oth + practypec + b.ecogvalue + smokey + dgradeh + surgery + site_ureter + site_renal + site_urethra + age + var1 + var2, data = sdat.c, x = TRUE)
+  }
 
   genDat <- function(k) {
-    # Increase effect of vars on outcome using MMOut
     outEff <- rep(1, length(coef(os1)))
-    lc <- length(outEff)
-    outEff[lc - 1] <- 20
-    outEff[lc] <- 10
+    if (!simple){
+      # Increase effect of vars on outcome using MMOut
+      lc = length (outEff)
+      outEff[lc-1] <- 20
+      outEff[lc] <- 10
+    }
+
     sor <- PlasmodeSur(
       objectOut = os1,
       objectCen = oc1,
@@ -153,6 +183,8 @@ for (w in 1:3) {
       # associations and altered associations
       # for treat and new variables
       ps <- matrix(NA, nrow = 50, ncol = 2)
+      treatCN <- rep (NA, 50)
+      treatNoCN <- rep (NA, 50)
       for (l in 1:50) {
         print(l)
         sor <- PlasmodeSur(
@@ -170,9 +202,14 @@ for (w in 1:3) {
         testdf$dead <- sor$Sim_Data$EVENT1 * 1
         testdf$cmonth <- sor$Sim_Data$TIME1
         os1test <- coxph(Surv(testdf$cmonth, testdf$dead) ~ treat + genderf + reth_black + reth_hisp + reth_oth + practypec + b.ecogvalue + smokey + dgradeh + surgery + site_ureter + site_renal + site_urethra + age + var1 + var2, data = testdf, x = TRUE)
+        treatCN[l] <- summary(os1test)$coefficients[1]
         ps[l, ] <- summary(os1test)$coefficients[(lc - 1):lc, 5]
+
+        os1test <- coxph(Surv(testdf$cmonth, testdf$dead) ~ treat + genderf + reth_black + reth_hisp + reth_oth + practypec + b.ecogvalue + smokey + dgradeh + surgery + site_ureter + site_renal + site_urethra + age + var1 + var2, data = testdf, x = TRUE)
+        treatNoCN[l] <- summary(os1test)$coefficients[1]
       }
       apply(ps, 2, function(x) mean(x <= 0.05))
+      cbind (treatCN, treatNoCN, treatCN - treatNoCN)
     }
 
     ### Generate missingness in simulated data
@@ -396,6 +433,10 @@ for (w in 1:3) {
     system(paste0("mkdir ", file.path(rootdir, "datasets", "cDats", "MAR", propName)))
     write.csv(train, file.path(rootdir, "datasets/mDats/MAR", propName, filename), row.names = F)
     write.csv(cData, file.path(rootdir, "datasets/cDats/MAR", propName, Cfilename), row.names = F)
-    write.csv(t(trueEffect), file.path(rootdir, "datasets/trueEff/MAR", propName, effname), row.names = F)
+    if (simple){
+      write.csv(t (trueEffect), file.path(rootdir, "datasets/trueEff_simple/MAR", propName, effname), row.names = F)
+    } else{
+      write.csv(t (trueEffect), file.path(rootdir, "datasets/trueEff/MAR", propName, effname), row.names = F)
+    }
   }
 }

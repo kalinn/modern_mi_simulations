@@ -1,0 +1,124 @@
+---
+title: "Plots to Evaluate Imputation Quality"
+author: "Kristin Linn"
+date: "5/22/2022"
+output: pdf_document
+---
+
+Results using 500 simulations, 10 MI
+
+```{r echo=F, include=F}
+library(ggplot2)
+library(gridExtra)
+library(grid)
+library(xtable)
+library(kableExtra)
+library(dplyr)
+library(reshape2)
+
+rootdir = "~/Box Sync/Mentoring/Students/Getz_Kylie/results"
+fdir = file.path (rootdir, "2022_05_22")
+
+mcar = read.csv (file.path (fdir, "evalImputations_MCAR.csv"))
+mar = read.csv (file.path (fdir, "evalImputations_MAR.csv"))
+mnar1 = read.csv (file.path (fdir, "evalImputations_MNAR1.csv"))
+mnar2 = read.csv (file.path (fdir, "evalImputations_MNAR2.csv"))
+
+mycols = rep (c ("#FF6666", "#CCFF66", "#5D2E8C", "#2EC4B6", "#F1E8B8", "#EE60F0", "#EC9DED", "#F1CEF1", "#FFAA00", "#FFCD6A", "#FFDC97", "#A0A0A0", "#E9E5E1", "#71FCFE", "#CDFFFD"), 5)
+
+makePlots = function (data){
+  md = melt (select (data, X, miceAvgMD, rfAvgMD, mech, prop), id.vars=c("X", "mech", "prop"))
+  md$variable = factor (md$variable, labels=c("MICE", "RF"))
+  mae = melt (select (data, X, miceAvgMAE, rfAvgMAE, mech, prop), id.vars=c("X", "mech", "prop"))
+  mae$variable = factor (mae$variable, labels=c("MICE", "RF"))
+  mse = melt (select (data, X, miceAvgMSE, rfAvgMSE, mech, prop), id.vars=c("X", "mech", "prop"))
+  mse$variable = factor (mse$variable, labels=c("MICE", "RF"))
+  
+  ggMD = ggplot (md, aes (x=X, y=value, fill=X)) + 
+    facet_wrap(~variable+prop, nrow=2) + geom_boxplot() +
+    ylab("Avg (imputations) Mean (obs in imp) Difference") +
+    xlab("") +
+    theme(legend.position = 'none',          
+          axis.text.x = element_text(angle = 75, hjust = 1, size=8)) +
+    scale_fill_manual(values=mycols)
+  ggMAE = ggplot (mae, aes (x=X, y=value, fill=X)) + 
+    facet_wrap(~variable+prop, nrow=2) + geom_boxplot() +
+    ylab("Avg (imputations) Mean Abs Error") +
+    xlab("") +
+    theme(legend.position = 'none',          
+          axis.text.x = element_text(angle = 75, hjust = 1, size=8)) +
+    scale_fill_manual(values=mycols)
+  return (list ('md'=ggMD, 'mae'=ggMAE))
+}
+
+plotMCAR = makePlots(mcar)
+plotMAR = makePlots(mar)
+plotMNAR1 = makePlots(mnar1)
+plotMNAR2 = makePlots(mnar2)
+```
+
+# MCAR Average (across imputations) Mean (across observations within an imputation) Difference
+```{r echo=F}
+plot (plotMCAR$md)
+plot (plotMCAR$md + coord_cartesian(ylim=c(-0.005, 0.005)))
+```
+
+\newpage
+
+# MCAR Average Mean Absolute Error
+```{r echo=F}
+plot (plotMCAR$mae)
+plot (plotMCAR$mae + coord_cartesian(ylim=c(0, 0.03)))
+```
+
+\newpage
+
+# MAR Average (across imputations) Mean (across observations within an imputation) Difference
+```{r echo=F}
+plot (plotMAR$md)
+plot (plotMAR$md + coord_cartesian(ylim=c(-0.01, 0.01)))
+```
+
+\newpage
+
+# MAR Average Mean Absolute Error
+```{r echo=F}
+plot (plotMAR$mae)
+plot (plotMAR$mae + coord_cartesian(ylim=c(0, 0.05)))
+```
+
+\newpage
+
+# MNAR1 Average (across imputations) Mean (across observations within an imputation) Difference
+```{r echo=F}
+plot (plotMNAR1$md)
+plot (plotMNAR1$md + coord_cartesian(ylim=c(-0.01, 0.01)))
+```
+
+\newpage
+
+# MNAR1 Average Mean Absolute Error
+```{r echo=F}
+plot (plotMNAR1$mae)
+plot (plotMNAR1$mae + coord_cartesian(ylim=c(0, 0.05)))
+```
+
+\newpage
+
+# MNAR2 Average (across imputations) Mean (across observations within an imputation) Difference
+```{r echo=F}
+plot (plotMNAR2$md)
+plot (plotMNAR2$md + coord_cartesian(ylim=c(-0.01, 0.01)))
+```
+
+\newpage
+
+# MNAR2 Average Mean Absolute Error
+```{r echo=F}
+plot (plotMNAR2$mae)
+plot (plotMNAR2$mae + coord_cartesian(ylim=c(0, 0.05)))
+```
+
+
+
+

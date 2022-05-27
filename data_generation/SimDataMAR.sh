@@ -1,2 +1,2 @@
 module load R
-Rscript SimDataMAR.R 
+Rscript SimDataMAR.R TRUE

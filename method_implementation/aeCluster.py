@@ -13,7 +13,11 @@ import desc
 import tensorflow
 import session_info
 os.chdir("/project/flatiron_ucc")
-rootdir = "/project/flatiron_ucc/programs/kylie/RunMe3/final_results"
+simple = str(sys.argv[3])
+if simple=='TRUE':
+    rootdir = "/project/flatiron_ucc/programs/kylie/RunMe3/final_simple"
+else:
+    rootdir = "/project/flatiron_ucc/programs/kylie/RunMe3/final_results"
 fp = "programs/kylie/RunMe3/"
 #if os.path.isdir(rootdir)==False:
 #    os.mkdir (rootdir)
@@ -58,5 +62,8 @@ for k in range(0, len(proportionList)):
         final = miss
         final.insert(loc=2, column="time", value=time)
         final = pd.DataFrame(final)
-        filename = "".join((fp, "final_results/", "AE", mech, "/", str(propName), "/", "result", str(i), "_num_", str(x), ".csv"))
+        if simple=='TRUE':
+            filename = "".join((fp, "final_simple/", "AE", mech, "/", str(propName), "/", "result", str(i), "_num_", str(x), ".csv"))
+        else:
+            filename = "".join((fp, "final_results/", "AE", mech, "/", str(propName), "/", "result", str(i), "_num_", str(x), ".csv"))
         final.to_csv(filename)

@@ -5,20 +5,32 @@ library(dplyr)
 library(tidyverse)
 args <- commandArgs(trailingOnly = TRUE)
 mech = as.character(args[2])
+simple = as.character(args[3])=='TRUE'
 
 rootdir <- "/project/flatiron_ucc/programs/kylie/RunMe3"
-system (paste0 ('mkdir ', file.path (rootdir, 'final_results')))
+if (simple){
+  rd = file.path (rootdir, 'final_simple')
+} else{
+  rd = file.path (rootdir, 'final_results')
+}
+system (paste0 ('mkdir ', rd))
+system (paste0 ('mkdir ', file.path (rd, mech)))
 
 proportionList <- c(10, 30, 50)
 set.seed(100)
 for (k in 1:length(proportionList)) {
   propName <- proportionList[k]
+  system (paste0 ('mkdir ', file.path (rd, mech, propName)))
   print(propName)
   i <- as.numeric(args[1])
   mData <- read.csv(file.path(rootdir, "datasets/mDats", mech, propName, paste0("mData", i, ".csv")))
   cData <- read.csv(file.path(rootdir, "datasets/cDats", mech, propName, paste0("cData", i, ".csv")))
   cData <- cData[, -1]
-  truth <- read.csv(file.path(rootdir, "datasets/trueEff", mech, propName, "propMiss_trueEffs1.csv"))
+  if (simple){
+    truth <- read.csv(file.path(rootdir, "datasets/trueEff_simple", mech, propName, "propMiss_trueEffs1.csv"))
+  } else{
+    truth <- read.csv(file.path(rootdir, "datasets/trueEff", mech, propName, "propMiss_trueEffs1.csv"))
+  }
   propMiss = truth[1]
   truth = as.numeric (as.matrix (truth[-1]))
 #  trueCoefs <- truth[names (truth)%in%c("TREAT", "b.ecogvalue", "var1", "var2")]
@@ -79,13 +91,20 @@ for (k in 1:length(proportionList)) {
   anesimp_long <- add_column(anesimp_long, site_renal = site_renal, .after = "site_ureter")
   anesimp_long <- add_column(anesimp_long, site_urethra = site_urethra, .after = "site_renal")
 
-  write.csv(anesimp_long, file.path(rootdir, "final_results", mech, propName, paste0("mice_", i, ".csv")))
+  write.csv(anesimp_long, file.path(rd, mech, propName, paste0("mice_", i, ".csv")))
   anesimp_long_mids <- as.mids(anesimp_long)
 
-  fitimp1 <- with(
-    anesimp_long_mids,
-    coxph(Surv(time, event) ~ treat + genderf + reth_black + reth_hisp + reth_oth + practypec + b.ecogvalue + smokey + dgradeh + surgery + site_ureter + site_renal + site_urethra + age + var1 + var2)
-  )
+  if (simple){
+    fitimp1 <- with(
+      anesimp_long_mids,
+      coxph(Surv(time, event) ~ treat + b.ecogvalue)
+    )
+  } else{
+    fitimp1 <- with(
+      anesimp_long_mids,
+      coxph(Surv(time, event) ~ treat + genderf + reth_black + reth_hisp + reth_oth + practypec + b.ecogvalue + smokey + dgradeh + surgery + site_ureter + site_renal + site_urethra + age + var1 + var2)
+    )
+  }
 
   pool <- summary(pool(fitimp1))
 
@@ -165,12 +184,20 @@ for (k in 1:length(proportionList)) {
   anesimp_long <- add_column(anesimp_long, site_renal = site_renal, .after = "site_ureter")
   anesimp_long <- add_column(anesimp_long, site_urethra = site_urethra, .after = "site_renal")
 
-  write.csv(anesimp_long, file.path(rootdir, "final_results", mech, propName, paste0("rf_", i, ".csv")))
+  write.csv(anesimp_long, file.path(rd, mech, propName, paste0("rf_", i, ".csv")))
+
   anesimp_long_mids <- as.mids(anesimp_long)
-  fitimp1 <- with(
-    anesimp_long_mids,
-    coxph(Surv(time, event) ~ treat + genderf + reth_black + reth_hisp + reth_oth + practypec + b.ecogvalue + smokey + dgradeh + surgery + site_ureter + site_renal + site_urethra + age + var1 + var2)
-  )
+  if (simple){
+    fitimp1 <- with(
+      anesimp_long_mids,
+      coxph(Surv(time, event) ~ treat + b.ecogvalue)
+    )
+  } else{
+    fitimp1 <- with(
+      anesimp_long_mids,
+      coxph(Surv(time, event) ~ treat + genderf + reth_black + reth_hisp + reth_oth + practypec + b.ecogvalue + smokey + dgradeh + surgery + site_ureter + site_renal + site_urethra + age + var1 + var2)
+    )
+  }
 
   pool <- summary(pool(fitimp1))
   terms = pool$term
@@ -185,7 +212,11 @@ for (k in 1:length(proportionList)) {
   print("Oracle")
 
   # compare complete dataset to OS1 estimates
-  CompleteFit <- coxph(Surv(time, event) ~ treat + genderf + reth_black + reth_hisp + reth_oth + practypec + b.ecogvalue + smokey + dgradeh + surgery + site_ureter + site_renal + site_urethra + age + var1 + var2, data = cData)
+  if (simple){
+    CompleteFit <- coxph(Surv(time, event) ~ treat + b.ecogvalue, data = cData)
+  } else{
+    CompleteFit <- coxph(Surv(time, event) ~ treat + genderf + reth_black + reth_hisp + reth_oth + practypec + b.ecogvalue + smokey + dgradeh + surgery + site_ureter + site_renal + site_urethra + age + var1 + var2, data = cData)
+  }
 
   biasComplete <- as.numeric (CompleteFit$coefficients - truth)
   SEComplete <- summary(CompleteFit)$coefficients[,3]
@@ -202,7 +233,11 @@ for (k in 1:length(proportionList)) {
 
   ExcludeData <- mData[complete.cases(mData), ]
 
-  ExcludeFit <- coxph(Surv(time, event) ~ treat + genderf + reth_black + reth_hisp + reth_oth + practypec + b.ecogvalue + smokey + dgradeh + surgery + site_ureter + site_renal + site_urethra + age + var1 + var2, data = ExcludeData)
+  if (simple){
+    ExcludeFit <- coxph(Surv(time, event) ~ treat + b.ecogvalue, data = ExcludeData)
+  } else{
+    ExcludeFit <- coxph(Surv(time, event) ~ treat + genderf + reth_black + reth_hisp + reth_oth + practypec + b.ecogvalue + smokey + dgradeh + surgery + site_ureter + site_renal + site_urethra + age + var1 + var2, data = ExcludeData)
+  }
 
   biasExclude <- as.numeric (ExcludeFit$coefficients - truth)
   SEExclude <- summary(ExcludeFit)$coefficients[,3]
@@ -218,8 +253,5 @@ for (k in 1:length(proportionList)) {
   coverage <- cbind(coverageComplete, coverageExclude, coverageMICE, coverageForest)
 
   results <- cbind(bias, se, coverage, mse)
-  wdir <- file.path(rootdir, "final_results")
-  system(paste0("mkdir ", file.path(wdir, mech)))
-  system(paste0("mkdir ", file.path(wdir, mech, propName)))
-  write.csv(results, file.path(rootdir, "final_results", mech, propName, paste0("result", i, ".csv")))
+  write.csv(results, file.path(rd, mech, propName, paste0("result", i, ".csv")))
 }

@@ -3,6 +3,8 @@ library(survival)
 library(dplyr)
 library(mice)
 library(tidyverse)
+args = commandArgs(trailingOnly = TRUE)
+simple = as.character(args[1])=='TRUE'
 
 rootdir <- "/project/flatiron_ucc/programs/kylie/RunMe3"
 system(paste0("mkdir ", file.path(rootdir, "datasets")))
@@ -124,11 +126,20 @@ for (w in 1:3) {
   # the formula for the exposure, rather than the first if you are having the
   # package run the model. If you run it yourself it gets it right.
 
-  # Build outcome hazard
-  os1 <- coxph(Surv(sdat.c$cmonth, sdat.c$dead) ~ treat + genderf + reth_black + reth_hisp + reth_oth + practypec + b.ecogvalue + smokey + dgradeh + surgery + site_ureter + site_renal + site_urethra + age + var1 + var2, data = sdat.c, x = TRUE)
 
-  # Censoring hazard
-  oc1 <- coxph(Surv(sdat.c$cmonth, sdat.c$ndead) ~ treat + genderf + reth_black + reth_hisp + reth_oth + practypec + b.ecogvalue + smokey + dgradeh + surgery + site_ureter + site_renal + site_urethra + age + var1 + var2, data = sdat.c, x = TRUE)
+  if (simple){
+    # Build outcome hazard with newVar
+    os1 <- coxph(Surv(sdat.c$cmonth, sdat.c$dead) ~ treat + b.ecogvalue, data = sdat.c, x = TRUE)
+
+    # Censoring hazard with newVar
+    oc1 <- coxph(Surv(sdat.c$cmonth, sdat.c$ndead) ~ treat + b.ecogvalue, data = sdat.c, x = TRUE)
+  } else{
+    # Build outcome hazard with newVar
+    os1 <- coxph(Surv(sdat.c$cmonth, sdat.c$dead) ~ treat + genderf + reth_black + reth_hisp + reth_oth + practypec + b.ecogvalue + smokey + dgradeh + surgery + site_ureter + site_renal + site_urethra + age + var1 + var2, data = sdat.c, x = TRUE)
+
+    # Censoring hazard with newVar
+    oc1 <- coxph(Surv(sdat.c$cmonth, sdat.c$ndead) ~ treat + genderf + reth_black + reth_hisp + reth_oth + practypec + b.ecogvalue + smokey + dgradeh + surgery + site_ureter + site_renal + site_urethra + age + var1 + var2, data = sdat.c, x = TRUE)
+  }
 
   # THE FOLLOWING WAS KYLIE'S CODE:
   # Simulate dichotomous variable zeta with an exposure probability of 20%
@@ -138,9 +149,12 @@ for (w in 1:3) {
   sdat.c$zeta <- rnorm(n = nrow(sdat.c))
   # Increase effect of newVar on outcome using MMOut
   outEff <- rep(1, length(coef(os1)))
-  lc = length (outEff)
-  outEff[lc-1] <- 20
-  outEff[lc] <- 10
+  if (!simple){
+    # Increase effect of vars on outcome using MMOut
+    lc = length (outEff)
+    outEff[lc-1] <- 20
+    outEff[lc] <- 10
+  }
   s <- 1000000
   sor <- PlasmodeSur(
     objectOut = os1,
@@ -170,7 +184,11 @@ for (w in 1:3) {
   id <- wdat$patientid
   wdat$patientid <- NULL
 
-  TrueFit <- coxph(Surv(time, event) ~ treat + genderf + reth_black + reth_hisp + reth_oth + practypec + b.ecogvalue + smokey + dgradeh + surgery + site_ureter + site_renal + site_urethra + age + var1 + var2, data = wdat)
+  if (simple){
+    TrueFit <- coxph(Surv(time, event) ~ treat + b.ecogvalue, data = wdat)
+  } else{
+    TrueFit <- coxph(Surv(time, event) ~ treat + genderf + reth_black + reth_hisp + reth_oth + practypec + b.ecogvalue + smokey + dgradeh + surgery + site_ureter + site_renal + site_urethra + age + var1 + var2, data = wdat)
+  }
 
   TreatRow <- which(names(TrueFit$coefficients) == "treat")
   EcogRow <- which(names(TrueFit$coefficients) == "b.ecogvalue")
@@ -178,11 +196,6 @@ for (w in 1:3) {
   trueEcog <- TrueFit$coefficients[EcogRow]
 
   genDat <- function (k){
-    # Increase effect of vars on outcome using MMOut
-    outEff <- rep(1, length(coef(os1)))
-    lc = length (outEff)
-    outEff[lc-1] <- 20
-    outEff[lc] <- 10
     sor <- PlasmodeSur(
       objectOut = os1,
       objectCen = oc1,
@@ -451,6 +464,10 @@ for (w in 1:3) {
     system(paste0("mkdir ", file.path(rootdir, "datasets", "cDats", "MNAR2", propName)))
     write.csv(train, file.path(rootdir, "datasets/mDats/MNAR2", propName, filename), row.names = F)
     write.csv(cData, file.path(rootdir, "datasets/cDats/MNAR2", propName, Cfilename), row.names = F)
-    write.csv(t (trueEffect), file.path(rootdir, "datasets/trueEff/MNAR2", propName, effname), row.names = F)
+    if (simple){
+      write.csv(t (trueEffect), file.path(rootdir, "datasets/trueEff_simple/MNAR2", propName, effname), row.names = F)
+    } else{
+      write.csv(t (trueEffect), file.path(rootdir, "datasets/trueEff/MNAR2", propName, effname), row.names = F)
+    }
   }
 }

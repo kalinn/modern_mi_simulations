@@ -1,2 +1,2 @@
 module load R
-Rscript SimDataMCAR.R 
+Rscript SimDataMCAR.R TRUE

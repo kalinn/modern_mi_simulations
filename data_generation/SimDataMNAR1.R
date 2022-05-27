@@ -3,6 +3,8 @@ library(survival)
 library(dplyr)
 library(mice)
 library(tidyverse)
+args = commandArgs(trailingOnly = TRUE)
+simple = as.character(args[1])=='TRUE'
 
 rootdir <- "/project/flatiron_ucc/programs/kylie/RunMe3"
 system(paste0("mkdir ", file.path(rootdir, "datasets")))
@@ -124,18 +126,30 @@ for (w in 1:3) {
   # the formula for the exposure, rather than the first if you are having the
   # package run the model. If you run it yourself it gets it right.
 
-  # Build outcome hazard
-  os1 <- coxph(Surv(sdat.c$cmonth, sdat.c$dead) ~ treat + genderf + reth_black + reth_hisp + reth_oth + practypec + b.ecogvalue + smokey + dgradeh + surgery + site_ureter + site_renal + site_urethra + age + var1 + var2, data = sdat.c, x = TRUE)
 
-  # Censoring hazard
-  oc1 <- coxph(Surv(sdat.c$cmonth, sdat.c$ndead) ~ treat + genderf + reth_black + reth_hisp + reth_oth + practypec + b.ecogvalue + smokey + dgradeh + surgery + site_ureter + site_renal + site_urethra + age + var1 + var2, data = sdat.c, x = TRUE)
+  if (simple){
+    # Build outcome hazard with newVar
+    os1 <- coxph(Surv(sdat.c$cmonth, sdat.c$dead) ~ treat + b.ecogvalue, data = sdat.c, x = TRUE)
+
+    # Censoring hazard with newVar
+    oc1 <- coxph(Surv(sdat.c$cmonth, sdat.c$ndead) ~ treat + b.ecogvalue, data = sdat.c, x = TRUE)
+  } else{
+    # Build outcome hazard with newVar
+    os1 <- coxph(Surv(sdat.c$cmonth, sdat.c$dead) ~ treat + genderf + reth_black + reth_hisp + reth_oth + practypec + b.ecogvalue + smokey + dgradeh + surgery + site_ureter + site_renal + site_urethra + age + var1 + var2, data = sdat.c, x = TRUE)
+
+    # Censoring hazard with newVar
+    oc1 <- coxph(Surv(sdat.c$cmonth, sdat.c$ndead) ~ treat + genderf + reth_black + reth_hisp + reth_oth + practypec + b.ecogvalue + smokey + dgradeh + surgery + site_ureter + site_renal + site_urethra + age + var1 + var2, data = sdat.c, x = TRUE)
+  }
 
   genDat <- function (k){
-    # Increase effect of vars on outcome using MMOut
     outEff <- rep(1, length(coef(os1)))
-    lc = length (outEff)
-    outEff[lc-1] <- 20
-    outEff[lc] <- 10
+    if (!simple){
+      # Increase effect of vars on outcome using MMOut
+      lc = length (outEff)
+      outEff[lc-1] <- 20
+      outEff[lc] <- 10
+    }
+
     sor <- PlasmodeSur(
       objectOut = os1,
       objectCen = oc1,
@@ -400,6 +414,10 @@ for (w in 1:3) {
     system(paste0("mkdir ", file.path(rootdir, "datasets", "cDats", "MNAR1", propName)))
     write.csv(train, file.path(rootdir, "datasets/mDats/MNAR1", propName, filename), row.names = F)
     write.csv(cData, file.path(rootdir, "datasets/cDats/MNAR1", propName, Cfilename), row.names = F)
-    write.csv(t (trueEffect), file.path(rootdir, "datasets/trueEff/MNAR1", propName, effname), row.names = F)
+    if (simple){
+      write.csv(t (trueEffect), file.path(rootdir, "datasets/trueEff_simple/MNAR1", propName, effname), row.names = F)
+    } else{
+      write.csv(t (trueEffect), file.path(rootdir, "datasets/trueEff/MNAR1", propName, effname), row.names = F)
+    }
   }
 }

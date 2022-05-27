@@ -1,2 +1,2 @@
 module load R
-Rscript SimDataMNAR2.R 
+Rscript SimDataMNAR2.R TRUE
