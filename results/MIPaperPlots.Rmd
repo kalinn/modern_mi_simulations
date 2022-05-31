@@ -22,9 +22,11 @@ library(dplyr)
 library(reshape2)
 
 rootdir = "~/Box Sync/Mentoring/Students/Getz_Kylie/results"
-fdir = file.path (rootdir, "2022_05_22")
+regDir = file.path (rootdir, "2022_05_22")
+ldDir = file.path (rootdir, "2022_05_31_lowDim")
+simpDir = file.path (rootdir, "2022_05_31_simple")
 
-getDfs <- function (mdm, pc){
+getDfs <- function (mdm, pc, fdir=regDir, aedir=regDir){
   # Oracle, CC, MICE, and RF
   avgName = paste0 ("Avgs_", mdm, "_", pc, ".csv")
   percName = paste0 ("Percentiles_", mdm, "_", pc, ".csv")
@@ -34,7 +36,7 @@ getDfs <- function (mdm, pc){
   # AE
   avgName = paste0 ("AE", avgName)  
   percName = paste0 ("AE", percName)  
-  aeAvg =  read.csv (file.path (fdir, avgName))
+  aeAvg =  read.csv (file.path (aedir, avgName))
   colnames (aeAvg) = c ("X", "biasAE", "seAE", "coverageAE", "mseAE")
   aeAvg$X = avgDf$X
   aePerc =  read.csv (file.path (fdir, percName))
@@ -47,7 +49,10 @@ getDfs <- function (mdm, pc){
   percDf$mech = mdm
   return (list ('avg'=avgDf, 'perc'=percDf))
 }
+```
 
+# Full outcome model, original DAE layers
+```{r echo=F, include=F}
 MCAR10 = getDfs ('MCAR', 10)
 MCAR30 = getDfs ('MCAR', 30)
 MCAR50 = getDfs ('MCAR', 50)
@@ -124,7 +129,7 @@ percPlot = function (data, variable){
 
 \newpage
 
-# treat
+## treat
 
 ```{r echo=F}
 percPlot(allData, 'treat')
@@ -132,7 +137,7 @@ percPlot(allData, 'treat')
 
 \newpage
 
-# genderf
+## genderf
 
 ```{r echo=F}
 percPlot(allData, 'genderf')
@@ -140,7 +145,7 @@ percPlot(allData, 'genderf')
 
 \newpage
 
-# reth_black
+## reth_black
 
 ```{r echo=F}
 percPlot(allData, 'reth_black')
@@ -148,7 +153,7 @@ percPlot(allData, 'reth_black')
 
 \newpage
 
-# reth_hisp
+## reth_hisp
 
 ```{r echo=F}
 percPlot(allData, 'reth_hisp')
@@ -156,7 +161,7 @@ percPlot(allData, 'reth_hisp')
 
 \newpage
 
-# reth_oth
+## reth_oth
 
 ```{r echo=F}
 percPlot(allData, 'reth_oth')
@@ -164,7 +169,7 @@ percPlot(allData, 'reth_oth')
 
 \newpage
 
-# practypec
+## practypec
 
 ```{r echo=F}
 percPlot(allData, 'practypec')
@@ -172,7 +177,7 @@ percPlot(allData, 'practypec')
 
 \newpage
 
-# b.ecogvalue
+## b.ecogvalue
 
 ```{r echo=F}
 percPlot(allData, 'b.ecogvalue')
@@ -180,7 +185,7 @@ percPlot(allData, 'b.ecogvalue')
 
 \newpage
 
-# smokey
+## smokey
 
 ```{r echo=F}
 percPlot(allData, 'smokey')
@@ -188,7 +193,7 @@ percPlot(allData, 'smokey')
 
 \newpage
 
-# dgradeh
+## dgradeh
 
 ```{r echo=F}
 percPlot(allData, 'dgradeh')
@@ -196,7 +201,7 @@ percPlot(allData, 'dgradeh')
 
 \newpage
 
-# surgery
+## surgery
 
 ```{r echo=F}
 percPlot(allData, 'surgery')
@@ -204,7 +209,7 @@ percPlot(allData, 'surgery')
 
 \newpage
 
-# site_ureter
+## site_ureter
 
 ```{r echo=F}
 percPlot(allData, 'site_ureter')
@@ -212,7 +217,7 @@ percPlot(allData, 'site_ureter')
 
 \newpage
 
-# site_renal
+## site_renal
 
 ```{r echo=F}
 percPlot(allData, 'site_renal')
@@ -220,7 +225,7 @@ percPlot(allData, 'site_renal')
 
 \newpage
 
-# site_urethra
+## site_urethra
 
 ```{r echo=F}
 percPlot(allData, 'site_urethra')
@@ -228,7 +233,7 @@ percPlot(allData, 'site_urethra')
 
 \newpage
 
-# age
+## age
 
 ```{r echo=F}
 percPlot(allData, 'age')
@@ -236,7 +241,7 @@ percPlot(allData, 'age')
 
 \newpage
 
-# var1
+## var1
 
 ```{r echo=F}
 percPlot(allData, 'var1')
@@ -244,19 +249,333 @@ percPlot(allData, 'var1')
 
 \newpage
 
-# var2
+## var2
 ```{r echo=F}
 percPlot(allData, 'var2')
 ```
 
-# All Figures
+## All Figures
 ```{r echo=F}
 vars = names (allData)[1:16]
 for (i in 1:length (vars)){
-  print (i)
-  pdf (paste0 ('~/Desktop/mi_plots/', vars[i], '.pdf'))
+  pdf (paste0 ('~/Desktop/mi_plots/regular_', vars[i], '.pdf'))
   percPlot(allData, vars[i])
   dev.off()
 }
 ```
 
+
+# Full outcome model, fewer DAE layers
+```{r echo=F, include=F}
+MCAR10 = getDfs ('MCAR', 10, regDir, ldDir)
+MCAR30 = getDfs ('MCAR', 30, regDir, ldDir)
+MCAR50 = getDfs ('MCAR', 50, regDir, ldDir)
+MCAR = rbind (MCAR10$perc, MCAR30$perc, MCAR50$perc)
+
+MAR10 = getDfs ('MAR', 10, regDir, ldDir)
+MAR30 = getDfs ('MAR', 30, regDir, ldDir)
+MAR50 = getDfs ('MAR', 50, regDir, ldDir)
+MAR = rbind (MAR10$perc, MAR30$perc, MAR50$perc)
+
+MNAR10a = getDfs ('MNAR1', 10, regDir, ldDir)
+MNAR30a = getDfs ('MNAR1', 30, regDir, ldDir)
+MNAR50a = getDfs ('MNAR1', 50, regDir, ldDir)
+MNAR1 = rbind (MNAR10a$perc, MNAR30a$perc, MNAR50a$perc)
+
+MNAR10b = getDfs ('MNAR2', 10, regDir, ldDir)
+MNAR30b = getDfs ('MNAR2', 30, regDir, ldDir)
+MNAR50b = getDfs ('MNAR2', 50, regDir, ldDir)
+MNAR2 = rbind (MNAR10b$perc, MNAR30b$perc, MNAR50b$perc)
+
+allData = rbind (MCAR, MAR, MNAR1, MNAR2)
+```
+
+```{r echo=F, include=F}
+
+mycols = c ("#D55E00", "#E69F00", "#2271B2", "#3DB7E9", "#359B73")
+
+plotOne <- function (data, mdm, variable){
+  varnames = names (data)
+  keep = varnames[which (varnames==variable)]
+  data$mech = factor (data$mech)
+  data$method = factor (data$method, levels=c("ORACLE", "CC", "MICE", "RF", "DAE"))
+  data = dplyr::select (data, all_of(keep), mech, prop, method)
+  colnames (data)[1] = 'y'
+  dat = dplyr::filter (data, mech==mdm)
+  datOracle = dplyr::filter (dat, method=='ORACLE' & prop==10)
+  dat = dplyr::filter (dat, !(method=='ORACLE'))
+  datOracle$prop = ""
+  fdat = rbind (datOracle, dat)
+  gg = ggplot(fdat, aes(x=method, y=y, fill=method)) + 
+    ylab("Estimate - True") +
+    xlab("") +
+    ggtitle(mdm) + 
+    geom_boxplot() + 
+#    geom_errorbar(aes(ymax = Upper, ymin = Lower), position = "dodge",size = 1.5) +
+    geom_hline(yintercept=0, linetype="dashed", color="black") +
+#    geom_point(shape=16,colour="black",size=2) +
+#    facet_grid(cols=vars(prop), scales = "free_x", space="free_x", switch="both") +
+    facet_grid(cols=vars(prop), scales = "free_x", space="free", switch="both") +
+    theme(panel.spacing = unit(1, "lines"),
+         strip.background = element_blank(),
+         axis.line = element_line(colour = "grey"),
+         panel.grid.major.y = element_line(colour = "grey"),
+         strip.placement = "outside",
+         axis.text.x = element_text(angle = 45, hjust = 1, size=8),
+         panel.background = element_rect(fill = 'white', colour = 'white')) +
+    scale_x_discrete(breaks=c("CC","MICE","RF","DAE","ORACLE")) + 
+    theme(legend.position = 'none') +
+    scale_fill_manual(values=mycols)
+  return (gg)
+}
+
+
+percPlot = function (data, variable){
+  mcar = plotOne (data, mdm='MCAR', variable)
+  mar = plotOne (data, mdm='MAR', variable)
+  mnar1 = plotOne (data, mdm='MNAR1', variable)
+  mnar2 = plotOne (data, mdm='MNAR2', variable)
+  op = grid.arrange(mcar, mar, mnar1, mnar2, nrow = 2)
+  return (op)
+}
+
+```
+
+\newpage
+
+## treat
+
+```{r echo=F}
+percPlot(allData, 'treat')
+```
+
+\newpage
+
+## genderf
+
+```{r echo=F}
+percPlot(allData, 'genderf')
+```
+
+\newpage
+
+## reth_black
+
+```{r echo=F}
+percPlot(allData, 'reth_black')
+```
+
+\newpage
+
+## reth_hisp
+
+```{r echo=F}
+percPlot(allData, 'reth_hisp')
+```
+
+\newpage
+
+## reth_oth
+
+```{r echo=F}
+percPlot(allData, 'reth_oth')
+```
+
+\newpage
+
+## practypec
+
+```{r echo=F}
+percPlot(allData, 'practypec')
+```
+
+\newpage
+
+## b.ecogvalue
+
+```{r echo=F}
+percPlot(allData, 'b.ecogvalue')
+```
+
+\newpage
+
+## smokey
+
+```{r echo=F}
+percPlot(allData, 'smokey')
+```
+
+\newpage
+
+## dgradeh
+
+```{r echo=F}
+percPlot(allData, 'dgradeh')
+```
+
+\newpage
+
+## surgery
+
+```{r echo=F}
+percPlot(allData, 'surgery')
+```
+
+\newpage
+
+## site_ureter
+
+```{r echo=F}
+percPlot(allData, 'site_ureter')
+```
+
+\newpage
+
+## site_renal
+
+```{r echo=F}
+percPlot(allData, 'site_renal')
+```
+
+\newpage
+
+## site_urethra
+
+```{r echo=F}
+percPlot(allData, 'site_urethra')
+```
+
+\newpage
+
+## age
+
+```{r echo=F}
+percPlot(allData, 'age')
+```
+
+\newpage
+
+## var1
+
+```{r echo=F}
+percPlot(allData, 'var1')
+```
+
+\newpage
+
+## var2
+```{r echo=F}
+percPlot(allData, 'var2')
+```
+
+## All Figures
+```{r echo=F}
+vars = names (allData)[1:16]
+for (i in 1:length (vars)){
+  pdf (paste0 ('~/Desktop/mi_plots/lowDim_', vars[i], '.pdf'))
+  percPlot(allData, vars[i])
+  dev.off()
+}
+```
+
+# Simple outcome model, original DAE layers
+```{r echo=F, include=F}
+MCAR10 = getDfs ('MCAR', 10, simpDir, simpDir)
+MCAR30 = getDfs ('MCAR', 30, simpDir, simpDir)
+MCAR50 = getDfs ('MCAR', 50, simpDir, simpDir)
+MCAR = rbind (MCAR10$perc, MCAR30$perc, MCAR50$perc)
+
+MAR10 = getDfs ('MAR', 10, simpDir, simpDir)
+MAR30 = getDfs ('MAR', 30, simpDir, simpDir)
+MAR50 = getDfs ('MAR', 50, simpDir, simpDir)
+MAR = rbind (MAR10$perc, MAR30$perc, MAR50$perc)
+
+MNAR10a = getDfs ('MNAR1', 10, simpDir, simpDir)
+MNAR30a = getDfs ('MNAR1', 30, simpDir, simpDir)
+MNAR50a = getDfs ('MNAR1', 50, simpDir, simpDir)
+MNAR1 = rbind (MNAR10a$perc, MNAR30a$perc, MNAR50a$perc)
+
+MNAR10b = getDfs ('MNAR2', 10, simpDir, simpDir)
+MNAR30b = getDfs ('MNAR2', 30, simpDir, simpDir)
+MNAR50b = getDfs ('MNAR2', 50, simpDir, simpDir)
+MNAR2 = rbind (MNAR10b$perc, MNAR30b$perc, MNAR50b$perc)
+
+allData = rbind (MCAR, MAR, MNAR1, MNAR2)
+```
+
+```{r echo=F, include=F}
+
+mycols = c ("#D55E00", "#E69F00", "#2271B2", "#3DB7E9", "#359B73")
+
+plotOne <- function (data, mdm, variable){
+  varnames = names (data)
+  keep = varnames[which (varnames==variable)]
+  data$mech = factor (data$mech)
+  data$method = factor (data$method, levels=c("ORACLE", "CC", "MICE", "RF", "DAE"))
+  data = dplyr::select (data, all_of(keep), mech, prop, method)
+  colnames (data)[1] = 'y'
+  dat = dplyr::filter (data, mech==mdm)
+  datOracle = dplyr::filter (dat, method=='ORACLE' & prop==10)
+  dat = dplyr::filter (dat, !(method=='ORACLE'))
+  datOracle$prop = ""
+  fdat = rbind (datOracle, dat)
+  gg = ggplot(fdat, aes(x=method, y=y, fill=method)) + 
+    ylab("Estimate - True") +
+    xlab("") +
+    ggtitle(mdm) + 
+    geom_boxplot() + 
+#    geom_errorbar(aes(ymax = Upper, ymin = Lower), position = "dodge",size = 1.5) +
+    geom_hline(yintercept=0, linetype="dashed", color="black") +
+#    geom_point(shape=16,colour="black",size=2) +
+#    facet_grid(cols=vars(prop), scales = "free_x", space="free_x", switch="both") +
+    facet_grid(cols=vars(prop), scales = "free_x", space="free", switch="both") +
+    theme(panel.spacing = unit(1, "lines"),
+         strip.background = element_blank(),
+         axis.line = element_line(colour = "grey"),
+         panel.grid.major.y = element_line(colour = "grey"),
+         strip.placement = "outside",
+         axis.text.x = element_text(angle = 45, hjust = 1, size=8),
+         panel.background = element_rect(fill = 'white', colour = 'white')) +
+    scale_x_discrete(breaks=c("CC","MICE","RF","DAE","ORACLE")) + 
+    theme(legend.position = 'none') +
+    scale_fill_manual(values=mycols)
+  return (gg)
+}
+
+
+percPlot = function (data, variable){
+  mcar = plotOne (data, mdm='MCAR', variable)
+  mar = plotOne (data, mdm='MAR', variable)
+  mnar1 = plotOne (data, mdm='MNAR1', variable)
+  mnar2 = plotOne (data, mdm='MNAR2', variable)
+  op = grid.arrange(mcar, mar, mnar1, mnar2, nrow = 2)
+  return (op)
+}
+
+```
+
+\newpage
+
+## treat
+
+```{r echo=F}
+percPlot(allData, 'treat')
+```
+
+\newpage
+
+## b.ecogvalue
+
+```{r echo=F}
+percPlot(allData, 'b.ecogvalue')
+```
+
+## All Figures
+```{r echo=F}
+vars = names (allData)[1:16]
+for (i in 1:length (vars)){
+  pdf (paste0 ('~/Desktop/mi_plots/simple_', vars[i], '.pdf'))
+  percPlot(allData, vars[i])
+  dev.off()
+}
+```

@@ -13,20 +13,18 @@ import desc
 import tensorflow
 import session_info
 os.chdir("/project/flatiron_ucc")
-rootdir = "/project/flatiron_ucc/programs/kylie/RunMeLowDim/final_results"
+rootdir = "/project/flatiron_ucc/programs/kylie/RunMe3/final_lowDim"
 fp = "programs/kylie/RunMe3/"
 #if os.path.isdir(rootdir)==False:
 #    os.mkdir (rootdir)
 
 mech = str(sys.argv[2])
 foldName = "AE" + mech
-path = rootdir + "/" + foldName
 
 proportionList = (10, 30, 50)
 for k in range(0, len(proportionList)):
     propName = proportionList[k]
     print(propName)
-    path = rootdir + "/" + foldName + "/" + str(propName)
     i = sys.argv[1]
     print(i)
     filename = "".join((fp, "datasets/mDats/", mech, "/", str(propName), "/", "mData", str(i), ".csv"))
@@ -35,7 +33,7 @@ for k in range(0, len(proportionList)):
     train = train.drop("time", axis=1)
     #16 nodes in 2nd layer
     n = len(train.columns)
-    dim = [train.shape[1], n+7]
+    dim = [train.shape[1],n+4,n+8,n+4]
     #dim= [train.shape[1],n+7,n+14,n+21,n+14,n+7]
     #dim= [train.shape[1],n-5,n-10]
     # fill NAs with column mean b/c encoder needs full dataset

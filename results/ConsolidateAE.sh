@@ -1,1 +1,1 @@
-Rscript ConsolidateAE.R final_lowDim
+Rscript ConsolidateAE.R final_simple

@@ -2,7 +2,9 @@ library(dplyr)
 library(survival)
 
 rd <- "/project/flatiron_ucc/programs/kylie/RunMe3"
-rootdir <- file.path (rd, "final_results")
+args = commandArgs(trailingOnly = TRUE)
+dir = as.character(args[1])
+rootdir <- file.path (rd, dir)
 iter = 500
 
 makeTable <- function(iter, mdm='MCAR', pc=10) {

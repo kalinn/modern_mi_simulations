@@ -11,7 +11,11 @@ mechList <- c("MCAR", "MAR", "MNAR1", "MNAR2")
 proportionList <- c(10, 30, 50)
 
 consol = function (i, mdm, pc){
-    truth <- read.csv(file.path(rd, "datasets/trueEff", mdm, as.character(pc), "propMiss_trueEffs1.csv"))
+    if (dir=='final_simple'){
+        truth <- read.csv(file.path(rd, "datasets/trueEff_simple", mdm, as.character(pc), "propMiss_trueEffs1.csv"))
+    } else{
+        truth <- read.csv(file.path(rd, "datasets/trueEff", mdm, as.character(pc), "propMiss_trueEffs1.csv"))
+    }
     truth = truth[-1]
 
     fileList = list.files(file.path(rootdir, paste0 ("AE", mdm), as.character(pc)), full.names = TRUE)
@@ -19,7 +23,11 @@ consol = function (i, mdm, pc){
     fits = lapply (1:J, function (x){
         data <- read.csv(file.path(rootdir, paste0("AE", mdm), as.character(pc), paste0("result", i, "_num_", x, ".csv")), row.names = 1) # read in instead
 
-        daeFit <- coxph(Surv(time, event) ~ treat + genderf + reth_black + reth_hisp + reth_oth + practypec + b.ecogvalue + smokey + dgradeh + surgery + site_ureter + site_renal + site_urethra + age + var1 + var2, data = data)
+        if (dir=='final_simple'){
+            daeFit <- coxph(Surv(time, event) ~ treat + b.ecogvalue , data = data)
+        } else{
+            daeFit <- coxph(Surv(time, event) ~ treat + genderf + reth_black + reth_hisp + reth_oth + practypec + b.ecogvalue + smokey + dgradeh + surgery + site_ureter + site_renal + site_urethra + age + var1 + var2, data = data)
+        }
         return (daeFit)
     })
     getCoefs = lapply (fits, function (x){
