@@ -3,13 +3,17 @@ library(survival)
 
 rd <- "/project/flatiron_ucc/programs/kylie/RunMe3"
 args = commandArgs(trailingOnly = TRUE)
-dir = as.character(args[1])
-rootdir <- file.path (rd, dir)
+simple = as.character(args[1])=='simple'
+opdir = 'final_results'
+if (simple){
+    opdir = 'final_simple'
+}
+
 iter = 500
 
 makeTable <- function(iter, mdm='MCAR', pc=10) {
   keep = 1:iter
-  fnames = list.files(file.path(rootdir, mdm, as.character (pc)), full.names = TRUE, pattern='result')[keep]
+  fnames = list.files(file.path(rd, opdir, mdm, as.character (pc)), full.names = TRUE, pattern='result')[keep]
   df <- lapply(fnames, read.csv)
 
   # For percentile plots
@@ -46,8 +50,8 @@ makeTable <- function(iter, mdm='MCAR', pc=10) {
   percRF$method = 'RF'
   PercentileDf <- rbind(percOracle, percCC, percMICE, percRF)
 
-  write.csv (PercentileDf, file=file.path (rootdir, paste0 ("Percentiles_", mdm, "_", as.character(pc), '.csv')))
-  write.csv (dfAvg, file=file.path (rootdir, paste0 ("Avgs_", mdm, "_", as.character(pc), '.csv')))
+  write.csv (PercentileDf, file=file.path (rd, opdir, paste0 ("Percentiles_", mdm, "_", as.character(pc), '.csv')))
+  write.csv (dfAvg, file=file.path (rd, opdir, paste0 ("Avgs_", mdm, "_", as.character(pc), '.csv')))
 
   return(list("perc" = PercentileDf, "avg" = dfAvg))
 }

@@ -3,27 +3,32 @@ library(survival)
 
 rd <- "/project/flatiron_ucc/programs/kylie/RunMe3"
 args = commandArgs(trailingOnly = TRUE)
-dir = as.character(args[1])
-rootdir <- file.path (rd, dir)
+simple = as.character(args[1])=='simple'
+shallow = as.character(args[1])=='shallow'
+ds = 'datasets'
+opdir = 'final_results'
+if (simple){
+    ds = 'datasets_simple'
+    opdir = 'final_simple'
+}
+if (shallow){
+    opdir = 'final_lowDim'
+}
+
 iter = 500
 J = 10 #number of imputations
 mechList <- c("MCAR", "MAR", "MNAR1", "MNAR2")
 proportionList <- c(10, 30, 50)
 
 consol = function (i, mdm, pc){
-    if (dir=='final_simple'){
-        truth <- read.csv(file.path(rd, "datasets/trueEff_simple", mdm, as.character(pc), "propMiss_trueEffs1.csv"))
-    } else{
-        truth <- read.csv(file.path(rd, "datasets/trueEff", mdm, as.character(pc), "propMiss_trueEffs1.csv"))
-    }
+    truth <- read.csv(file.path(rd, ds, "trueEff", mdm, as.character(pc), "propMiss_trueEffs1.csv"))
+    propMiss = truth[1]
     truth = truth[-1]
 
-    fileList = list.files(file.path(rootdir, paste0 ("AE", mdm), as.character(pc)), full.names = TRUE)
-
     fits = lapply (1:J, function (x){
-        data <- read.csv(file.path(rootdir, paste0("AE", mdm), as.character(pc), paste0("result", i, "_num_", x, ".csv")), row.names = 1) # read in instead
+        data <- read.csv(file.path(rd, opdir, paste0("AE", mdm), as.character(pc), paste0("result", i, "_num_", x, ".csv")), row.names = 1) # read in instead
 
-        if (dir=='final_simple'){
+        if (opdir=='final_simple'){
             daeFit <- coxph(Surv(time, event) ~ treat + b.ecogvalue , data = data)
         } else{
             daeFit <- coxph(Surv(time, event) ~ treat + genderf + reth_black + reth_hisp + reth_oth + practypec + b.ecogvalue + smokey + dgradeh + surgery + site_ureter + site_renal + site_urethra + age + var1 + var2, data = data)
@@ -75,8 +80,8 @@ final = function (iter, mdm, pc){
     avgCoverage = apply (allCoverage, 2, mean)
     avgMSE = apply (allMSE, 2, mean)
     df = cbind (avgBias, avgSE, avgCoverage, avgMSE)
-    write.csv (df, file=file.path (rootdir, paste0 ('AEAvgs_', mdm, '_', as.character(pc), '.csv')))
-    write.csv (allBias, file=file.path (rootdir, paste0 ('AEPercentiles_', mdm, '_', as.character(pc), '.csv')))
+    write.csv (df, file=file.path (rd, opdir, paste0 ('AEAvgs_', mdm, '_', as.character(pc), '.csv')))
+    write.csv (allBias, file=file.path (rd, opdir, paste0 ('AEPercentiles_', mdm, '_', as.character(pc), '.csv')))
 }
 
 final (iter, 'MCAR', 10)

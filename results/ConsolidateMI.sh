@@ -1,1 +1,2 @@
-Rscript ConsolidateMI.R final_simple
+Rscript ConsolidateMI.R simple
+Rscript ConsolidateMI.R full

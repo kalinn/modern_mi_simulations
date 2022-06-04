@@ -1,7 +1,7 @@
 ---
 title: "MI Paper Plots"
 author: "Kylie Getz and Kristin Linn"
-date: "5/21/2022"
+date: "5/31/2022"
 output: pdf_document
 ---
 
@@ -13,6 +13,7 @@ reth_black + reth_hisp + reth_oth + practypec + b.ecogvalue + smokey +  dgradeh 
 
 
 ```{r echo=F, include=F}
+library(tidyverse)
 library(ggplot2)
 library(gridExtra)
 library(grid)
@@ -21,10 +22,11 @@ library(kableExtra)
 library(dplyr)
 library(reshape2)
 
-rootdir = "~/Box Sync/Mentoring/Students/Getz_Kylie/results"
+#rootdir = "~/Box Sync/Mentoring/Students/Getz_Kylie/results"
+rootdir = "~/Box/Mentoring/Students/Getz_Kylie/results"
 regDir = file.path (rootdir, "2022_05_22")
-ldDir = file.path (rootdir, "2022_05_31_lowDim")
-simpDir = file.path (rootdir, "2022_05_31_simple")
+ldDir = file.path (rootdir, "2022_05_31b_lowDim")
+simpDir = file.path (rootdir, "2022_05_31b_simple")
 
 getDfs <- function (mdm, pc, fdir=regDir, aedir=regDir){
   # Oracle, CC, MICE, and RF
@@ -572,10 +574,12 @@ percPlot(allData, 'b.ecogvalue')
 
 ## All Figures
 ```{r echo=F}
-vars = names (allData)[1:16]
-for (i in 1:length (vars)){
-  pdf (paste0 ('~/Desktop/mi_plots/simple_', vars[i], '.pdf'))
-  percPlot(allData, vars[i])
-  dev.off()
+pdf (paste0 ('~/Desktop/mi_plots/simple_treat.pdf'))
+percPlot(allData, 'treat')
+dev.off()
+
+pdf (paste0 ('~/Desktop/mi_plots/simple_b.ecogvalue.pdf'))
+percPlot(allData, 'b.ecogvalue')
+dev.off()
 }
 ```
