@@ -7,18 +7,18 @@ import keras
 from keras import backend as K
 from sklearn import preprocessing
 import sys
-sys.path.append("/project/flatiron_ucc")
-sys.path.append("/project/flatiron_ucc/__pycache__")
+sys.path.append("/project/flatiron_ucc/programs/kylie/RunMe4/code_kal")
+sys.path.append("/project/flatiron_ucc/programs/kylie/RunMe4/code_kal/__pycache__")
 import desc
 import tensorflow
 import session_info
 os.chdir("/project/flatiron_ucc")
 simple = str(sys.argv[3])
 if simple=='TRUE':
-    rootdir = "/project/flatiron_ucc/programs/kylie/RunMe3/final_simple"
+    rootdir = "/project/flatiron_ucc/programs/kylie/RunMe4/final_simple"
 else:
-    rootdir = "/project/flatiron_ucc/programs/kylie/RunMe3/final_results"
-fp = "programs/kylie/RunMe3/"
+    rootdir = "/project/flatiron_ucc/programs/kylie/RunMe4/final_results"
+fp = "programs/kylie/RunMe4/"
 #if os.path.isdir(rootdir)==False:
 #    os.mkdir (rootdir)
 
@@ -37,26 +37,35 @@ for k in range(0, len(proportionList)):
     train = pd.read_csv(filename)
     time = train["time"]
     train = train.drop("time", axis=1)
+    trainComplete = train.dropna(axis=0)
     #16 nodes in 2nd layer
-    n = len(train.columns)
-    dim = [train.shape[1], n+7, n+14, n+21]
-    #dim= [train.shape[1],n+7,n+14,n+21,n+14,n+7]
+    n = len(trainComplete.columns)
+    dim = [trainComplete.shape[1], n+7, n+14, n+21]
     #dim= [train.shape[1],n-5,n-10]
     # fill NAs with column mean b/c encoder needs full dataset
-    trainFilled = train.fillna(train.mean())
-    train2 = np.matrix(trainFilled)
+    trainFilled = np.matrix (train.fillna(value=0))
+    train2 = np.matrix(trainComplete)
     for x in range(1, 11):
+#        np.random.RandomState(seed=x)
+#        N = train2.shape[0]
+#        p = train2.shape[1]
+#        R = round (N*p*0.1)
+#        arr = np.array([None] * R + [1] * (N*p-R))
+#        np.random.shuffle(arr)
+#        oparr = pd.DataFrame(arr.reshape((N, p)))
+#        train2[oparr.isnull()] = 0
         K.clear_session()
         try:
-            sae = desc.SAE(dims=dim, drop_rate=0.5, batch_size=256, random_seed=x, act="tanh", actincenter="linear")
+            sae = desc.SAE(dims=dim, drop_rate=0.2, batch_size=32, random_seed=x, act="tanh", actincenter="linear")
         except:
             print("desc.SAE error")
         finally:
             sae = desc.SAE(dims=dim, drop_rate=0.5, batch_size=256, random_seed=x, act="tanh", actincenter="linear")
         sae.fit(train2, epochs=500)
-        predict = sae.autoencoders.predict(train2)
+#        predict = sae.autoencoders.predict(trainFilled)
+        predict = sae.extract_preds(trainFilled)
         #predict1= predict.round(0)
-        predictNew = pd.DataFrame(predict, columns=train.columns, index=train.index)
+        predictNew = pd.DataFrame(predict, columns=trainFilled.columns, index=trainFilled.index)
         miss = pd.DataFrame(train.copy())
         miss[miss.isnull()] = predictNew
         final = miss

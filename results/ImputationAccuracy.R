@@ -1,14 +1,66 @@
 library(dplyr)
 
 rd <- "/project/flatiron_ucc/programs/kylie/RunMe3"
-cdir = file.path (rd, 'datasets/cDats')
-rootdir <- file.path (rd, "final_results")
+cdir = file.path (rd, 'datasets_simple/cDats')
+rootdir <- file.path (rd, "final_simple")
+opdir = file.path (rootdir, "density_plots")
 iter = 500
+
+dens <- function (i, mdm, pc){
+    cDat = read.csv (file.path (cdir, mdm, pc, paste0 ('cData', i, '.csv')))
+    mice = read.csv (file.path (rootdir, mdm, pc, paste0 ('mice_', i, '.csv')))
+    rf = read.csv (file.path (rootdir, mdm, pc, paste0 ('rf_', i, '.csv')))
+    daeList = lapply (1:10, function (x){
+        dat = read.csv (file.path (rootdir, paste0 ('AE', mdm), pc, paste0 ('result', i, '_num_', x, '.csv')))
+        .imp = rep (x, nrow (dat))
+        newdat = cbind (.imp, dat)
+    })
+    dae = do.call ('rbind', daeList)
+    missEcog = mice$b.ecogvalue[which (mice$.imp==0)]
+    missInd = which (is.na (missEcog))
+    miceImputed = lapply (1:10, function (x){
+        dat = filter (mice, .imp==x)
+        dat = select (dat[missInd,], treat, b.ecogvalue)
+        dat$variable = 'MICE'
+        return (dat)
+    })
+    rfImputed = lapply (1:10, function (x){
+        dat = filter (rf, .imp==x)
+        dat = select (dat[missInd,], treat, b.ecogvalue)
+        dat$variable = 'RF'
+        return (dat)
+    })
+    daeImputed = lapply (1:10, function (x){
+        dat = filter (dae, .imp==x)
+        dat = select (dat[missInd,], treat, b.ecogvalue)
+        dat$variable = 'DAE'
+        return (dat)
+    })
+    miceFinal = do.call ('rbind', miceImputed)
+    rfFinal = do.call ('rbind', rfImputed)
+    daeFinal = do.call ('rbind', daeImputed)
+    true = data.frame ('treat'=cDat$treat[missInd], 'b.ecogvalue'=cDat$b.ecogvalue[missInd], 'variable'='True')
+    final = rbind (true, miceFinal, rfFinal, daeFinal)
+    write.csv(final, file=file.path (opdir, paste0 (mdm, '_', pc, '_', 'iter', i, '.csv')), row.names=FALSE)
+}
+
+for (j in 21:50){
+    print (j)
+    dens(j, 'MCAR', 50)
+    dens(j, 'MAR', 50)
+    dens(j, 'MNAR1', 50)
+}
 
 getDiff = function (i, mdm, pc){
     cDat = read.csv (file.path (cdir, mdm, pc, paste0 ('cData', i, '.csv')))
     mice = read.csv (file.path (rootdir, mdm, pc, paste0 ('mice_', i, '.csv')))
     rf = read.csv (file.path (rootdir, mdm, pc, paste0 ('rf_', i, '.csv')))
+    daeList = lapply (1:10, function (x){
+        dat = read.csv (file.path (rootdir, paste0 ('AE', mdm), pc, paste0 ('result', i, '_num_', x, '.csv')))
+        dat = cbind (x, dat)
+        colnames (dat)[1] = '.imp'
+    })
+    dae = do.call ('rbind', daeList)
 
     cDat = select (cDat, genderf, reth_black, reth_hisp, reth_oth, age, practypec, site_ureter, site_renal, site_urethra, smokey, dgradeh, surgery, b.ecogvalue, var1, var2)
 
@@ -66,9 +118,36 @@ getDiff = function (i, mdm, pc){
     opRF = cbind (avgAvgDiff, avgMAE, avgMSE)
     colnames (opRF) = c ("rfAvgMD", "rfAvgMAE", "rfAvgMSE")
 
+    dae = select (dae, .imp, genderf, reth_black, reth_hisp, reth_oth, age, practypec, site_ureter, site_renal, site_urethra, smokey, dgradeh, surgery, b.ecogvalue, var1, var2)
+
+    diffs = lapply (1:10, function (x){
+        imputed = filter (dae, .imp==x)
+        imputed = select (imputed, -.imp)
+        diff = as.matrix (imputed) - as.matrix (cDat)
+        return (diff)
+    })
+
+    mde = lapply (diffs, function (x){
+        apply (x, 2, mean)
+    })
+    mae = lapply (diffs, function (x){
+        err = abs (x)
+        apply (err, 2, mean)
+    })
+    mse = lapply (diffs, function (x){
+        err = x^2
+        apply (err, 2, mean)
+    })
+    avgAvgDiff = Reduce ('+', mde)/length (mde)
+    avgMAE = Reduce ('+', mae)/length (mae)
+    avgMSE = Reduce ('+', mse)/length (mse)
+
+    opDAE = cbind (avgAvgDiff, avgMAE, avgMSE)
+    colnames (opDAE) = c ("daeAvgMD", "daeAvgMAE", "daeAvgMSE")
+
     X = rownames (opRF)
 
-    op = cbind (opMICE, opRF)
+    op = cbind (opMICE, opRF, opDAE)
     rownames (op) = NULL
     op = cbind (X, as.data.frame (op))
     op$mech = mdm

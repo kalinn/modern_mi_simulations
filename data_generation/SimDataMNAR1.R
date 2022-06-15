@@ -5,25 +5,32 @@ library(mice)
 library(tidyverse)
 args = commandArgs(trailingOnly = TRUE)
 simple = as.character(args[1])=='TRUE'
+ds = 'datasets'
+if (simple){
+  ds = 'datasets_simple'
+}
+mm = 'MNAR1'
 
-rootdir <- "/project/flatiron_ucc/programs/kylie/RunMe3"
-system(paste0("mkdir ", file.path(rootdir, "datasets")))
-system(paste0("mkdir ", file.path(rootdir, "datasets", "mDats")))
-system(paste0("mkdir ", file.path(rootdir, "datasets", "cDats")))
-system(paste0("mkdir ", file.path(rootdir, "datasets", "trueEff")))
-system(paste0("mkdir ", file.path(rootdir, "datasets", "mDats", "MNAR1")))
-system(paste0("mkdir ", file.path(rootdir, "datasets", "cDats", "MNAR1")))
-system(paste0("mkdir ", file.path(rootdir, "datasets", "trueEff", "MNAR1")))
+rootdir <- "/project/flatiron_ucc/programs/kylie/RunMe4"
+system (paste0 ('mkdir ', rootdir))
+system (paste0 ('mkdir ', file.path (rootdir, ds)))
+system (paste0 ('mkdir ', file.path (rootdir, ds, 'mDats')))
+system (paste0 ('mkdir ', file.path (rootdir, ds, 'cDats')))
+system (paste0 ('mkdir ', file.path (rootdir, ds, 'trueEff')))
+system (paste0 ('mkdir ', file.path (rootdir, ds, 'mDats', mm)))
+system (paste0 ('mkdir ', file.path (rootdir, ds, 'cDats', mm)))
+system (paste0 ('mkdir ', file.path (rootdir, ds, 'trueEff', mm)))
 
 # These are for row-wise missing covariates
 # other than ECOG
 proportionList <- c(10, 30, 50)
-# These are for column-wise missing in ECOG
-ecogList <- c(10, 20, 30)
 
-system(paste0("mkdir ", file.path(rootdir, "datasets", "trueEff", "MNAR1", proportionList[1])))
-system(paste0("mkdir ", file.path(rootdir, "datasets", "trueEff", "MNAR1", proportionList[2])))
-system(paste0("mkdir ", file.path(rootdir, "datasets", "trueEff", "MNAR1", proportionList[3])))
+for (j in 1:length(proportionList)){
+  system (paste0 ('mkdir ', file.path (rootdir, ds, 'trueEff', mm, proportionList[j])))
+  system (paste0 ('mkdir ', file.path (rootdir, ds, 'mDats', mm, proportionList[j])))
+  system (paste0 ('mkdir ', file.path (rootdir, ds, 'cDats', mm, proportionList[j])))
+}
+
 iter <- 1000
 effOR <- 0.5
 
@@ -32,12 +39,12 @@ nsim <- 1
 
 # Magic intercepts for columnwise missingness proportions
 # in ECOG to be 10/20/30%
-b0 = c (-37.53653, -35.93894, -34.70900)
+b0 = c (-37.53742, -34.70806, -32.49902)
 
 # Magic intercepts for rowwise missingness proportions
 # in var1 and var2 to be 10/30/50%
-b0var1 = c (-38.65038, -37.26411, -36.39782)
-b0var2 = c (-38.96550, -37.55989, -36.67841)
+b0var1 = c (-38.74588, -37.38060, -36.52843)
+b0var2 = c (-39.06882, -37.68182, -36.81363)
 
 for (w in 1:3) {
   set.seed(123)
@@ -226,12 +233,11 @@ for (w in 1:3) {
     # Computes columnwise prob of missing to reach
     # Pr(missing at least 1) = 10/30/50%
     # Exclude treat and ECOG
-    # ECOG treated separately, columnwise
     # Subtract 4 because race and site categories
     # each only count as 1. 
     # Subtract 2 for event and time
-    # Subtract 2 for treat and ECOG
-    nvars = ncol (X) - 4 - 2 - 2
+    # Subtract 1 for treat
+    nvars = ncol (X) - 4 - 2 - 1
     mult = 1 - exp (log (1 - proportionList/100)/nvars)
 
     X <- as.matrix(X)
@@ -282,7 +288,7 @@ for (w in 1:3) {
       }
       b0 = rep (NA, 3)
       for (r in 1:3){
-        b0[r] = binsearch (-1000, 0, miss.coef, ecogList[r]/100)
+        b0[r] = binsearch (-1000, 0, miss.coef, proportionList[r]/100)
       }
       b0
     }
@@ -410,14 +416,9 @@ for (w in 1:3) {
     effname <- paste0("propMiss_trueEffs", i, ".csv")
 
     propName <- proportionList[w]
-    system(paste0("mkdir ", file.path(rootdir, "datasets", "mDats", "MNAR1", propName)))
-    system(paste0("mkdir ", file.path(rootdir, "datasets", "cDats", "MNAR1", propName)))
-    write.csv(train, file.path(rootdir, "datasets/mDats/MNAR1", propName, filename), row.names = F)
-    write.csv(cData, file.path(rootdir, "datasets/cDats/MNAR1", propName, Cfilename), row.names = F)
-    if (simple){
-      write.csv(t (trueEffect), file.path(rootdir, "datasets/trueEff_simple/MNAR1", propName, effname), row.names = F)
-    } else{
-      write.csv(t (trueEffect), file.path(rootdir, "datasets/trueEff/MNAR1", propName, effname), row.names = F)
-    }
+    
+    write.csv(train, file.path(rootdir, ds, "mDats", mm, propName, filename), row.names = F)
+    write.csv(cData, file.path(rootdir, ds, "cDats", mm, propName, Cfilename), row.names = F)
+    write.csv(t (trueEffect), file.path(rootdir, ds, "trueEff", mm, propName, effname), row.names = F)
   }
 }

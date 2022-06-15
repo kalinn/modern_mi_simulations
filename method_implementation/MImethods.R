@@ -7,7 +7,7 @@ args <- commandArgs(trailingOnly = TRUE)
 mech = as.character(args[2])
 simple = as.character(args[3])=='TRUE'
 
-rootdir <- "/project/flatiron_ucc/programs/kylie/RunMe3"
+rootdir <- "/project/flatiron_ucc/programs/kylie/RunMe4"
 if (simple){
   rd = file.path (rootdir, 'final_simple')
 } else{

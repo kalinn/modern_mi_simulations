@@ -19,6 +19,36 @@ library(reshape2)
 rootdir = "~/Box Sync/Mentoring/Students/Getz_Kylie/results"
 fdir = file.path (rootdir, "2022_05_22")
 
+rootdir = "/Users/klinn/Desktop/dens"
+type = 'MAR'
+for (i in 1:20){
+  print (i)
+  dat = read.csv (file.path (rootdir, paste0 (type, '_50_iter', i, '.csv')))
+  datTrue = filter (dat, variable=='True')
+  datRepTrue = data.frame ('variable'='True', 'treat'=rep (datTrue$treat, 10), 'b.ecogvalue'=rep (datTrue$b.ecogvalue, 10)) 
+  dat = filter (dat, variable!='True')
+  dat = rbind (datRepTrue, dat)
+  dat$b.ecogvalue = round (dat$b.ecogvalue)
+  treat0 = filter (dat, treat==0)
+  treat1 = filter (dat, treat==1)
+  grp0 = group_by(treat0, variable) %>% table()
+  grp1 = group_by(treat1, variable) %>% table()
+  grpLong0 = melt (grp0)
+  grpLong1 = melt (grp1)
+  grpLong = rbind (grpLong0, grpLong1)
+  colnames (grpLong)[4] = 'count'
+  
+  gg = ggplot (grpLong, aes (x=factor (b.ecogvalue), y=count, fill=variable)) + geom_col(aes (color=variable), position = 'dodge') + facet_wrap(~treat)
+
+  pdf (paste0 ('~/Desktop/mi_dens/', type, '_iter_', i, '.pdf'))
+  plot (gg)
+  dev.off()
+}
+
+```
+
+
+```{r echo=F, include=F}
 mcar = read.csv (file.path (fdir, "evalImputations_MCAR.csv"))
 mar = read.csv (file.path (fdir, "evalImputations_MAR.csv"))
 mnar1 = read.csv (file.path (fdir, "evalImputations_MNAR1.csv"))

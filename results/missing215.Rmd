@@ -1,0 +1,150 @@
+---
+title: "Single iteration evaluation"
+author: "Kristin Linn"
+date: "6/3/2022"
+output: pdf_document
+---
+
+Results using 500 simulations, 10 MI
+trueTreatment approx -0.69, trueEcog appox 0.4
+
+os1 <- coxph(Surv(cmonth, dead) ~ treat + genderf +  
+reth_black + reth_hisp + reth_oth + practypec + b.ecogvalue + smokey +  dgradeh + surgery + site_ureter + site_renal + site_urethra + age + var1 + var2, data=sdat.c, x=T)
+
+
+```{r echo=F, include=F}
+library(tidyverse)
+library(ggplot2)
+library(gridExtra)
+library(grid)
+library(xtable)
+library(kableExtra)
+library(dplyr)
+library(reshape2)
+
+rootdir = '~/Desktop'
+cDat = read.csv (file.path (rootdir, 'cData215.csv'))
+mDat = read.csv (file.path (rootdir, 'mData215.csv'))
+
+miceFile = list.files (file.path (rootdir, 'mice'), full.names = TRUE)
+mice = read.csv (miceFile)
+mice$type = 'MICE'
+mice$X = NULL
+mice$.id = NULL
+mice = filter (mice, .imp!=0)
+
+rfFile = list.files (file.path (rootdir, 'rf'), full.names = TRUE)
+rf = read.csv (rfFile)
+rf$type = 'RF'
+rf$X = NULL
+rf$.id = NULL
+rf = filter (rf, .imp!=0)
+
+daeFiles = list.files (file.path (rootdir, 'dae'), full.names = TRUE)
+daeAll = lapply (1:10, function (x){
+  d = read.csv (daeFiles[[x]])
+  d$.imp = x
+  return (d)
+})
+dae = do.call ('rbind', daeAll)
+dae$type = 'DAE'
+daeImp = dae$.imp
+dae$.imp = NULL
+dae$X = NULL
+daeMost = dae
+dae = cbind (daeImp, daeMost)
+colnames (dae)[1] = '.imp'
+
+allDf = rbind (mice, rf, dae)
+```
+
+```{r echo=F, include=F}
+ecogMiss = which (is.na (mDat$b.ecogvalue))
+fMice = lapply (1:10, function (x){
+  d = filter (mice, .imp==x)[ecogMiss,]
+  d = select (d, event, hazard, time, b.ecogvalue, treat, type)
+  return (d)
+})
+fMice = do.call ('rbind', fMice)
+fRf = lapply (1:10, function (x){
+  d = filter (rf, .imp==x)[ecogMiss,]
+  d = select (d, event, hazard, time, b.ecogvalue, treat, type)
+  return (d)
+}) 
+fRf = do.call ('rbind', fRf)
+fDae = lapply (1:10, function (x){
+  d = filter (dae, .imp==x)[ecogMiss,]
+  d = select (d, event, hazard, time, b.ecogvalue, treat, type)
+  return (d)
+})
+fDae = do.call ('rbind', fDae)
+
+fComp = cDat[ecogMiss,]
+fComp$type = 'Complete'
+fComp = select (fComp, event, hazard, time, b.ecogvalue, treat, type)
+copies = lapply (1:10, function (x){
+  return (fComp)
+})
+fComp10 = do.call ('rbind', copies) 
+
+fAll = rbind (fComp10, fMice, fRf, fDae)
+
+gg = ggplot (fAll, aes (x=round (b.ecogvalue), fill=type)) + geom_histogram(aes (color=type), position='dodge') + facet_wrap (~treat)
+plot (gg)
+```
+
+
+```{r echo=FALSE}
+ecogDiffs = function (dat, x){
+  d = filter (dat, .imp==x)
+  vals = d$b.ecogvalue[ecogMiss]
+  diff = vals - cDat$b.ecogvalue[ecogMiss]
+  return (diff)
+}
+miceMiss = lapply (1:10, function (x){
+  ecogDiffs (mice, x)
+})
+miceDiff = unlist (miceMiss)
+rfMiss = lapply (1:10, function (x){
+  ecogDiffs (rf, x)
+})
+rfDiff = unlist (rfMiss)
+daeMiss = lapply (1:10, function (x){
+  ecogDiffs (rf, x)
+})
+daeDiff = unlist (daeMiss)
+
+miceLong = data.frame ('type'='MICE', 'value'=miceDiff)
+rfLong = data.frame ('type'='RF', 'value'=rfDiff)
+daeLong = data.frame ('type'='DAE', 'value'=daeDiff)
+
+allDiff = rbind (miceLong, rfLong, daeLong)
+```
+
+```{r echo=F}
+gg = ggplot (allDiff, aes (x=value)) + geom_histogram() + facet_wrap(~type)
+plot (gg)
+
+```
+
+
+
+
+```{r echo=F, include=F}
+plotVar = function (data, variable){
+    newdat = select (data, .imp, all_of (variable), type)
+    gg = ggplot (newdat, aes (x=variable, group=.imp)) + geom_density() + facet_wrap(~type, ncol=1) + xlab ('')
+    return (gg)
+}
+```
+
+```{r echo=F}
+
+newdat = select (allDf, .imp, b.ecogvalue, type)
+gg = ggplot (newdat, aes (x=b.ecogvalue)) + geom_histogram() + facet_wrap(~type, ncol=1) + xlab ('')
+plot (gg)
+
+
+treat = plotVar (allDf, 'treat')
+plot (treat)
+```

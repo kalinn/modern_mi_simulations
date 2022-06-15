@@ -5,26 +5,32 @@ library(mice)
 library(tidyverse)
 args = commandArgs(trailingOnly = TRUE)
 simple = as.character(args[1])=='TRUE'
+ds = 'datasets'
+if (simple){
+  ds = 'datasets_simple'
+}
+mm = 'MCAR'
 
-rootdir <- "/project/flatiron_ucc/programs/kylie/RunMe3"
+rootdir <- "/project/flatiron_ucc/programs/kylie/RunMe4"
 system (paste0 ('mkdir ', rootdir))
-system (paste0 ('mkdir ', file.path (rootdir, 'datasets')))
-system (paste0 ('mkdir ', file.path (rootdir, 'datasets', 'mDats')))
-system (paste0 ('mkdir ', file.path (rootdir, 'datasets', 'cDats')))
-system (paste0 ('mkdir ', file.path (rootdir, 'datasets', 'trueEff')))
-system (paste0 ('mkdir ', file.path (rootdir, 'datasets', 'mDats', 'MCAR')))
-system (paste0 ('mkdir ', file.path (rootdir, 'datasets', 'cDats', 'MCAR')))
-system (paste0 ('mkdir ', file.path (rootdir, 'datasets', 'trueEff', 'MCAR')))
+system (paste0 ('mkdir ', file.path (rootdir, ds)))
+system (paste0 ('mkdir ', file.path (rootdir, ds, 'mDats')))
+system (paste0 ('mkdir ', file.path (rootdir, ds, 'cDats')))
+system (paste0 ('mkdir ', file.path (rootdir, ds, 'trueEff')))
+system (paste0 ('mkdir ', file.path (rootdir, ds, 'mDats', mm)))
+system (paste0 ('mkdir ', file.path (rootdir, ds, 'cDats', mm)))
+system (paste0 ('mkdir ', file.path (rootdir, ds, 'trueEff', mm)))
 
 # These are for row-wise missing covariates
 # other than ECOG
 proportionList <- c(10, 30, 50)
-# These are for column-wise missing in ECOG
-ecogList <- c(10, 20, 30)
 
-system (paste0 ('mkdir ', file.path (rootdir, 'datasets', 'trueEff', 'MCAR', proportionList[1])))
-system (paste0 ('mkdir ', file.path (rootdir, 'datasets', 'trueEff', 'MCAR', proportionList[2])))
-system (paste0 ('mkdir ', file.path (rootdir, 'datasets', 'trueEff', 'MCAR', proportionList[3])))
+for (j in 1:length(proportionList)){
+  system (paste0 ('mkdir ', file.path (rootdir, ds, 'trueEff', mm, proportionList[j])))
+  system (paste0 ('mkdir ', file.path (rootdir, ds, 'mDats', mm, proportionList[j])))
+  system (paste0 ('mkdir ', file.path (rootdir, ds, 'cDats', mm, proportionList[j])))
+}
+
 iter <- 1000
 effOR <- 0.5
 
@@ -130,12 +136,20 @@ for (w in 1:3) {
 
     # Censoring hazard with newVar
     oc1 <- coxph(Surv(sdat.c$cmonth, sdat.c$ndead) ~ treat + b.ecogvalue, data = sdat.c, x = TRUE)
+
+    os1noECOG = coxph(Surv(sdat.c$cmonth, sdat.c$dead) ~ treat, data = sdat.c, x = TRUE)
+
+    oc1noECOG = coxph(Surv(sdat.c$cmonth, sdat.c$ndead) ~ treat, data = sdat.c, x = TRUE)
   } else{
     # Build outcome hazard with newVar
     os1 <- coxph(Surv(sdat.c$cmonth, sdat.c$dead) ~ treat + genderf + reth_black + reth_hisp + reth_oth + practypec + b.ecogvalue + smokey + dgradeh + surgery + site_ureter + site_renal + site_urethra + age + var1 + var2, data = sdat.c, x = TRUE)
 
     # Censoring hazard with newVar
     oc1 <- coxph(Surv(sdat.c$cmonth, sdat.c$ndead) ~ treat + genderf + reth_black + reth_hisp + reth_oth + practypec + b.ecogvalue + smokey + dgradeh + surgery + site_ureter + site_renal + site_urethra + age + var1 + var2, data = sdat.c, x = TRUE)
+
+    os1noECOG = coxph(Surv(sdat.c$cmonth, sdat.c$dead) ~ treat + genderf + reth_black + reth_hisp + reth_oth + practypec + smokey + dgradeh + surgery + site_ureter + site_renal + site_urethra + age + var1 + var2, data = sdat.c, x = TRUE)
+
+    oc1noECOG = coxph(Surv(sdat.c$cmonth, sdat.c$ndead) ~ treat + genderf + reth_black + reth_hisp + reth_oth + practypec + smokey + dgradeh + surgery + site_ureter + site_renal + site_urethra + age + var1 + var2, data = sdat.c, x = TRUE)
   }
 
   genDat <- function (k){
@@ -178,6 +192,18 @@ for (w in 1:3) {
         testdf <- dplyr::left_join(sor$Sim_Data, sdat.c, by = "patientid")
         testdf$dead <- sor$Sim_Data$EVENT1 * 1
         testdf$cmonth <- sor$Sim_Data$TIME1
+        if (FALSE){
+          colnames(sor$Sim_Data)[1] <- "patientid"
+          testdf <- dplyr::left_join(sor$Sim_Data, sdat.c, by = "patientid")
+          testdf$dead <- sor$Sim_Data$EVENT1 * 1
+          testdf$cmonth <- sor$Sim_Data$TIME1
+          os1test = coxph(Surv(testdf$cmonth, testdf$dead) ~ treat + b.ecogvalue, data=testdf, x=TRUE)
+          os1testNoECOG = coxph(Surv(testdf$cmonth, testdf$dead) ~ treat, data=testdf, x=TRUE)
+          os1testNoTreat = coxph(Surv(testdf$cmonth, testdf$dead) ~ b.ecogvalue, data=testdf, x=TRUE)
+          summary(os1test)
+          summary(os1testNoECOG)
+          summary(os1testNoTreat)
+        }
         os1test <- coxph(Surv(testdf$cmonth, testdf$dead) ~ treat + genderf + reth_black + reth_hisp + reth_oth + practypec + b.ecogvalue + smokey + dgradeh + surgery + site_ureter + site_renal + site_urethra + age + var1 + var2, data = testdf, x = TRUE)
         ps[l,] = summary(os1test)$coefficients[(lc-1):lc,5]
       }
@@ -206,15 +232,14 @@ for (w in 1:3) {
     # Computes columnwise prob of missing to reach
     # Pr(missing at least 1) = 10/30/50%
     # No missingness in txt
-    # ECOG treated separately, columnwise
     # Subtract 4 for race and site categories
     # Subtract 3 to exclude event, time, hazard
-    # Subtract 2 for treat and ECOG
-    nvars = ncol (wdat) - 4 - 3 - 2
+    # Subtract 1 for treat 
+    nvars = ncol (wdat) - 4 - 3 - 1
     multiplier <- 1 - exp(log(1 - proportionList[w] / 100) / nvars)
 
     # Add MCAR missingness to ECOG
-    miss.ind <- rbinom(wdat, 1, ecogList[w]/100)
+    miss.ind <- rbinom(wdat, 1, proportionList[w]/100)
     NAEcog <- wdat$b.ecogvalue
     NAEcog[miss.ind == 1] <- NA
 
@@ -301,14 +326,9 @@ for (w in 1:3) {
     effname <- paste0("propMiss_trueEffs", i, ".csv")
 
     propName <- proportionList[w]
-    system(paste0("mkdir ", file.path(rootdir, "datasets", "mDats", "MCAR", propName)))
-    system(paste0("mkdir ", file.path(rootdir, "datasets", "cDats", "MCAR", propName)))
-    write.csv(train, file.path(rootdir, "datasets/mDats/MCAR", propName, filename), row.names = F)
-    write.csv(cData, file.path(rootdir, "datasets/cDats/MCAR", propName, Cfilename), row.names = F)
-    if (simple){
-      write.csv(t (trueEffect), file.path(rootdir, "datasets/trueEff_simple/MCAR", propName, effname), row.names = F)
-    } else{
-      write.csv(t (trueEffect), file.path(rootdir, "datasets/trueEff/MCAR", propName, effname), row.names = F)
-    }
+
+    write.csv(train, file.path(rootdir, ds, "mDats", mm, propName, filename), row.names = F)
+    write.csv(cData, file.path(rootdir, ds, "cDats", mm, propName, Cfilename), row.names = F)
+    write.csv(t (trueEffect), file.path(rootdir, ds, "trueEff", mm, propName, effname), row.names = F)
   }
 }
