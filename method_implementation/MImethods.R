@@ -9,8 +9,10 @@ simple = as.character(args[3])=='TRUE'
 
 rootdir <- "/project/flatiron_ucc/programs/kylie/RunMe4"
 if (simple){
+  ds = 'datasets_simple'
   rd = file.path (rootdir, 'final_simple')
 } else{
+  ds = 'datasets'
   rd = file.path (rootdir, 'final_results')
 }
 system (paste0 ('mkdir ', rd))
@@ -23,17 +25,12 @@ for (k in 1:length(proportionList)) {
   system (paste0 ('mkdir ', file.path (rd, mech, propName)))
   print(propName)
   i <- as.numeric(args[1])
-  mData <- read.csv(file.path(rootdir, "datasets/mDats", mech, propName, paste0("mData", i, ".csv")))
-  cData <- read.csv(file.path(rootdir, "datasets/cDats", mech, propName, paste0("cData", i, ".csv")))
+  mData <- read.csv(file.path(rootdir, ds, "mDats", mech, propName, paste0("mData", i, ".csv")))
+  cData <- read.csv(file.path(rootdir, ds, "cDats", mech, propName, paste0("cData", i, ".csv")))
   cData <- cData[, -1]
-  if (simple){
-    truth <- read.csv(file.path(rootdir, "datasets/trueEff_simple", mech, propName, "propMiss_trueEffs1.csv"))
-  } else{
-    truth <- read.csv(file.path(rootdir, "datasets/trueEff", mech, propName, "propMiss_trueEffs1.csv"))
-  }
+  truth <- read.csv(file.path(rootdir, ds, "trueEff", mech, propName, "propMiss_trueEffs1.csv"))
   propMiss = truth[1]
   truth = as.numeric (as.matrix (truth[-1]))
-#  trueCoefs <- truth[names (truth)%in%c("TREAT", "b.ecogvalue", "var1", "var2")]
 
   mCat <- mData
   mCat$race <- rep(NA, nrow(mData))
@@ -119,7 +116,7 @@ for (k in 1:length(proportionList)) {
 
   print("RF imputation")
 
-  mData <- read.csv(file.path(rootdir, "datasets/mDats", mech, propName, paste0("mData", i, ".csv")))
+  mData <- read.csv(file.path(rootdir, ds, "mDats", mech, propName, paste0("mData", i, ".csv")))
 
   mCat <- mData
   mCat$race <- rep(NA, nrow(mData))
@@ -229,7 +226,7 @@ for (k in 1:length(proportionList)) {
   print("Complete Case")
 
   # compare exclude missingness dataset to OS1 estimates
-  mData <- read.csv(file.path(rootdir, "datasets/mDats", mech, propName, paste0("mData", i, ".csv")))
+  mData <- read.csv(file.path(rootdir, ds, "mDats", mech, propName, paste0("mData", i, ".csv")))
 
   ExcludeData <- mData[complete.cases(mData), ]
 

@@ -1,5 +1,25 @@
 module load python/3.8
-python aeCluster.py $LSB_JOBINDEX MCAR TRUE
-python aeCluster.py $LSB_JOBINDEX MAR TRUE
-python aeCluster.py $LSB_JOBINDEX MNAR1 TRUE
-python aeCluster.py $LSB_JOBINDEX MNAR2 TRUE
+python aeCluster.py $LSB_JOBINDEX MCAR 10 FALSE
+python aeCluster.py $LSB_JOBINDEX MAR 10 FALSE
+python aeCluster.py $LSB_JOBINDEX MNAR1 10 FALSE
+python aeCluster.py $LSB_JOBINDEX MNAR2 10 FALSE
+python aeCluster.py $LSB_JOBINDEX MCAR 30 FALSE
+python aeCluster.py $LSB_JOBINDEX MAR 30 FALSE
+python aeCluster.py $LSB_JOBINDEX MNAR1 30 FALSE
+python aeCluster.py $LSB_JOBINDEX MNAR2 30 FALSE
+python aeCluster.py $LSB_JOBINDEX MCAR 50 FALSE
+python aeCluster.py $LSB_JOBINDEX MAR 50 FALSE
+python aeCluster.py $LSB_JOBINDEX MNAR1 50 FALSE
+python aeCluster.py $LSB_JOBINDEX MNAR2 50 FALSE
+python aeCluster.py $LSB_JOBINDEX MCAR 10 TRUE
+python aeCluster.py $LSB_JOBINDEX MAR 10 TRUE
+python aeCluster.py $LSB_JOBINDEX MNAR1 10 TRUE
+python aeCluster.py $LSB_JOBINDEX MNAR2 10 TRUE
+python aeCluster.py $LSB_JOBINDEX MCAR 30 TRUE
+python aeCluster.py $LSB_JOBINDEX MAR 30 TRUE
+python aeCluster.py $LSB_JOBINDEX MNAR1 30 TRUE
+python aeCluster.py $LSB_JOBINDEX MNAR2 30 TRUE
+python aeCluster.py $LSB_JOBINDEX MCAR 50 TRUE
+python aeCluster.py $LSB_JOBINDEX MAR 50 TRUE
+python aeCluster.py $LSB_JOBINDEX MNAR1 50 TRUE
+python aeCluster.py $LSB_JOBINDEX MNAR2 50 TRUE
