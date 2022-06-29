@@ -95,6 +95,9 @@ levels (sdat.c$surgery) = c ('No surgery', 'Surgery')
 sdat.c$treat = factor (sdat.c$treat)
 levels (sdat.c$treat) = c ('Chemotherapy', 'Immunotherapy')
 
+sdat.c$dead = factor (sdat.c$dead)
+levels (sdat.c$dead) = c ('Survived', 'Died')
+
 
 n = group_by(sdat.c, treat) %>% summarize (., 'N'=n())
 N = as.integer (n$N)
@@ -194,14 +197,19 @@ site$Urethra = round (site$Urethra, 1)
 
 pctSite = data.frame('Variable'=rep ("Primary Site", 4),'subgroup'=c('Bladder', 'Ureter', 'Renal', 'Urethra'), 'Chemo'=c (paste0(site$N0[1], ' (', site$Bladder[1], ')'), paste0(site$N1[1], ' (', site$Ureter[1], ')'), paste0(site$N2[1], ' (', site$Renal[1], ')'), paste0(site$N3[1], ' (', site$Urethra[1], ')')), 'Immuno'=c (paste0(site$N0[2], ' (', site$Bladder[2], ')'), paste0(site$N1[2], ' (', site$Ureter[2], ')'), paste0(site$N2[2], ' (', site$Renal[2], ')'), paste0(site$N3[2], ' (', site$Urethra[2], ')')))
 
-
 binDf = rbind (pctSex, pctRace, pctSite, pctPrac, pctSmoke, pctGrade, pctSurg, pctEcog)
 binDf$Chemo = as.character(binDf$Chemo)
 binDf$Immuno = as.character(binDf$Immuno)
 colnames (binDf)[3:4] = c (name1, name2)
 
 #dfCont = data.frame ('Variable'=c ('N', 'Age', 'ECOG'), 'subgroup'=c ('N', 'Age (mean, SD)', 'ECOG PS (mean, SD)'), 'Chemo'=c (N[1], contDf[1,1], contDf[2,1]), 'Immuno'=c (N[2], contDf[2,1], contDf[2,2]))
-dfCont = data.frame ('Variable'=c ('N', 'Age'), 'subgroup'=c ('N', 'Age (mean, SD)'), 'Chemo'=c (N[1], contDf[1,1]), 'Immuno'=c (N[2], contDf[1,2]))
+
+dead = group_by(sdat.c, treat) %>% summarize (., 'Died'=100*mean (dead=='Died'), 'N0'=sum(dead=='Died'))
+dead$Died = round (dead$Died, 1)
+
+pctDead = data.frame('Variable'=rep ("Outcome", 1),'subgroup'=c('Died'), 'Chemo'=c (paste0 (dead$N0[1], ' (', dead$Died[1], ')')), 'Immuno'=c (paste0 (dead$N0[2], ' (', dead$Died[2], ')')))
+
+dfCont = data.frame ('Variable'=c ('N', 'Died', 'Age'), 'subgroup'=c ('N', 'Died (N, %)', 'Age (mean, SD)'), 'Chemo'=c (N[1], pctDead[1,3], contDf[1,1]), 'Immuno'=c (N[2], pctDead[1,4], contDf[1,2]))
 colnames (dfCont)[2:4] = c ('subgroup', name1, name2)
 
 allDf = rbind (dfCont, binDf)
@@ -213,14 +221,14 @@ colnames (allDf)[1] = " "
 if (!completeCaseVersion){
 kable(allDf, row.names=FALSE, align=c("l", "c", "c"), format = "latex", booktabs = T) %>%
   kable_styling(latex_options = c("striped", "hold_position"), full_width = F) %>%
-  pack_rows("Sex N (%)", 3, 5) %>% 
+  pack_rows("Sex N (%)", 4, 5) %>% 
   pack_rows("Race N (%)", 6, 9) %>% 
   pack_rows("Primary Site N (%)", 10, 13) %>% 
   pack_rows("Practice Type N (%)", 14, 15) %>% 
   pack_rows("Smoking Status N (%)", 16, 17) %>% 
   pack_rows("Grade N (%)", 18, 19) %>% 
   pack_rows("Surgery N (%)", 20, 21) %>%
-  pack_rows("ECOG N (%)", 22, 26)
+  pack_rows("ECOG N (%)", 22, 25)
 } else{
 kable(allDf, row.names=FALSE, align=c("l", "c", "c"), format = "latex", booktabs = T) %>%
   kable_styling(latex_options = c("striped", "hold_position"), full_width = F) %>%
