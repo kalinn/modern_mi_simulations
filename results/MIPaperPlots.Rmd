@@ -1,7 +1,7 @@
 ---
 title: "MI Paper Plots"
 author: "Kylie Getz and Kristin Linn"
-date: "6/3/2022"
+date: "6/28/2022"
 output: pdf_document
 ---
 
@@ -24,9 +24,9 @@ library(reshape2)
 
 rootdir = "~/Box Sync/Mentoring/Students/Getz_Kylie/results"
 #rootdir = "~/Box/Mentoring/Students/Getz_Kylie/results"
-regDir = file.path (rootdir, "2022_06_03/final_results")
-simpDir = file.path (rootdir, "2022_06_03/final_simple")
-ldDir = file.path (rootdir, "2022_06_03/final_lowDim")
+regDir = file.path (rootdir, "2022_06_28/final_results")
+simpDir = file.path (rootdir, "2022_06_28/final_simple")
+ldDir = file.path (rootdir, "2022_06_28/final_lowDim")
 
 getDfs <- function (mdm, pc, fdir=regDir, aedir=regDir){
   # Oracle, CC, MICE, and RF
