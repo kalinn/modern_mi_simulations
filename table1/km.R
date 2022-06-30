@@ -1,6 +1,7 @@
 library(Plasmode)
 library(dplyr)
 library(Survival)
+library(survminer)
 
 rootdir <- "/project/flatiron_ucc/programs/kylie/RunMe"
 ################################################################################
@@ -57,3 +58,9 @@ if (completeCaseVersion){
 
 f1 <- survfit(Surv(cmonth, dead) ~ 1, data = sdat.c)
 
+sdat.c$treat = factor (sdat.c$treat)
+levels (sdat.c$treat) = c ('Chemotherapy', 'Immunotherapy')
+
+png('/home/klinn/mi_km_curves.png', width=5.5, height=4, units='in', res=300, pointsize=10)
+ggsurvplot(fit=survfit(Surv(cmonth, dead) ~ treat, data = sdat.c), xlab = "Month", ylab = "Overall survival probability")
+dev.off()
