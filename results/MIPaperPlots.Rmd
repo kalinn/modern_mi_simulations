@@ -5,7 +5,7 @@ date: "6/28/2022"
 output: pdf_document
 ---
 
-Results using 500 simulations, 10 MI
+Results using 1000 simulations, 10 MI
 trueTreatment approx -0.69, trueEcog appox 0.4
 
 os1 <- coxph(Surv(cmonth, dead) ~ treat + genderf +  
@@ -21,6 +21,8 @@ library(xtable)
 library(kableExtra)
 library(dplyr)
 library(reshape2)
+
+mi_plots = FALSE
 
 rootdir = "~/Box Sync/Mentoring/Students/Getz_Kylie/results"
 #rootdir = "~/Box/Mentoring/Students/Getz_Kylie/results"
@@ -82,7 +84,7 @@ allData = rbind (MCAR, MAR, MNAR1, MNAR2)
 
 mycols = c ("#D55E00", "#E69F00", "#2271B2", "#3DB7E9", "#359B73")
 
-plotOne <- function (data, mdm, variable){
+plotOne <- function (data, mdm, variable, ylimit=NULL){
   varnames = names (data)
   keep = varnames[which (varnames==variable)]
   data$mech = factor (data$mech)
@@ -114,15 +116,18 @@ plotOne <- function (data, mdm, variable){
     scale_x_discrete(breaks=c("CC","MICE","RF","DAE","ORACLE")) + 
     theme(legend.position = 'none') +
     scale_fill_manual(values=mycols)
+    if (!is.null (ylimit)){
+      gg = gg + coord_cartesian(ylim=ylimit)
+    }
   return (gg)
 }
 
 
-percPlot = function (data, variable){
-  mcar = plotOne (data, mdm='MCAR', variable)
-  mar = plotOne (data, mdm='MAR', variable)
-  mnar1 = plotOne (data, mdm='MNAR1', variable)
-  mnar2 = plotOne (data, mdm='MNAR2', variable)
+percPlot = function (data, variable, y=NULL){
+  mcar = plotOne (data, mdm='MCAR', variable, y)
+  mar = plotOne (data, mdm='MAR', variable, y)
+  mnar1 = plotOne (data, mdm='MNAR1', variable, y)
+  mnar2 = plotOne (data, mdm='MNAR2', variable, y)
   op = grid.arrange(mcar, mar, mnar1, mnar2, nrow = 2)
   return (op)
 }
@@ -259,11 +264,22 @@ percPlot(allData, 'var2')
 ## All Figures
 ```{r echo=F}
 vars = names (allData)[1:16]
-for (i in 1:length (vars)){
-  pdf (paste0 ('~/Desktop/mi_plots/regular_', vars[i], '.pdf'))
-  percPlot(allData, vars[i])
-  dev.off()
+if (mi_plots){
+  for (i in 1:length (vars)){
+    pdf (paste0 ('~/Desktop/mi_plots/regular_', vars[i], '.pdf'))
+    percPlot(allData, vars[i])
+    dev.off()
+  }
 }
+
+# With fixed y axis
+pdf (paste0 ('~/Desktop/plotAllECOG.pdf'), width=6, height=6, pointsize=1)
+percPlot(allData, 'b.ecogvalue', y=c(-0.3,0.2))
+dev.off()
+pdf (paste0 ('~/Desktop/plotAllTreat.pdf'), width=6, height=6, pointsize=1)
+percPlot(allData, 'treat', y=c(-0.5,0.5))
+dev.off()
+
 ```
 
 
@@ -362,6 +378,7 @@ percPlot(allData, 'b.ecogvalue')
 
 ## All Figures
 ```{r echo=F}
+if (mi_plots){
 pdf (paste0 ('~/Desktop/mi_plots/simple_treat.pdf'))
 percPlot(allData, 'treat')
 dev.off()
@@ -369,6 +386,7 @@ dev.off()
 pdf (paste0 ('~/Desktop/mi_plots/simple_b.ecogvalue.pdf'))
 percPlot(allData, 'b.ecogvalue')
 dev.off()
+}
 ```
 
 
@@ -401,7 +419,7 @@ allData = rbind (MCAR, MAR, MNAR1, MNAR2)
 
 mycols = c ("#D55E00", "#E69F00", "#2271B2", "#3DB7E9", "#359B73")
 
-plotOne <- function (data, mdm, variable){
+plotOne <- function (data, mdm, variable, ylimit=NULL){
   varnames = names (data)
   keep = varnames[which (varnames==variable)]
   data$mech = factor (data$mech)
@@ -433,15 +451,18 @@ plotOne <- function (data, mdm, variable){
     scale_x_discrete(breaks=c("CC","MICE","RF","DAE","ORACLE")) + 
     theme(legend.position = 'none') +
     scale_fill_manual(values=mycols)
+    if (!is.null (ylimit)){
+      gg = gg + coord_cartesian(ylim=ylimit)
+    }
   return (gg)
 }
 
 
-percPlot = function (data, variable){
-  mcar = plotOne (data, mdm='MCAR', variable)
-  mar = plotOne (data, mdm='MAR', variable)
-  mnar1 = plotOne (data, mdm='MNAR1', variable)
-  mnar2 = plotOne (data, mdm='MNAR2', variable)
+percPlot = function (data, variable, y=NULL){
+  mcar = plotOne (data, mdm='MCAR', variable, y)
+  mar = plotOne (data, mdm='MAR', variable, y)
+  mnar1 = plotOne (data, mdm='MNAR1', variable, y)
+  mnar2 = plotOne (data, mdm='MNAR2', variable, y)
   op = grid.arrange(mcar, mar, mnar1, mnar2, nrow = 2)
   return (op)
 }
@@ -578,9 +599,19 @@ percPlot(allData, 'var2')
 ## All Figures
 ```{r echo=F}
 vars = names (allData)[1:16]
-for (i in 1:length (vars)){
-  pdf (paste0 ('~/Desktop/mi_plots/lowDim_', vars[i], '.pdf'))
-  percPlot(allData, vars[i])
-  dev.off()
+if (mi_plots){
+  for (i in 1:length (vars)){
+    pdf (paste0 ('~/Desktop/mi_plots/lowDim_', vars[i], '.pdf'))
+    percPlot(allData, vars[i])
+    dev.off()
+  }
 }
+
+# With fixed y axis
+pdf (paste0 ('~/Desktop/plotAllECOG_lowDim.pdf'), width=6, height=6, pointsize=1)
+percPlot(allData, 'b.ecogvalue', y=c(-0.3,0.2))
+dev.off()
+pdf (paste0 ('~/Desktop/plotAllTreat_lowDim.pdf'), width=6, height=6, pointsize=1)
+percPlot(allData, 'treat', y=c(-0.5,0.5))
+dev.off()
 ```

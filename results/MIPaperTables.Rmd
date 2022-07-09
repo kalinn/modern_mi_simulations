@@ -134,57 +134,57 @@ print(tab1final)
 # Table 2: Treat SE and coverage
 
 # MCAR
-tab4MCARse = filter (getRows[,seCols], type=='MCAR')
-tab4MCARcoverage = filter (getRows[,coverageCols], type=='MCAR')
-tab4MCARse$type = NULL
-tab4MCARcoverage$type = NULL
+tab2MCARse = filter (getRows[,seCols], type=='MCAR')
+tab2MCARcoverage = filter (getRows[,coverageCols], type=='MCAR')
+tab2MCARse$type = NULL
+tab2MCARcoverage$type = NULL
 
-tab4MCAR <- cbind(t (tab4MCARse), t (tab4MCARcoverage))
+tab2MCAR <- cbind(t (tab2MCARse), t (tab2MCARcoverage))
 prop <- c(10,30,50,10,30,50)
-tab4MCAR <- rbind(prop,tab4MCAR)
-rownames(tab4MCAR) <- c("prop","ORACLE", "CC", "MICE", "RF", "DAE")
+tab2MCAR <- rbind(prop,tab2MCAR)
+rownames(tab2MCAR) <- c("prop","ORACLE", "CC", "MICE", "RF", "DAE")
 
 # MAR
-tab4MARse = filter (getRows[,seCols], type=='MAR')
-tab4MARcoverage = filter (getRows[,coverageCols], type=='MAR')
-tab4MARse$type = NULL
-tab4MARcoverage$type = NULL
+tab2MARse = filter (getRows[,seCols], type=='MAR')
+tab2MARcoverage = filter (getRows[,coverageCols], type=='MAR')
+tab2MARse$type = NULL
+tab2MARcoverage$type = NULL
 
-tab4MAR <- cbind(t (tab4MARse), t (tab4MARcoverage))
+tab2MAR <- cbind(t (tab2MARse), t (tab2MARcoverage))
 prop <- c(10,30,50,10,30,50)
-tab4MAR <- rbind(prop,tab4MAR)
-rownames(tab4MAR) <- c("prop","ORACLE", "CC", "MICE", "RF", "DAE")
+tab2MAR <- rbind(prop,tab2MAR)
+rownames(tab2MAR) <- c("prop","ORACLE", "CC", "MICE", "RF", "DAE")
 
 # MNAR1
-tab4MNAR1se = filter (getRows[,seCols], type=='MNAR1')
-tab4MNAR1coverage = filter (getRows[,coverageCols], type=='MNAR1')
-tab4MNAR1se$type = NULL
-tab4MNAR1coverage$type = NULL
+tab2MNAR1se = filter (getRows[,seCols], type=='MNAR1')
+tab2MNAR1coverage = filter (getRows[,coverageCols], type=='MNAR1')
+tab2MNAR1se$type = NULL
+tab2MNAR1coverage$type = NULL
 
-tab4MNAR1 <- cbind(t (tab4MNAR1se), t (tab4MNAR1coverage))
+tab2MNAR1 <- cbind(t (tab2MNAR1se), t (tab2MNAR1coverage))
 prop <- c(10,30,50,10,30,50)
-tab4MNAR1 <- rbind(prop,tab4MNAR1)
-rownames(tab4MNAR1) <- c("prop","ORACLE", "CC", "MICE", "RF", "DAE")
+tab2MNAR1 <- rbind(prop,tab2MNAR1)
+rownames(tab2MNAR1) <- c("prop","ORACLE", "CC", "MICE", "RF", "DAE")
 
 # MNAR2
-tab4MNAR2se = filter (getRows[,seCols], type=='MNAR2')
-tab4MNAR2coverage = filter (getRows[,coverageCols], type=='MNAR2')
-tab4MNAR2se$type = NULL
-tab4MNAR2coverage$type = NULL
+tab2MNAR2se = filter (getRows[,seCols], type=='MNAR2')
+tab2MNAR2coverage = filter (getRows[,coverageCols], type=='MNAR2')
+tab2MNAR2se$type = NULL
+tab2MNAR2coverage$type = NULL
 
-tab4MNAR2 <- cbind(t (tab4MNAR2se), t (tab4MNAR2coverage))
+tab2MNAR2 <- cbind(t (tab2MNAR2se), t (tab2MNAR2coverage))
 prop <- c(10,30,50,10,30,50)
-tab4MNAR2 <- rbind(prop,tab4MNAR2)
-rownames(tab4MNAR2) <- c("prop","ORACLE", "CC", "MICE", "RF", "DAE")
+tab2MNAR2 <- rbind(prop,tab2MNAR2)
+rownames(tab2MNAR2) <- c("prop","ORACLE", "CC", "MICE", "RF", "DAE")
 
 # All mechs
-tab4final <- rbind(tab4MCAR,tab4MAR,tab4MNAR1,tab4MNAR2)
-print(tab4final)
+tab2final <- rbind(tab2MCAR,tab2MAR,tab2MNAR1,tab2MNAR2)
+print(tab2final)
 
 tab1Treat <- round (tab1final, 4)
-tab4Treat <- round (tab4final, 4)
+tab2Treat <- round (tab2final, 4)
 tab1Treat = tab1Treat[-c (1, 7:8,13:14,19:20),]
-tab4Treat = tab4Treat[-c (1, 7:8,13:14,19:20),]
+tab2Treat = tab2Treat[-c (1, 7:8,13:14,19:20),]
 ```
 
 \newpage
@@ -208,7 +208,7 @@ kable(tab1Treat, row.names=TRUE, align=c("l", "c", "c", "c", "c", "c", "c"), for
 \newpage
 
 ```{r echo=FALSE}
-kable(tab4Treat, row.names=TRUE, align=c("l", "c", "c", "c", "c", "c", "c"), format = "latex", booktabs = T, linesep = lsep, caption = "Treatment") %>%
+kable(tab2Treat, row.names=TRUE, align=c("l", "c", "c", "c", "c", "c", "c"), format = "latex", booktabs = T, linesep = lsep, caption = "Treatment") %>%
   kable_styling(latex_options = c("striped", "hold_position"), full_width = F) %>%
   add_header_above(c(" "=1, "Low"=1, "Medium"=1, "High"=1, "Low"=1, "Medium"=1, "High"=1)) %>%
   add_header_above(c(" "=1, "SE"=3, "Coverage"=3)) %>% 

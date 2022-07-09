@@ -1,5 +1,5 @@
 ---
-title: "MI Paper Tables - Lower dimension DAE"
+title: "MI Paper Tables"
 author: "Kylie Getz and Kristin Linn"
 date: "6/28/2022"
 output: pdf_document
@@ -11,8 +11,7 @@ trueTreatment approx -0.69, trueEcog appox 0.4
 os1 <- coxph(Surv(cmonth, dead) ~ treat + genderf +  
 reth_black + reth_hisp + reth_oth + practypec + b.ecogvalue + smokey +  dgradeh + surgery + site_ureter + site_renal + site_urethra + age + var1 + var2, data=sdat.c, x=T)
 
-# Low Dimensional DAE Results
-
+# Full Model Results 
 ```{r echo=F, include=F}
 library(ggplot2)
 library(gridExtra)
@@ -23,7 +22,7 @@ library(dplyr)
 library(reshape2)
 
 rootdir = "~/Box Sync/Mentoring/Students/Getz_Kylie/results"
-fdir = file.path (rootdir, "2022_06_28/final_lowDim")
+fdir = file.path (rootdir, "2022_06_28/final_results")
 
 getDfs <- function (mdm, pc){
   # Oracle, CC, MICE, and RF
@@ -38,6 +37,7 @@ getDfs <- function (mdm, pc){
   avgDf$percMiss = pc
   return (avgDf)
 }
+
 MCAR10 = getDfs ('MCAR', 10)
 MCAR30 = getDfs ('MCAR', 30)
 MCAR50 = getDfs ('MCAR', 50)
@@ -80,56 +80,26 @@ mseCols = c (14:17, 21, 23)
 ```
 
 ```{r echo=F, include=F}
+prop <- c(10,30,50,10,30,50,10,30,50)
+
 # Table 1: Treat Bias and MSE
 getRows = allData[TreatInds,]
 
 # MCAR
 tab1MCARbias = filter (getRows[,biasCols], type=='MCAR')
-tab1MCARmse = filter (getRows[,mseCols], type=='MCAR')
 tab1MCARbias$type = NULL
-tab1MCARmse$type = NULL
-
-tab1MCAR <- cbind(t (tab1MCARbias), t (tab1MCARmse))
-prop <- c(10,30,50,10,30,50)
-tab1MCAR <- rbind(prop,tab1MCAR)
-rownames(tab1MCAR) <- c("prop","ORACLE", "CC", "MICE", "RF", "DAE")
 
 # MAR
 tab1MARbias = filter (getRows[,biasCols], type=='MAR')
-tab1MARmse = filter (getRows[,mseCols], type=='MAR')
 tab1MARbias$type = NULL
-tab1MARmse$type = NULL
-
-tab1MAR <- cbind(t (tab1MARbias), t (tab1MARmse))
-prop <- c(10,30,50,10,30,50)
-tab1MAR <- rbind(prop,tab1MAR)
-rownames(tab1MAR) <- c("prop","ORACLE", "CC", "MICE", "RF", "DAE")
 
 # MNAR1
 tab1MNAR1bias = filter (getRows[,biasCols], type=='MNAR1')
-tab1MNAR1mse = filter (getRows[,mseCols], type=='MNAR1')
 tab1MNAR1bias$type = NULL
-tab1MNAR1mse$type = NULL
-
-tab1MNAR1 <- cbind(t (tab1MNAR1bias), t (tab1MNAR1mse))
-prop <- c(10,30,50,10,30,50)
-tab1MNAR1 <- rbind(prop,tab1MNAR1)
-rownames(tab1MNAR1) <- c("prop","ORACLE", "CC", "MICE", "RF", "DAE")
 
 # MNAR2
 tab1MNAR2bias = filter (getRows[,biasCols], type=='MNAR2')
-tab1MNAR2mse = filter (getRows[,mseCols], type=='MNAR2')
 tab1MNAR2bias$type = NULL
-tab1MNAR2mse$type = NULL
-
-tab1MNAR2 <- cbind(t (tab1MNAR2bias), t (tab1MNAR2mse))
-prop <- c(10,30,50,10,30,50)
-tab1MNAR2 <- rbind(prop,tab1MNAR2)
-rownames(tab1MNAR2) <- c("prop","ORACLE", "CC", "MICE", "RF", "DAE")
-
-# All mechs
-tab1final <- rbind(tab1MCAR,tab1MAR,tab1MNAR1,tab1MNAR2)
-print(tab1final)
 
 # Table 2: Treat SE and coverage
 
@@ -139,8 +109,7 @@ tab2MCARcoverage = filter (getRows[,coverageCols], type=='MCAR')
 tab2MCARse$type = NULL
 tab2MCARcoverage$type = NULL
 
-tab2MCAR <- cbind(t (tab2MCARse), t (tab2MCARcoverage))
-prop <- c(10,30,50,10,30,50)
+tab2MCAR <- cbind(t (tab1MCARbias), t (tab2MCARse), t (tab2MCARcoverage))
 tab2MCAR <- rbind(prop,tab2MCAR)
 rownames(tab2MCAR) <- c("prop","ORACLE", "CC", "MICE", "RF", "DAE")
 
@@ -150,8 +119,7 @@ tab2MARcoverage = filter (getRows[,coverageCols], type=='MAR')
 tab2MARse$type = NULL
 tab2MARcoverage$type = NULL
 
-tab2MAR <- cbind(t (tab2MARse), t (tab2MARcoverage))
-prop <- c(10,30,50,10,30,50)
+tab2MAR <- cbind(t (tab1MARbias), t (tab2MARse), t (tab2MARcoverage))
 tab2MAR <- rbind(prop,tab2MAR)
 rownames(tab2MAR) <- c("prop","ORACLE", "CC", "MICE", "RF", "DAE")
 
@@ -161,8 +129,7 @@ tab2MNAR1coverage = filter (getRows[,coverageCols], type=='MNAR1')
 tab2MNAR1se$type = NULL
 tab2MNAR1coverage$type = NULL
 
-tab2MNAR1 <- cbind(t (tab2MNAR1se), t (tab2MNAR1coverage))
-prop <- c(10,30,50,10,30,50)
+tab2MNAR1 <- cbind(t (tab1MNAR1bias), t (tab2MNAR1se), t (tab2MNAR1coverage))
 tab2MNAR1 <- rbind(prop,tab2MNAR1)
 rownames(tab2MNAR1) <- c("prop","ORACLE", "CC", "MICE", "RF", "DAE")
 
@@ -172,8 +139,7 @@ tab2MNAR2coverage = filter (getRows[,coverageCols], type=='MNAR2')
 tab2MNAR2se$type = NULL
 tab2MNAR2coverage$type = NULL
 
-tab2MNAR2 <- cbind(t (tab2MNAR2se), t (tab2MNAR2coverage))
-prop <- c(10,30,50,10,30,50)
+tab2MNAR2 <- cbind(t (tab1MNAR2bias), t (tab2MNAR2se), t (tab2MNAR2coverage))
 tab2MNAR2 <- rbind(prop,tab2MNAR2)
 rownames(tab2MNAR2) <- c("prop","ORACLE", "CC", "MICE", "RF", "DAE")
 
@@ -181,9 +147,7 @@ rownames(tab2MNAR2) <- c("prop","ORACLE", "CC", "MICE", "RF", "DAE")
 tab2final <- rbind(tab2MCAR,tab2MAR,tab2MNAR1,tab2MNAR2)
 print(tab2final)
 
-tab1Treat <- round (tab1final, 4)
 tab2Treat <- round (tab2final, 4)
-tab1Treat = tab1Treat[-c (1, 7:8,13:14,19:20),]
 tab2Treat = tab2Treat[-c (1, 7:8,13:14,19:20),]
 ```
 
@@ -191,12 +155,12 @@ tab2Treat = tab2Treat[-c (1, 7:8,13:14,19:20),]
 
 ## Treat
 ```{r echo=FALSE}
-lsep = c("\\addlinespace", "", "", "", "\\addlinespace", "", "", "", "\\addlinespace", "", "", "", "")
+lsep = c("\\addlinespace", "", "", "", "\\addlinespace", "", "", "", "\\addlinespace", "", "", "", "", "\\addlinespace", "", "", "", "")
 
-kable(tab1Treat, row.names=TRUE, align=c("l", "c", "c", "c", "c", "c", "c"), format = "latex", booktabs = T, linesep = lsep, caption = "Treatment") %>%
+kable(tab2Treat, row.names=TRUE, align=c("l", "c", "c", "c", "c", "c", "c", "c", "c", "c"), format = "latex", booktabs = T, linesep = lsep, caption = "Treatment") %>%
   kable_styling(latex_options = c("striped", "hold_position"), full_width = F) %>%
-  add_header_above(c(" "=1, "Low"=1, "Medium"=1, "High"=1, "Low"=1, "Medium"=1, "High"=1)) %>%
-  add_header_above(c(" "=1, "Bias"=3, "MSE"=3)) %>% 
+  add_header_above(c(" "=1, "Low"=1, "Medium"=1, "High"=1, "Low"=1, "Medium"=1, "High"=1, "Low"=1, "Medium"=1, "High"=1)) %>%
+  add_header_above(c(" "=1, "Bias"=3, "SE"=3, "Coverage"=3)) %>% 
   pack_rows("MCAR", 2, 5) %>% 
   pack_rows("MAR", 6, 9) %>% 
   pack_rows("MNAR 1", 10, 13) %>% 
@@ -207,71 +171,25 @@ kable(tab1Treat, row.names=TRUE, align=c("l", "c", "c", "c", "c", "c", "c"), for
 
 \newpage
 
-```{r echo=FALSE}
-kable(tab2Treat, row.names=TRUE, align=c("l", "c", "c", "c", "c", "c", "c"), format = "latex", booktabs = T, linesep = lsep, caption = "Treatment") %>%
-  kable_styling(latex_options = c("striped", "hold_position"), full_width = F) %>%
-  add_header_above(c(" "=1, "Low"=1, "Medium"=1, "High"=1, "Low"=1, "Medium"=1, "High"=1)) %>%
-  add_header_above(c(" "=1, "SE"=3, "Coverage"=3)) %>% 
-  pack_rows("MCAR", 2, 5) %>% 
-  pack_rows("MAR", 6, 9) %>% 
-  pack_rows("MNAR 1", 10, 13) %>% 
-  pack_rows("MNAR 2", 14, 17) 
-
-```
-
-
-
 ```{r echo=F, include=F}
 # Table 3: ECOG Bias and MSE
 getRows = allData[EcogInds,]
 
 # MCAR
 tab3MCARbias = filter (getRows[,biasCols], type=='MCAR')
-tab3MCARmse = filter (getRows[,mseCols], type=='MCAR')
 tab3MCARbias$type = NULL
-tab3MCARmse$type = NULL
-
-tab3MCAR <- cbind(t (tab3MCARbias), t (tab3MCARmse))
-prop <- c(10,30,50,10,30,50)
-tab3MCAR <- rbind(prop,tab3MCAR)
-rownames(tab3MCAR) <- c("prop","ORACLE", "CC", "MICE", "RF", "DAE")
 
 # MAR
 tab3MARbias = filter (getRows[,biasCols], type=='MAR')
-tab3MARmse = filter (getRows[,mseCols], type=='MAR')
 tab3MARbias$type = NULL
-tab3MARmse$type = NULL
-
-tab3MAR <- cbind(t (tab3MARbias), t (tab3MARmse))
-prop <- c(10,30,50,10,30,50)
-tab3MAR <- rbind(prop,tab3MAR)
-rownames(tab3MAR) <- c("prop","ORACLE", "CC", "MICE", "RF", "DAE")
 
 # MNAR1
 tab3MNAR1bias = filter (getRows[,biasCols], type=='MNAR1')
-tab3MNAR1mse = filter (getRows[,mseCols], type=='MNAR1')
 tab3MNAR1bias$type = NULL
-tab3MNAR1mse$type = NULL
-
-tab3MNAR1 <- cbind(t (tab3MNAR1bias), t (tab3MNAR1mse))
-prop <- c(10,30,50,10,30,50)
-tab3MNAR1 <- rbind(prop,tab3MNAR1)
-rownames(tab3MNAR1) <- c("prop","ORACLE", "CC", "MICE", "RF", "DAE")
 
 # MNAR2
 tab3MNAR2bias = filter (getRows[,biasCols], type=='MNAR2')
-tab3MNAR2mse = filter (getRows[,mseCols], type=='MNAR2')
 tab3MNAR2bias$type = NULL
-tab3MNAR2mse$type = NULL
-
-tab3MNAR2 <- cbind(t (tab3MNAR2bias), t (tab3MNAR2mse))
-prop <- c(10,30,50,10,30,50)
-tab3MNAR2 <- rbind(prop,tab3MNAR2)
-rownames(tab3MNAR2) <- c("prop","ORACLE", "CC", "MICE", "RF", "DAE")
-
-# All mechs
-tab3final <- rbind(tab3MCAR,tab3MAR,tab3MNAR1,tab3MNAR2)
-print(tab3final)
 
 # Table 4: ECOG SE and coverage
 
@@ -281,8 +199,7 @@ tab4MCARcoverage = filter (getRows[,coverageCols], type=='MCAR')
 tab4MCARse$type = NULL
 tab4MCARcoverage$type = NULL
 
-tab4MCAR <- cbind(t (tab4MCARse), t (tab4MCARcoverage))
-prop <- c(10,30,50,10,30,50)
+tab4MCAR <- cbind(t (tab3MCARbias), t (tab4MCARse), t (tab4MCARcoverage))
 tab4MCAR <- rbind(prop,tab4MCAR)
 rownames(tab4MCAR) <- c("prop","ORACLE", "CC", "MICE", "RF", "DAE")
 
@@ -292,8 +209,7 @@ tab4MARcoverage = filter (getRows[,coverageCols], type=='MAR')
 tab4MARse$type = NULL
 tab4MARcoverage$type = NULL
 
-tab4MAR <- cbind(t (tab4MARse), t (tab4MARcoverage))
-prop <- c(10,30,50,10,30,50)
+tab4MAR <- cbind(t (tab3MARbias), t (tab4MARse), t (tab4MARcoverage))
 tab4MAR <- rbind(prop,tab4MAR)
 rownames(tab4MAR) <- c("prop","ORACLE", "CC", "MICE", "RF", "DAE")
 
@@ -303,8 +219,7 @@ tab4MNAR1coverage = filter (getRows[,coverageCols], type=='MNAR1')
 tab4MNAR1se$type = NULL
 tab4MNAR1coverage$type = NULL
 
-tab4MNAR1 <- cbind(t (tab4MNAR1se), t (tab4MNAR1coverage))
-prop <- c(10,30,50,10,30,50)
+tab4MNAR1 <- cbind(t (tab3MNAR1bias), t (tab4MNAR1se), t (tab4MNAR1coverage))
 tab4MNAR1 <- rbind(prop,tab4MNAR1)
 rownames(tab4MNAR1) <- c("prop","ORACLE", "CC", "MICE", "RF", "DAE")
 
@@ -314,8 +229,7 @@ tab4MNAR2coverage = filter (getRows[,coverageCols], type=='MNAR2')
 tab4MNAR2se$type = NULL
 tab4MNAR2coverage$type = NULL
 
-tab4MNAR2 <- cbind(t (tab4MNAR2se), t (tab4MNAR2coverage))
-prop <- c(10,30,50,10,30,50)
+tab4MNAR2 <- cbind(t (tab3MNAR2bias), t (tab4MNAR2se), t (tab4MNAR2coverage))
 tab4MNAR2 <- rbind(prop,tab4MNAR2)
 rownames(tab4MNAR2) <- c("prop","ORACLE", "CC", "MICE", "RF", "DAE")
 
@@ -323,9 +237,7 @@ rownames(tab4MNAR2) <- c("prop","ORACLE", "CC", "MICE", "RF", "DAE")
 tab4final <- rbind(tab4MCAR,tab4MAR,tab4MNAR1,tab4MNAR2)
 print(tab4final)
 
-tab3ECOG <- round (tab3final, 4)
 tab4ECOG <- round (tab4final, 4)
-tab3ECOG = tab3ECOG[-c (1, 7:8,13:14,19:20),]
 tab4ECOG = tab4ECOG[-c (1, 7:8,13:14,19:20),]
 ```
 
@@ -333,12 +245,12 @@ tab4ECOG = tab4ECOG[-c (1, 7:8,13:14,19:20),]
 
 ## ECOG
 ```{r echo=FALSE}
-lsep = c("\\addlinespace", "", "", "", "\\addlinespace", "", "", "", "\\addlinespace", "", "", "", "")
+lsep = c("\\addlinespace", "", "", "", "\\addlinespace", "", "", "", "\\addlinespace", "", "", "", "", "\\addlinespace", "", "", "", "")
 
-kable(tab3ECOG, row.names=TRUE, align=c("l", "c", "c", "c", "c", "c", "c"), format = "latex", booktabs = T, linesep = lsep, caption = "ECOG") %>%
+kable(tab4ECOG, row.names=TRUE, align=c("l", "c", "c", "c", "c", "c", "c", "c", "c", "c"), format = "latex", booktabs = T, linesep = lsep, caption = "ECOG") %>%
   kable_styling(latex_options = c("striped", "hold_position"), full_width = F) %>%
-  add_header_above(c(" "=1, "Low"=1, "Medium"=1, "High"=1, "Low"=1, "Medium"=1, "High"=1)) %>%
-  add_header_above(c(" "=1, "Bias"=3, "MSE"=3)) %>% 
+  add_header_above(c(" "=1, "Low"=1, "Medium"=1, "High"=1, "Low"=1, "Medium"=1, "High"=1, "Low"=1, "Medium"=1, "High"=1)) %>%
+  add_header_above(c(" "=1, "Bias"=3, "SE"=3, "Coverage"=3)) %>% 
   pack_rows("MCAR", 2, 5) %>% 
   pack_rows("MAR", 6, 9) %>% 
   pack_rows("MNAR 1", 10, 13) %>% 
@@ -347,17 +259,5 @@ kable(tab3ECOG, row.names=TRUE, align=c("l", "c", "c", "c", "c", "c", "c"), form
 #  group_rows(index=c(" "=1, "MCAR"=4, "MAR"=4, "MNAR 1"=4, "MNAR 2"=4))
 ```
 
-\newpage
 
-```{r echo=FALSE}
-kable(tab4ECOG, row.names=TRUE, align=c("l", "c", "c", "c", "c", "c", "c"), format = "latex", booktabs = T, linesep = lsep, caption = "ECOG") %>%
-  kable_styling(latex_options = c("striped", "hold_position"), full_width = F) %>%
-  add_header_above(c(" "=1, "Low"=1, "Medium"=1, "High"=1, "Low"=1, "Medium"=1, "High"=1)) %>%
-  add_header_above(c(" "=1, "SE"=3, "Coverage"=3)) %>% 
-  pack_rows("MCAR", 2, 5) %>% 
-  pack_rows("MAR", 6, 9) %>% 
-  pack_rows("MNAR 1", 10, 13) %>% 
-  pack_rows("MNAR 2", 14, 17) 
-
-```
 
